@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\DashboardController;
@@ -13,9 +14,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Página principal - Calendario de disponibilidad
-Route::get('/', [CalendarioController::class, 'index'])->name('calendario');
-Route::get('/calendario', [CalendarioController::class, 'index']);
+// Página principal - Inicio
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Calendario de disponibilidad
+Route::get('/calendario', [CalendarioController::class, 'index'])->name('calendario');
 
 // API para consultar disponibilidad (usado por JavaScript)
 Route::get('/calendario/disponibilidad', [CalendarioController::class, 'disponibilidad'])

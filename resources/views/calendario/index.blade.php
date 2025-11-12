@@ -16,13 +16,24 @@
     <!-- Lista de Recintos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         @foreach($recintos as $recinto)
+        @php
+            // Manejar horarios_disponibles como string o array
+            $horarios = is_array($recinto->horarios_disponibles) 
+                ? $recinto->horarios_disponibles 
+                : json_decode($recinto->horarios_disponibles, true);
+            
+            // Manejar dias_cerrados como string o array
+            $diasCerrados = is_array($recinto->dias_cerrados) 
+                ? $recinto->dias_cerrados 
+                : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+        @endphp
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $recinto->nombre }}</h3>
             <p class="text-gray-600 text-sm mb-4">{{ $recinto->descripcion }}</p>
             <div class="text-sm text-gray-500 mb-4">
                 <p><strong>Capacidad:</strong> {{ $recinto->capacidad_maxima }} personas</p>
-                <p><strong>Horario:</strong> {{ $recinto->horarios_disponibles['inicio'] }} - {{ $recinto->horarios_disponibles['fin'] }}</p>
-                @if($recinto->dias_cerrados)
+                <p><strong>Horario:</strong> {{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</p>
+                @if($diasCerrados && count($diasCerrados) > 0)
                     <p class="text-red-600"><strong>Cerrado:</strong> Lunes (mantenimiento)</p>
                 @endif
             </div>
@@ -60,18 +71,15 @@
                         @php
                             $tieneReservas = isset($reservas[$recinto->id][$fechaString]);
                             
-                            // Verificar si está cerrado - más seguro
+                            // Manejar dias_cerrados como string o array
+                            $diasCerradosCalendario = is_array($recinto->dias_cerrados) 
+                                ? $recinto->dias_cerrados 
+                                : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+                            
+                            // Verificar si está cerrado
                             $esDiaCerrado = false;
-                            if ($recinto->dias_cerrados) {
-                                if (is_array($recinto->dias_cerrados)) {
-                                    $esDiaCerrado = in_array(strtolower($fecha->format('l')), $recinto->dias_cerrados);
-                                } else {
-                                    // Si es string, intentar decodificar
-                                    $diasArray = json_decode($recinto->dias_cerrados, true);
-                                    if (is_array($diasArray)) {
-                                        $esDiaCerrado = in_array(strtolower($fecha->format('l')), $diasArray);
-                                    }
-                                }
+                            if ($diasCerradosCalendario && is_array($diasCerradosCalendario)) {
+                                $esDiaCerrado = in_array(strtolower($fecha->format('l')), $diasCerradosCalendario);
                             }
                         @endphp
                         
