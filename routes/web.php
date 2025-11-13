@@ -14,13 +14,17 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Página principal - Inicio
+// Página principal - Inicio con carrusel y calendarios
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Calendario de disponibilidad
+// Calendario de disponibilidad semanal
 Route::get('/calendario', [CalendarioController::class, 'index'])->name('calendario');
 
-// API para consultar disponibilidad (usado por JavaScript)
+// API para obtener disponibilidad de un recinto en una fecha
+Route::get('/api/disponibilidad', [HomeController::class, 'obtenerDisponibilidad'])
+    ->name('api.disponibilidad');
+
+// API para consultar disponibilidad (usado por JavaScript en calendario semanal)
 Route::get('/calendario/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('calendario.disponibilidad');
 
