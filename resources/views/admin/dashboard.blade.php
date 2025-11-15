@@ -136,7 +136,7 @@
     </div>
 
     <!-- Enlaces útiles -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <a href="{{ route('calendario') }}" class="bg-blue-100 hover:bg-blue-200 p-6 rounded-lg text-center transition-colors">
             <h3 class="font-semibold text-blue-800">Ver Calendario Público</h3>
             <p class="text-blue-600 text-sm mt-1">Ver disponibilidad de recintos</p>
@@ -145,6 +145,11 @@
         <a href="{{ route('admin.reservas.index') }}" class="bg-green-100 hover:bg-green-200 p-6 rounded-lg text-center transition-colors">
             <h3 class="font-semibold text-green-800">Gestionar Reservas</h3>
             <p class="text-green-600 text-sm mt-1">Ver todas las reservas</p>
+        </a>
+        
+        <a href="{{ route('admin.estadisticas.index') }}" class="bg-purple-100 hover:bg-purple-200 p-6 rounded-lg text-center transition-colors">
+            <h3 class="font-semibold text-purple-800">Ver Estadísticas</h3>
+            <p class="text-purple-600 text-sm mt-1">Reportes y análisis de uso</p>
         </a>
         
         <div class="bg-gray-100 p-6 rounded-lg text-center">

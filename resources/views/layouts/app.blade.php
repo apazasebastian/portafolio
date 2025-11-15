@@ -11,7 +11,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- Vite - AGREGADO -->
+    <!-- Vite -->
     @vite(['resources/js/app.js'])
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -34,8 +34,11 @@
                         Calendario
                     </a>
                     @auth
-                        <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-200 transition-colors">
+                        <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Administración
+                        </a>
+                        <a href="{{ route('admin.estadisticas.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.estadisticas.index') ? 'font-bold border-b-2 border-blue-200' : '' }}">
+                            Estadísticas
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
@@ -67,8 +70,11 @@
                     Calendario
                 </a>
                 @auth
-                    <a href="{{ route('admin.dashboard') }}" class="block py-2 hover:text-blue-200 transition-colors">
+                    <a href="{{ route('admin.dashboard') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold' : '' }}">
                         Administración
+                    </a>
+                    <a href="{{ route('admin.estadisticas.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.estadisticas.index') ? 'font-bold' : '' }}">
+                        Estadísticas
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

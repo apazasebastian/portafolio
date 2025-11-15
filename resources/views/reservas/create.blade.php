@@ -27,6 +27,17 @@
         </div>
 
         <!-- Info del Recinto -->
+        @php
+            // Decodificar JSON si es necesario
+            $horarios = is_array($recinto->horarios_disponibles) 
+                ? $recinto->horarios_disponibles 
+                : json_decode($recinto->horarios_disponibles, true);
+                
+            $diasCerrados = is_array($recinto->dias_cerrados) 
+                ? $recinto->dias_cerrados 
+                : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+        @endphp
+        
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
             <h2 class="text-2xl font-bold mb-3">{{ $recinto->nombre }}</h2>
             <p class="mb-4 opacity-90">{{ $recinto->descripcion }}</p>
@@ -42,11 +53,11 @@
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                     </svg>
-                    <span>Horario: <strong>08:00 - 23:00</strong></span>
+                    <span>Horario: <strong>{{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</strong></span>
                 </div>
             </div>
             
-            @if($recinto->dias_cerrados && in_array('monday', $recinto->dias_cerrados))
+            @if($diasCerrados && in_array('monday', $diasCerrados))
             <div class="mt-4 bg-red-500 bg-opacity-20 border border-white border-opacity-30 rounded-lg p-3">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -471,7 +482,7 @@
                 <!-- Condición 5 -->
                 <div class="flex items-start">
                     <div class="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="20 20">
+                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
                         </svg>
                     </div>

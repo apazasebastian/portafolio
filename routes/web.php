@@ -58,6 +58,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
     
+    // NUEVA RUTA - Estadísticas
+    Route::get('/estadisticas', [\App\Http\Controllers\Admin\EstadisticasController::class, 'index'])
+        ->name('estadisticas.index');
+    
     // Gestión de reservas
     Route::get('/reservas', [AdminReservaController::class, 'index'])
         ->name('reservas.index');

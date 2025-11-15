@@ -238,26 +238,42 @@ function mostrarDisponibilidad(data, recintoId) {
         `;
     }
 
-    // Franjas horarias
+    // Franjas horarias - SECCIÓN CORREGIDA
     const franjasDiv = document.getElementById('franjasHorarias');
     franjasDiv.innerHTML = data.franjas_horarias.map(franja => {
-        let bgColor, textColor, icon, estado;
+        let bgColor, textColor, icon, estadoHtml;
         
         if (data.cerrado) {
             bgColor = 'bg-yellow-50 border-yellow-200';
             textColor = 'text-yellow-700';
             icon = '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
-            estado = 'Cerrado por mantenimiento';
+            estadoHtml = '<p class="text-sm ' + textColor + '">Cerrado por mantenimiento</p>';
         } else if (franja.disponible) {
             bgColor = 'bg-green-50 border-green-200';
             textColor = 'text-green-700';
             icon = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-            estado = 'Disponible';
+            estadoHtml = '<p class="text-sm ' + textColor + '">Disponible</p>';
         } else {
             bgColor = 'bg-red-50 border-red-200';
             textColor = 'text-red-700';
             icon = '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-            estado = franja.reserva ? `Reservado por ${franja.reserva.nombre_solicitante}` : 'No disponible';
+            
+            // AQUÍ ESTÁ LA CORRECCIÓN PRINCIPAL - mostrar organización y deporte
+            if (franja.reserva) {
+                estadoHtml = `
+                    <p class="text-sm ${textColor} font-semibold">Reservado por ${franja.reserva.nombre_organizacion}</p>
+                    <p class="text-xs ${textColor} mt-1">
+                        <span class="inline-flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                            </svg>
+                            ${franja.reserva.deporte}
+                        </span>
+                    </p>
+                `;
+            } else {
+                estadoHtml = '<p class="text-sm ' + textColor + '">No disponible</p>';
+            }
         }
 
         return `
@@ -267,7 +283,7 @@ function mostrarDisponibilidad(data, recintoId) {
                         ${icon}
                         <div>
                             <p class="font-bold ${textColor}">${franja.hora_inicio} - ${franja.hora_fin}</p>
-                            <p class="text-sm ${textColor}">${estado}</p>
+                            ${estadoHtml}
                         </div>
                     </div>
                 </div>
