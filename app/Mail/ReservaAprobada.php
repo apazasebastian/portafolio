@@ -13,14 +13,23 @@ class ReservaAprobada extends Mailable
 
     public $reserva;
 
+    /**
+     * Create a new message instance.
+     */
     public function __construct(Reserva $reserva)
     {
         $this->reserva = $reserva;
     }
 
+    /**
+     * Build the message.
+     */
     public function build()
     {
-        return $this->subject('Reserva Aprobada - ' . $this->reserva->recinto->nombre)
-                    ->view('emails.reserva-aprobada');
+        return $this->subject('Tu reserva ha sido aprobada - ' . $this->reserva->recinto->nombre)
+                    ->view('emails.reserva-aprobada')
+                    ->with([
+                        'reserva' => $this->reserva
+                    ]);
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CalendarioController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\CancelacionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminReservaController;
 use App\Http\Controllers\AuthController;
@@ -38,6 +39,28 @@ Route::get('/reservas/{reserva}', [ReservaController::class, 'show'])
 
 /*
 |--------------------------------------------------------------------------
+| Rutas de Cancelación de Reservas (públicas)
+|--------------------------------------------------------------------------
+*/
+
+// Formulario para ingresar código de cancelación
+Route::get('/cancelar-reserva', [CancelacionController::class, 'mostrarFormulario'])
+    ->name('cancelacion.formulario');
+
+// Buscar reserva por código
+Route::post('/cancelar-reserva/buscar', [CancelacionController::class, 'buscarReserva'])
+    ->name('cancelacion.buscar');
+
+// Procesar cancelación
+Route::post('/cancelar-reserva/{codigo}', [CancelacionController::class, 'cancelar'])
+    ->name('cancelacion.procesar');
+
+// Página de cancelación exitosa
+Route::get('/cancelacion-exitosa', [CancelacionController::class, 'exito'])
+    ->name('cancelacion.exito');
+
+/*
+|--------------------------------------------------------------------------
 | Autenticación Administrativa
 |--------------------------------------------------------------------------
 */
@@ -58,7 +81,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
     
-    // NUEVA RUTA - Estadísticas
+    // Estadísticas
     Route::get('/estadisticas', [\App\Http\Controllers\Admin\EstadisticasController::class, 'index'])
         ->name('estadisticas.index');
     

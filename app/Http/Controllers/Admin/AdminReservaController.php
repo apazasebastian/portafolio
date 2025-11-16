@@ -4,76 +4,57 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
-use App\Models\Recinto;
-use Illuminate\Http\Request;
 use App\Mail\ReservaAprobada;
 use App\Mail\ReservaRechazada;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 
 class AdminReservaController extends Controller
 {
-    public function index(Request $request)
+    // ... otros métodos ...
+
+    /**
+     * Aprobar una reserva
+     */
+    public function aprobar(Reserva $reserva)
     {
-        $query = Reserva::with(['recinto', 'aprobadaPor']);
-        
-        // Filtros
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
+        // Generar código de cancelación si no existe
+        if (!$reserva->codigo_cancelacion) {
+            // CORRECCIÓN: Llamar al método del controlador, no del modelo
+            $reserva->codigo_cancelacion = $this->generarCodigoCancelacion();
         }
         
-        if ($request->filled('recinto_id')) {
-            $query->where('recinto_id', $request->recinto_id);
-        }
+        // Actualizar estado
+        $reserva->estado = 'aprobada';
+        $reserva->fecha_respuesta = now();
+        $reserva->aprobada_por = auth()->id();
+        $reserva->save();
         
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha_reserva', '>=', $request->fecha_desde);
-        }
-        
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha_reserva', '<=', $request->fecha_hasta);
-        }
-        
-        $reservas = $query->orderBy('created_at', 'desc')->paginate(20);
-        $recintos = Recinto::activos()->get();
-        
-        return view('admin.reservas.index', compact('reservas', 'recintos'));
-    }
-    
-    public function show(Reserva $reserva)
-    {
-        $reserva->load(['recinto', 'aprobadaPor']);
-        return view('admin.reservas.show', compact('reserva'));
-    }
-    
-    public function aprobar(Request $request, Reserva $reserva)
-    {
-        if ($reserva->estado !== 'pendiente') {
-            return back()->withErrors(['error' => 'Solo se pueden aprobar reservas pendientes']);
-        }
-        
-        $reserva->aprobar(auth()->id(), $request->observaciones);
-        
-        // Enviar correo de aprobación
+        // Enviar correo de aprobación con el código
         try {
             Mail::to($reserva->email)->send(new ReservaAprobada($reserva));
         } catch (\Exception $e) {
             \Log::error('Error enviando correo de aprobación: ' . $e->getMessage());
         }
         
-        return back()->with('success', 'Reserva aprobada y notificación enviada');
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Reserva aprobada correctamente y correo enviado.');
     }
-    
+
+    /**
+     * Rechazar una reserva
+     */
     public function rechazar(Request $request, Reserva $reserva)
     {
         $request->validate([
             'motivo_rechazo' => 'required|string|max:500'
         ]);
         
-        if ($reserva->estado !== 'pendiente') {
-            return back()->withErrors(['error' => 'Solo se pueden rechazar reservas pendientes']);
-        }
-        
-        $reserva->rechazar(auth()->id(), $request->motivo_rechazo);
+        $reserva->estado = 'rechazada';
+        $reserva->fecha_respuesta = now();
+        $reserva->motivo_rechazo = $request->motivo_rechazo;
+        $reserva->save();
         
         // Enviar correo de rechazo
         try {
@@ -82,6 +63,22 @@ class AdminReservaController extends Controller
             \Log::error('Error enviando correo de rechazo: ' . $e->getMessage());
         }
         
-        return back()->with('success', 'Reserva rechazada y notificación enviada');
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Reserva rechazada y notificación enviada.');
     }
+
+    /**
+     * Genera un código único de cancelación
+     * IMPORTANTE: Este método debe estar en el CONTROLADOR, no en el modelo
+     */
+    private function generarCodigoCancelacion()
+    {
+        do {
+            $codigo = strtoupper(Str::random(8) . '-' . Str::random(8));
+        } while (Reserva::where('codigo_cancelacion', $codigo)->exists());
+        
+        return $codigo;
+    }
+    
+    // ... otros métodos ...
 }

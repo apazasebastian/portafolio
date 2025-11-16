@@ -33,6 +33,9 @@
                     <a href="{{ route('calendario') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('calendario') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                         Calendario
                     </a>
+                    <a href="{{ route('cancelacion.formulario') }}" class="hover:text-blue-200 transition-colors">
+                        Cancelar Reserva
+                    </a>
                     @auth
                         <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Administración
