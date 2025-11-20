@@ -12,7 +12,7 @@
     
     <div style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
         <p style="font-size: 16px; color: #555;">
-            Estimado/a <strong>{{ $reserva->nombre_contacto }}</strong>,
+            Estimado/a <strong>{{ $reserva->representante_nombre ?? $reserva->nombre_organizacion }}</strong>,
         </p>
         
         <p style="font-size: 16px; color: #555;">
@@ -43,7 +43,8 @@
                         <strong>📅 Fecha:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        {{ \Carbon\Carbon::parse($reserva->fecha_inicio)->format('d/m/Y') }}
+                        {{-- CORRECCIÓN CLAVE: Usar format('d/m/Y') en la fecha --}}
+                        {{ $reserva->fecha_reserva->format('d/m/Y') }}
                     </td>
                 </tr>
                 <tr>
@@ -51,7 +52,8 @@
                         <strong>⏰ Horario:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        {{ $reserva->fecha_inicio }} - {{ $reserva->fecha_fin }}
+                        {{-- CORRECCIÓN CLAVE: Usar format('H:i') en las horas --}}
+                        {{ $reserva->hora_inicio->format('H:i') }} - {{ $reserva->hora_fin->format('H:i') }}
                     </td>
                 </tr>
                 <tr>
@@ -59,7 +61,8 @@
                         <strong>👥 Personas:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        {{ $reserva->numero_personas }}
+                        {{-- CORRECCIÓN DE NOMBRE DE CAMPO --}}
+                        {{ $reserva->cantidad_personas }}
                     </td>
                 </tr>
                 <tr>
@@ -86,6 +89,7 @@
             <div style="background-color: #fef3c7; border: 2px dashed #f59e0b; padding: 20px; margin: 20px 0; text-align: center; border-radius: 8px;">
                 <p style="margin: 0 0 5px 0; font-size: 14px; color: #92400e;">Tu código es:</p>
                 <p style="margin: 0; font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace; letter-spacing: 3px; color: #d97706;">
+                    {{-- El código ahora es corto y legible gracias a la corrección en Reserva.php --}}
                     {{ $reserva->codigo_cancelacion }}
                 </p>
             </div>
@@ -93,8 +97,9 @@
             <div style="background-color: #fff; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
                 <h3 style="margin: 0 0 10px 0; color: #92400e;">¿Necesitas cancelar?</h3>
                 <p style="margin: 5px 0;">Ingresa tu código en nuestro portal de cancelaciones:</p>
+                {{-- Asegúrate de que esta ruta 'cancelacion.formulario' esté definida en tu web.php --}}
                 <a href="{{ route('cancelacion.formulario') }}" 
-                   style="display: inline-block; background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+                    style="display: inline-block; background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                     Cancelar Mi Reserva
                 </a>
             </div>
