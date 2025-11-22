@@ -41,7 +41,16 @@ class Recinto extends Model
         $fechaCarbon = Carbon::parse($fecha);
         $diaSemana = strtolower($fechaCarbon->format('l'));
 
-        if ($this->dias_cerrados && in_array($diaSemana, $this->dias_cerrados)) {
+        // Convertir dias_cerrados a array si es necesario
+        $diasCerrados = $this->dias_cerrados;
+        if (is_string($diasCerrados)) {
+            $diasCerrados = json_decode($diasCerrados, true) ?? [];
+        } elseif (!is_array($diasCerrados)) {
+            $diasCerrados = [];
+        }
+
+        // Verificar si es día cerrado
+        if (in_array($diaSemana, $diasCerrados)) {
             return false;
         }
 
@@ -55,6 +64,7 @@ class Recinto extends Model
         $conflictos = $this->reservas()
             ->where('fecha_reserva', $fecha)
             ->where('estado', 'aprobada')
+            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
             ->where(function($query) use ($horaInicio, $horaFin) {
                 $query->where(function($q) use ($horaInicio, $horaFin) {
                     $q->where('hora_inicio', '<=', $horaInicio)
@@ -77,6 +87,7 @@ class Recinto extends Model
         return $this->reservas()
             ->where('fecha_reserva', $fecha)
             ->where('estado', 'aprobada')
+            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
             ->orderBy('hora_inicio')
             ->get();
     }

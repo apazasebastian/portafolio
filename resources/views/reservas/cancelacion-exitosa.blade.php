@@ -45,7 +45,7 @@
                 
                 <div class="flex justify-between border-b pb-2">
                     <span class="text-gray-600">Horario:</span>
-                    <span class="font-semibold text-gray-800">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</span>
+                    <span class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}</span>
                 </div>
                 
                 <div class="flex justify-between">

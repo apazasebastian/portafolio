@@ -75,10 +75,11 @@ class HomeController extends Controller
         $horaInicio = $horarios['inicio'] ?? '08:00';
         $horaFin = $horarios['fin'] ?? '23:00';
         
-        // Obtener reservas aprobadas para ese día con información de organización y deporte
+        // Obtener reservas aprobadas y NO CANCELADAS para ese día con información de organización y deporte
         $reservas = Reserva::where('recinto_id', $recintoId)
             ->where('fecha_reserva', $fecha)
             ->where('estado', 'aprobada')
+            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
             ->orderBy('hora_inicio')
             ->get();
         
@@ -129,7 +130,7 @@ class HomeController extends Controller
                 'inicio' => $horaInicio,
                 'fin' => $horaFin
             ],
-            'franjas_horarias' => $franjasHorarias,
+            'horarios' => $franjasHorarias, // Cambiado de 'franjas_horarias' a 'horarios'
             'total_reservas' => $reservas->count()
         ]);
     }

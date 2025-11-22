@@ -18,9 +18,10 @@ class CalendarioController extends Controller
         $fechaInicio = Carbon::now()->startOfDay();
         $fechaFin = Carbon::now()->addDays(30)->endOfDay();
         
-        // Obtener reservas aprobadas para el período
+        // Obtener reservas aprobadas para el período (excluyendo canceladas)
         $reservas = Reserva::with('recinto')
             ->aprobadas()
+            ->whereNull('fecha_cancelacion') // Excluir las que fueron canceladas
             ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
             ->get()
             ->groupBy(['recinto_id', 'fecha_reserva']);
@@ -42,33 +43,81 @@ class CalendarioController extends Controller
             return response()->json(['error' => 'Recinto no encontrado'], 404);
         }
         
-        // Generar horarios disponibles (cada 1 hora)
-        $horariosDisponibles = [];
-        $horaInicio = Carbon::parse($recinto->horarios_disponibles['inicio'] ?? '08:00');
-        $horaFin = Carbon::parse($recinto->horarios_disponibles['fin'] ?? '23:00');
+        $fechaCarbon = Carbon::parse($fecha);
+        $diaSemana = strtolower($fechaCarbon->format('l')); // monday, tuesday, etc.
         
-        while ($horaInicio < $horaFin) {
-            $siguienteHora = $horaInicio->copy()->addHour();
+        // Verificar si el recinto está cerrado ese día
+        $diasCerrados = is_array($recinto->dias_cerrados) 
+            ? $recinto->dias_cerrados 
+            : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : []);
+        
+        $esDiaCerrado = in_array($diaSemana, $diasCerrados ?? []);
+        
+        // Obtener horarios disponibles
+        $horarios = is_array($recinto->horarios_disponibles) 
+            ? $recinto->horarios_disponibles 
+            : json_decode($recinto->horarios_disponibles, true);
+        
+        $horaInicio = $horarios['inicio'] ?? '08:00';
+        $horaFin = $horarios['fin'] ?? '23:00';
+        
+        // Obtener reservas aprobadas y NO CANCELADAS para ese día
+        $reservas = Reserva::where('recinto_id', $recintoId)
+            ->where('fecha_reserva', $fecha)
+            ->where('estado', 'aprobada')
+            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
+            ->orderBy('hora_inicio')
+            ->get();
+        
+        // Generar franjas horarias cada hora
+        $franjasHorarias = [];
+        $horaActual = Carbon::parse($horaInicio);
+        $horaFinCarbon = Carbon::parse($horaFin);
+        
+        while ($horaActual < $horaFinCarbon) {
+            $siguienteHora = $horaActual->copy()->addHour();
             
-            $disponible = $recinto->disponibleEn(
-                $fecha, 
-                $horaInicio->format('H:i'), 
-                $siguienteHora->format('H:i')
-            );
+            $ocupada = false;
+            $reservaInfo = null;
             
-            $horariosDisponibles[] = [
-                'hora_inicio' => $horaInicio->format('H:i'),
+            // Verificar si esta franja está ocupada
+            foreach ($reservas as $reserva) {
+                $reservaInicio = Carbon::parse($reserva->hora_inicio);
+                $reservaFin = Carbon::parse($reserva->hora_fin);
+                
+                if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
+                    $ocupada = true;
+                    $reservaInfo = [
+                        'nombre_organizacion' => $reserva->nombre_organizacion,
+                        'deporte' => $reserva->deporte ?? 'No especificado',
+                        'hora_inicio' => $reserva->hora_inicio,
+                        'hora_fin' => $reserva->hora_fin
+                    ];
+                    break;
+                }
+            }
+            
+            $franjasHorarias[] = [
+                'hora_inicio' => $horaActual->format('H:i'),
                 'hora_fin' => $siguienteHora->format('H:i'),
-                'disponible' => $disponible
+                'disponible' => !$ocupada && !$esDiaCerrado,
+                'reserva' => $reservaInfo
             ];
             
-            $horaInicio = $siguienteHora;
+            $horaActual = $siguienteHora;
         }
         
         return response()->json([
             'recinto' => $recinto->nombre,
-            'fecha' => $fecha,
-            'horarios' => $horariosDisponibles
+            'fecha' => $fechaCarbon->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY'),
+            'cerrado' => $esDiaCerrado,
+            'motivo_cierre' => $esDiaCerrado ? 'Día de mantenimiento' : null,
+            'horario_general' => [
+                'inicio' => $horaInicio,
+                'fin' => $horaFin
+            ],
+            'horarios' => $franjasHorarias,
+            'total_reservas' => $reservas->count()
         ]);
     }
 }

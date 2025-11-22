@@ -419,8 +419,8 @@ function mostrarDisponibilidad(data, fechaOriginal) {
             </div>
         `;
     } else {
-        const disponibles = data.franjas_horarias.filter(f => f.disponible).length;
-        const total = data.franjas_horarias.length;
+        const disponibles = data.horarios.filter(f => f.disponible).length;
+        const total = data.horarios.length;
         estadoDiv.innerHTML = `
             <div class="grid grid-cols-3 gap-4 text-center">
                 <div class="bg-blue-50 p-4 rounded-lg">
@@ -441,7 +441,7 @@ function mostrarDisponibilidad(data, fechaOriginal) {
 
     // Franjas horarias
     const franjasDiv = document.getElementById('franjasHorarias');
-    franjasDiv.innerHTML = data.franjas_horarias.map(franja => {
+    franjasDiv.innerHTML = data.horarios.map(franja => {
         let bgColor, textColor, icon, estadoHtml;
         
         if (data.cerrado) {

@@ -21,13 +21,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Calendario de disponibilidad semanal
 Route::get('/calendario', [CalendarioController::class, 'index'])->name('calendario');
 
-// API para obtener disponibilidad de un recinto en una fecha
-Route::get('/api/disponibilidad', [HomeController::class, 'obtenerDisponibilidad'])
+// API para obtener disponibilidad de un recinto en una fecha (usada por JavaScript)
+Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('api.disponibilidad');
-
-// API para consultar disponibilidad (usado por JavaScript en calendario semanal)
-Route::get('/calendario/disponibilidad', [CalendarioController::class, 'disponibilidad'])
-    ->name('calendario.disponibilidad');
 
 // Reservas públicas
 Route::get('/reservas/crear/{recinto}', [ReservaController::class, 'create'])

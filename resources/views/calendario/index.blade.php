@@ -67,7 +67,9 @@
                     @if($recintos->count() > 0)
                         @foreach($recintos as $recinto)
                             @php
-                                $tieneReservas = isset($reservas[$recinto->id][$fechaString]);
+                                // Verificar si hay reservas NO canceladas para este recinto en esta fecha
+                                $tieneReservas = isset($reservas[$recinto->id][$fechaString]) && 
+                                                $reservas[$recinto->id][$fechaString]->count() > 0;
                                 
                                 $diasCerradosCalendario = is_array($recinto->dias_cerrados) 
                                     ? $recinto->dias_cerrados 
@@ -163,6 +165,18 @@
                 </a>
             </div>
         </div>
+
+        <!-- Error State -->
+        <div id="modalError" class="hidden p-6 text-center">
+            <svg class="w-12 h-12 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-red-600 font-semibold mb-2">Error al cargar la disponibilidad</p>
+            <p class="text-gray-600 text-sm mb-4" id="errorMessage"></p>
+            <button onclick="cerrarModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                Cerrar
+            </button>
+        </div>
     </div>
 </div>
 
@@ -173,6 +187,7 @@ function verDisponibilidadRecinto(recintoId, recintoNombre, fecha) {
     document.getElementById('modalDisponibilidad').classList.remove('hidden');
     document.getElementById('modalLoading').classList.remove('hidden');
     document.getElementById('modalContent').classList.add('hidden');
+    document.getElementById('modalError').classList.add('hidden');
 
     // Hacer petición AJAX
     fetch(`/api/disponibilidad?recinto_id=${recintoId}&fecha=${fecha}`, {
@@ -181,74 +196,73 @@ function verDisponibilidadRecinto(recintoId, recintoNombre, fecha) {
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Respuesta API:', data);
         mostrarDisponibilidad(data, recintoId);
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al cargar la disponibilidad');
-        cerrarModal();
+        mostrarError('No se pudo cargar la disponibilidad. Por favor, intenta nuevamente.');
     });
 }
 
+function mostrarError(mensaje) {
+    document.getElementById('modalLoading').classList.add('hidden');
+    document.getElementById('modalContent').classList.add('hidden');
+    document.getElementById('modalError').classList.remove('hidden');
+    document.getElementById('errorMessage').textContent = mensaje;
+}
+
 function mostrarDisponibilidad(data, recintoId) {
+    // Verificar estructura de datos
+    if (!data.horarios || !Array.isArray(data.horarios)) {
+        console.error('Estructura de datos inválida:', data);
+        mostrarError('La respuesta del servidor no tiene el formato esperado.');
+        return;
+    }
+
     // Ocultar loading
     document.getElementById('modalLoading').classList.add('hidden');
     document.getElementById('modalContent').classList.remove('hidden');
 
     // Actualizar header
-    document.getElementById('modalRecintoNombre').textContent = data.recinto;
-    document.getElementById('modalFecha').textContent = data.fecha;
+    document.getElementById('modalRecintoNombre').textContent = data.recinto || 'Recinto';
+    document.getElementById('modalFecha').textContent = data.fecha || new Date().toLocaleDateString();
 
     // Estado general
     const estadoDiv = document.getElementById('estadoGeneral');
-    if (data.cerrado) {
-        estadoDiv.innerHTML = `
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div>
-                        <p class="font-bold text-yellow-800">Recinto Cerrado</p>
-                        <p class="text-yellow-700 text-sm">${data.motivo_cierre}</p>
-                    </div>
-                </div>
+    const disponibles = data.horarios.filter(h => h.disponible).length;
+    const total = data.horarios.length;
+    
+    estadoDiv.innerHTML = `
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <p class="text-2xl font-bold text-blue-600">${total}</p>
+                <p class="text-sm text-gray-600">Franjas Totales</p>
             </div>
-        `;
-    } else {
-        const disponibles = data.franjas_horarias.filter(f => f.disponible).length;
-        const total = data.franjas_horarias.length;
-        estadoDiv.innerHTML = `
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-blue-600">${data.horario_general.inicio} - ${data.horario_general.fin}</p>
-                    <p class="text-sm text-gray-600">Horario</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-green-600">${disponibles}/${total}</p>
-                    <p class="text-sm text-gray-600">Franjas Disponibles</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-red-600">${data.total_reservas}</p>
-                    <p class="text-sm text-gray-600">Reservas</p>
-                </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <p class="text-2xl font-bold text-green-600">${disponibles}</p>
+                <p class="text-sm text-gray-600">Disponibles</p>
             </div>
-        `;
-    }
+            <div class="bg-red-50 p-4 rounded-lg">
+                <p class="text-2xl font-bold text-red-600">${total - disponibles}</p>
+                <p class="text-sm text-gray-600">Ocupadas</p>
+            </div>
+        </div>
+    `;
 
-    // Franjas horarias - SECCIÓN CORREGIDA
+    // Franjas horarias
     const franjasDiv = document.getElementById('franjasHorarias');
-    franjasDiv.innerHTML = data.franjas_horarias.map(franja => {
+    franjasDiv.innerHTML = data.horarios.map(horario => {
         let bgColor, textColor, icon, estadoHtml;
         
-        if (data.cerrado) {
-            bgColor = 'bg-yellow-50 border-yellow-200';
-            textColor = 'text-yellow-700';
-            icon = '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
-            estadoHtml = '<p class="text-sm ' + textColor + '">Cerrado por mantenimiento</p>';
-        } else if (franja.disponible) {
+        if (horario.disponible) {
             bgColor = 'bg-green-50 border-green-200';
             textColor = 'text-green-700';
             icon = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
@@ -257,23 +271,7 @@ function mostrarDisponibilidad(data, recintoId) {
             bgColor = 'bg-red-50 border-red-200';
             textColor = 'text-red-700';
             icon = '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-            
-            // AQUÍ ESTÁ LA CORRECCIÓN PRINCIPAL - mostrar organización y deporte
-            if (franja.reserva) {
-                estadoHtml = `
-                    <p class="text-sm ${textColor} font-semibold">Reservado por ${franja.reserva.nombre_organizacion}</p>
-                    <p class="text-xs ${textColor} mt-1">
-                        <span class="inline-flex items-center">
-                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-                            </svg>
-                            ${franja.reserva.deporte}
-                        </span>
-                    </p>
-                `;
-            } else {
-                estadoHtml = '<p class="text-sm ' + textColor + '">No disponible</p>';
-            }
+            estadoHtml = '<p class="text-sm ' + textColor + '">No disponible</p>';
         }
 
         return `
@@ -282,7 +280,7 @@ function mostrarDisponibilidad(data, recintoId) {
                     <div class="flex items-center space-x-3">
                         ${icon}
                         <div>
-                            <p class="font-bold ${textColor}">${franja.hora_inicio} - ${franja.hora_fin}</p>
+                            <p class="font-bold ${textColor}">${horario.hora_inicio} - ${horario.hora_fin}</p>
                             ${estadoHtml}
                         </div>
                     </div>
