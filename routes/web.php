@@ -6,6 +6,7 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\CancelacionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminReservaController;
+use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -77,17 +78,49 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
     
-    // Estadísticas
-    Route::get('/estadisticas', [\App\Http\Controllers\Admin\EstadisticasController::class, 'index'])
-        ->name('estadisticas.index');
+    /*
+    |----------------------------------------------------------------------
+    | Rutas de Estadísticas y Reportes (SECCIÓN 6)
+    |----------------------------------------------------------------------
+    */
     
-    // Gestión de reservas
-    Route::get('/reservas', [AdminReservaController::class, 'index'])
-        ->name('reservas.index');
-    Route::get('/reservas/{reserva}', [AdminReservaController::class, 'show'])
-        ->name('reservas.show');
-    Route::post('/reservas/{reserva}/aprobar', [AdminReservaController::class, 'aprobar'])
-        ->name('reservas.aprobar');
-    Route::post('/reservas/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
-        ->name('reservas.rechazar');
+    Route::prefix('estadisticas')->name('estadisticas.')->group(function () {
+        // Página principal de estadísticas - Dashboard
+        Route::get('/', [EstadisticasController::class, 'index'])
+            ->name('index');
+        
+        // Aplicar filtros (POST)
+        Route::post('/aplicar-filtros', [EstadisticasController::class, 'aplicarFiltros'])
+            ->name('aplicar-filtros');
+        
+        // Limpiar filtros (POST)
+        Route::post('/limpiar-filtros', [EstadisticasController::class, 'limpiarFiltros'])
+            ->name('limpiar-filtros');
+        
+        // Exportación a Excel
+        Route::get('/exportar-excel', [EstadisticasController::class, 'exportarExcel'])
+            ->name('exportar-excel');
+        
+        // Exportación a PDF
+        Route::get('/exportar-pdf', [EstadisticasController::class, 'exportarPdf'])
+            ->name('exportar-pdf');
+    });
+    
+    /*
+    |----------------------------------------------------------------------
+    | Gestión de Reservas
+    |----------------------------------------------------------------------
+    */
+    
+    Route::prefix('reservas')->name('reservas.')->group(function () {
+        Route::get('/', [AdminReservaController::class, 'index'])
+            ->name('index');
+        Route::get('/{reserva}', [AdminReservaController::class, 'show'])
+            ->name('show');
+        Route::post('/{reserva}/aprobar', [AdminReservaController::class, 'aprobar'])
+            ->name('aprobar');
+        Route::post('/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
+            ->name('rechazar');
+    });
+    
 });

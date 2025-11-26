@@ -62,6 +62,23 @@ class Reserva extends Model
         return $this->belongsTo(User::class, 'aprobada_por');
     }
 
+    /**
+     * Relación con Organizacion por nombre_organizacion
+     * Si tienes una tabla organizaciones con nombre único, ajusta según sea necesario
+     */
+    public function organizacion()
+    {
+        return $this->belongsTo(Organizacion::class, 'nombre_organizacion', 'nombre');
+    }
+
+    /**
+     * Relación con incidencias (problemas post-uso, daños, etc.)
+     */
+    public function incidencias()
+    {
+        return $this->hasMany(Incidencia::class);
+    }
+
     // --- ACCESORES Y FORMATEO ---
 
     public function getRutFormateadoAttribute()

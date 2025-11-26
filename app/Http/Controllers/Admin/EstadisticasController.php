@@ -4,115 +4,305 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
-use App\Models\Recinto;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EstadisticasController extends Controller
 {
+    public function aplicarFiltros(Request $request)
+    {
+        // Convertir a entero si no está vacío
+        $recintoId = $request->input('recinto_id') ? (int)$request->input('recinto_id') : null;
+        
+        session([
+            'filtro_recinto_id' => $recintoId,
+            'filtro_estado' => $request->input('estado'),
+        ]);
+        
+        return back();
+    }
+
+    public function limpiarFiltros()
+    {
+        session()->forget(['filtro_recinto_id', 'filtro_estado']);
+        return back();
+    }
+
     public function index(Request $request)
     {
-        // Rango de fechas (últimos 30 días por defecto)
-        $fechaInicio = $request->get('fecha_inicio', Carbon::now()->subDays(30)->format('Y-m-d'));
-        $fechaFin = $request->get('fecha_fin', Carbon::now()->format('Y-m-d'));
+        $fechaInicio = $request->input('fecha_inicio') 
+            ? Carbon::createFromFormat('Y-m-d', $request->input('fecha_inicio'))->startOfDay()
+            : now()->startOfMonth();
+            
+        $fechaFin = $request->input('fecha_fin')
+            ? Carbon::createFromFormat('Y-m-d', $request->input('fecha_fin'))->endOfDay()
+            : now()->endOfDay();
+
+        $params = [
+            'fechaInicio' => $fechaInicio->format('Y-m-d'),
+            'fechaFin' => $fechaFin->format('Y-m-d'),
+            'nombrePeriodo' => $this->getNombrePeriodo($fechaInicio, $fechaFin),
+        ];
+
+        $totalReservas = $this->getTotalReservas($fechaInicio, $fechaFin);
+        $reservasAprobadas = $this->getReservasAprobadas($fechaInicio, $fechaFin);
+        $reservasPendientes = $this->getReservasPendientes($fechaInicio, $fechaFin);
+        $reservasRechazadas = $this->getReservasRechazadas($fechaInicio, $fechaFin);
+        $tasaAprobacion = $totalReservas > 0 ? round(($reservasAprobadas / $totalReservas) * 100) : 0;
+
+        $params += [
+            'totalReservas' => $totalReservas,
+            'reservasAprobadas' => $reservasAprobadas,
+            'reservasPendientes' => $reservasPendientes,
+            'reservasRechazadas' => $reservasRechazadas,
+            'tasaAprobacion' => $tasaAprobacion,
+        ];
+
+        $params += [
+            'deportesPopulares' => $this->getDeportesPopulares($fechaInicio, $fechaFin),
+            'recintosMasSolicitados' => $this->getRecintosMasSolicitados($fechaInicio, $fechaFin),
+            'diasSemanaPopulares' => $this->getDiasSemanaPopulares($fechaInicio, $fechaFin),
+            'horariosPopulares' => $this->getHorariosPopulares($fechaInicio, $fechaFin),
+            'organizacionesMasActivas' => $this->getOrganizacionesMasActivas($fechaInicio, $fechaFin),
+        ];
+
+        $params += [
+            'reservasConUso' => $this->getReservasConUso($fechaInicio, $fechaFin),
+            'incidenciasReportadas' => $this->getIncidenciasReportadas($fechaInicio, $fechaFin),
+            'danosReportados' => $this->getDanosReportados($fechaInicio, $fechaFin),
+        ];
+
+        return view('admin.estadisticas.index', $params);
+    }
+
+    private function applyFilters($query)
+    {
+        if (session('filtro_recinto_id')) {
+            $query->where('reservas.recinto_id', session('filtro_recinto_id'));
+        }
         
-        // Deportes más populares
-        $deportesPopulares = Reserva::select('deporte', DB::raw('COUNT(*) as total'))
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('deporte')
-            ->orderBy('total', 'desc')
-            ->get();
+        if (session('filtro_estado')) {
+            $query->where('reservas.estado', session('filtro_estado'));
+        }
         
-        // Reservas por estado
-        $reservasPorEstado = Reserva::select('estado', DB::raw('COUNT(*) as total'))
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('estado')
-            ->get();
+        return $query;
+    }
+
+    private function getNombrePeriodo($inicio, $fin)
+    {
+        $inicio->setLocale('es');
+        $fin->setLocale('es');
         
-        // Recintos más solicitados
-        $recintosMasSolicitados = Reserva::select('recintos.nombre', DB::raw('COUNT(reservas.id) as total'))
+        $mesInicio = $inicio->isoFormat('MMMM');
+        $mesFin = $fin->isoFormat('MMMM');
+        $año = $inicio->year;
+        
+        if ($inicio->month === $fin->month && $inicio->year === $fin->year) {
+            return ucfirst($mesInicio) . ' ' . $año;
+        }
+        
+        if ($inicio->year === $fin->year) {
+            return ucfirst($mesInicio) . ' - ' . ucfirst($mesFin) . ' ' . $año;
+        }
+        
+        return ucfirst($mesInicio) . ' ' . $inicio->year . ' - ' . ucfirst($mesFin) . ' ' . $fin->year;
+    }
+
+    private function getTotalReservas($inicio, $fin)
+    {
+        $query = Reserva::whereBetween('fecha_reserva', [$inicio, $fin]);
+        return $this->applyFilters($query)->count();
+    }
+
+    private function getReservasAprobadas($inicio, $fin)
+    {
+        $query = Reserva::whereBetween('fecha_reserva', [$inicio, $fin])->where('estado', 'aprobada');
+        return $this->applyFilters($query)->count();
+    }
+
+    private function getReservasPendientes($inicio, $fin)
+    {
+        $query = Reserva::whereBetween('fecha_reserva', [$inicio, $fin])->where('estado', 'pendiente');
+        return $this->applyFilters($query)->count();
+    }
+
+    private function getReservasRechazadas($inicio, $fin)
+    {
+        $query = Reserva::whereBetween('fecha_reserva', [$inicio, $fin])->where('estado', 'rechazada');
+        return $this->applyFilters($query)->count();
+    }
+
+    private function getDeportesPopulares($inicio, $fin)
+    {
+        $query = Reserva::selectRaw('deporte, COUNT(*) as total')
+            ->whereBetween('fecha_reserva', [$inicio, $fin])
+            ->where('estado', 'aprobada');
+        return $this->applyFilters($query)->groupBy('deporte')->orderByDesc('total')->limit(8)->get();
+    }
+
+    private function getRecintosMasSolicitados($inicio, $fin)
+    {
+        $query = Reserva::selectRaw('recintos.nombre, recintos.id, COUNT(reservas.id) as total')
             ->join('recintos', 'reservas.recinto_id', '=', 'recintos.id')
-            ->whereBetween('reservas.fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('recintos.nombre', 'recintos.id')
-            ->orderBy('total', 'desc')
-            ->get();
+            ->whereBetween('reservas.fecha_reserva', [$inicio, $fin])
+            ->where('reservas.estado', 'aprobada');
+        return $this->applyFilters($query)->groupBy('recintos.id', 'recintos.nombre')->orderByDesc('total')->limit(5)->get();
+    }
+
+    private function getDiasSemanaPopulares($inicio, $fin)
+    {
+        $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         
-        // Reservas por mes (últimos 6 meses)
-        $reservasPorMes = Reserva::select(
-                DB::raw('YEAR(fecha_reserva) as año'),
-                DB::raw('MONTH(fecha_reserva) as mes'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->where('fecha_reserva', '>=', Carbon::now()->subMonths(6))
-            ->groupBy('año', 'mes')
-            ->orderBy('año', 'asc')
-            ->orderBy('mes', 'asc')
-            ->get();
+        $query = Reserva::selectRaw('DAYNAME(fecha_reserva) as dia_nombre, DAYOFWEEK(fecha_reserva) as dia_numero, COUNT(*) as total')
+            ->whereBetween('fecha_reserva', [$inicio, $fin])
+            ->where('estado', 'aprobada');
         
-        // Organizaciones más activas
-        $organizacionesMasActivas = Reserva::select('nombre_organizacion', DB::raw('COUNT(*) as total'))
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('nombre_organizacion')
-            ->orderBy('total', 'desc')
-            ->limit(10)
-            ->get();
+        $result = $this->applyFilters($query)->groupBy('dia_numero', 'dia_nombre')->orderBy('dia_numero')->get();
+
+        return $result->map(function ($item) use ($dias) {
+            $item->dia_nombre = $dias[$item->dia_numero - 1] ?? 'Desconocido';
+            return $item;
+        });
+    }
+
+    private function getHorariosPopulares($inicio, $fin)
+    {
+        $query = Reserva::selectRaw('HOUR(hora_inicio) as hora, COUNT(*) as total')
+            ->whereBetween('fecha_reserva', [$inicio, $fin])
+            ->where('estado', 'aprobada');
+        return $this->applyFilters($query)->groupBy('hora')->orderByDesc('total')->limit(10)->get();
+    }
+
+    private function getOrganizacionesMasActivas($inicio, $fin)
+    {
+        $query = Reserva::selectRaw('nombre_organizacion, COUNT(*) as total')
+            ->whereBetween('fecha_reserva', [$inicio, $fin])
+            ->where('estado', 'aprobada')
+            ->whereNotNull('nombre_organizacion')
+            ->where('nombre_organizacion', '!=', '');
         
-        // Días de la semana más solicitados
-        $diasSemanaPopulares = Reserva::select(
-                DB::raw('DAYOFWEEK(fecha_reserva) as dia_semana'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('dia_semana')
-            ->orderBy('dia_semana', 'asc')
-            ->get()
-            ->map(function($item) {
-                $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                $item->dia_nombre = $dias[$item->dia_semana - 1];
+        return $this->applyFilters($query)->groupBy('nombre_organizacion')->orderByDesc('total')->limit(10)->get()
+            ->map(function ($item) {
+                $item->nombre_organizacion = $item->nombre_organizacion ?? 'Sin especificar';
                 return $item;
             });
-        
-        // Horarios más solicitados
-        $horariosPopulares = Reserva::select(
-                DB::raw('HOUR(hora_inicio) as hora'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->groupBy('hora')
-            ->orderBy('total', 'desc')
-            ->limit(10)
-            ->get();
-        
-        // Estadísticas generales
-        $totalReservas = Reserva::whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])->count();
-        $reservasAprobadas = Reserva::where('estado', 'aprobada')
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->count();
-        $reservasPendientes = Reserva::where('estado', 'pendiente')
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->count();
-        $reservasRechazadas = Reserva::where('estado', 'rechazada')
-            ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
-            ->count();
-        
-        $tasaAprobacion = $totalReservas > 0 ? round(($reservasAprobadas / $totalReservas) * 100, 1) : 0;
-        
-        return view('admin.estadisticas.index', compact(
-            'deportesPopulares',
-            'reservasPorEstado',
-            'recintosMasSolicitados',
-            'reservasPorMes',
-            'organizacionesMasActivas',
-            'diasSemanaPopulares',
-            'horariosPopulares',
-            'totalReservas',
-            'reservasAprobadas',
-            'reservasPendientes',
-            'reservasRechazadas',
-            'tasaAprobacion',
-            'fechaInicio',
-            'fechaFin'
-        ));
+    }
+
+    private function getReservasConUso($inicio, $fin)
+    {
+        $query = Reserva::whereBetween('fecha_reserva', [$inicio, $fin])->where('estado', 'aprobada');
+        return $this->applyFilters($query)->count();
+    }
+
+    private function getIncidenciasReportadas($inicio, $fin)
+    {
+        return DB::table('incidencias')->whereBetween('created_at', [$inicio, $fin])->count();
+    }
+
+    private function getDanosReportados($inicio, $fin)
+    {
+        return DB::table('incidencias')->whereBetween('created_at', [$inicio, $fin])->where('tipo', 'dano')->count();
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        try {
+            $fechaInicio = $request->input('fecha_inicio', now()->startOfMonth()->format('Y-m-d'));
+            $fechaFin = $request->input('fecha_fin', now()->format('Y-m-d'));
+
+            $query = Reserva::whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+                ->with('recinto')
+                ->orderBy('fecha_reserva', 'desc');
+            
+            if (session('filtro_recinto_id')) {
+                $query->where('recinto_id', session('filtro_recinto_id'));
+            }
+            if (session('filtro_estado')) {
+                $query->where('estado', session('filtro_estado'));
+            }
+            
+            $reservas = $query->get();
+
+            $csvFileName = 'estadisticas_' . Carbon::now()->format('d-m-Y-His') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+            ];
+
+            $callback = function () use ($reservas) {
+                $file = fopen('php://output', 'w');
+                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+                
+                fputcsv($file, ['ID', 'Recinto', 'Deporte', 'Fecha', 'Hora Inicio', 'Hora Fin', 'Organización', 'Estado', 'Participantes'], ',');
+
+                foreach ($reservas as $reserva) {
+                    fputcsv($file, [
+                        $reserva->id,
+                        $reserva->recinto->nombre ?? 'N/A',
+                        $reserva->deporte,
+                        $reserva->fecha_reserva->format('d/m/Y'),
+                        $reserva->hora_inicio->format('H:i'),
+                        $reserva->hora_fin->format('H:i'),
+                        $reserva->nombre_organizacion ?? 'N/A',
+                        ucfirst($reserva->estado),
+                        $reserva->cantidad_personas ?? 0
+                    ], ',');
+                }
+                
+                fclose($file);
+            };
+
+            return response()->streamDownload($callback, $csvFileName, $headers);
+
+        } catch (\Exception $e) {
+            return back()->withErrors('Error al descargar CSV: ' . $e->getMessage());
+        }
+    }
+
+    public function exportarPdf(Request $request)
+    {
+        try {
+            $fechaInicio = $request->input('fecha_inicio', now()->startOfMonth()->format('Y-m-d'));
+            $fechaFin = $request->input('fecha_fin', now()->format('Y-m-d'));
+
+            $query = Reserva::whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
+                ->with('recinto')
+                ->orderBy('fecha_reserva', 'desc');
+            
+            if (session('filtro_recinto_id')) {
+                $query->where('recinto_id', session('filtro_recinto_id'));
+            }
+            if (session('filtro_estado')) {
+                $query->where('estado', session('filtro_estado'));
+            }
+            
+            $reservas = $query->get();
+
+            $totalReservas = $reservas->count();
+            $reservasAprobadas = $reservas->where('estado', 'aprobada')->count();
+            $tasaAprobacion = $totalReservas > 0 ? round(($reservasAprobadas / $totalReservas) * 100) : 0;
+
+            $desde = Carbon::parse($fechaInicio)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+            $hasta = Carbon::parse($fechaFin)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+
+            $pdf = Pdf::loadView('admin.estadisticas.pdf', compact(
+                'reservas',
+                'totalReservas',
+                'reservasAprobadas',
+                'tasaAprobacion',
+                'desde',
+                'hasta'
+            ));
+
+            $filename = 'estadisticas_' . Carbon::now()->format('d-m-Y-His') . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            return back()->withErrors('Error al descargar PDF: ' . $e->getMessage());
+        }
     }
 }
