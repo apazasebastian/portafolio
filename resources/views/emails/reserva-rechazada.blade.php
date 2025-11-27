@@ -146,7 +146,6 @@
 <body>
     <div class="email-container">
         
-        <!-- Header con icono -->
         <div class="header">
             <div class="header-icon">
                 ✕
@@ -155,7 +154,6 @@
             <p>Información sobre tu solicitud</p>
         </div>
 
-        <!-- Contenido -->
         <div class="content">
             <p class="greeting">Estimado/a <strong>{{ $reserva->representante_nombre }}</strong>,</p>
             
@@ -165,13 +163,11 @@
                 <span class="status-badge">✕ RECHAZADA</span>
             </div>
 
-            <!-- Motivo del rechazo -->
             <div class="reason-box">
                 <h3>📝 Motivo del rechazo</h3>
                 <p>{{ $reserva->motivo_rechazo }}</p>
             </div>
 
-            <!-- Detalles de la solicitud -->
             <div class="details-box">
                 <h3>📋 Detalles de tu Solicitud</h3>
                 
@@ -187,7 +183,10 @@
                 
                 <div class="detail-item">
                     <span class="detail-label">🕐 Horario:</span>
-                    <span class="detail-value">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</span>
+                    <span class="detail-value">
+                        {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                        {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                    </span>
                 </div>
                 
                 <div class="detail-item">
@@ -196,7 +195,6 @@
                 </div>
             </div>
 
-            <!-- Ayuda -->
             <div class="help-box">
                 <p>
                     💡 <strong>¿Necesitas ayuda?</strong><br>
@@ -212,7 +210,6 @@
             </p>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
             <p style="margin: 0;">Saludos cordiales,</p>
             <strong>Municipalidad de Arica</strong>

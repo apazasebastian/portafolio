@@ -100,27 +100,10 @@
                                 <div class="text-sm text-gray-500">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $reserva->cantidad_personas }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex space-x-2">
-                                    <form method="POST" action="{{ route('admin.reservas.aprobar', $reserva) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" 
-                                                onclick="return confirm('¿Aprobar esta reserva?')"
-                                                class="text-green-600 hover:text-green-800 text-sm font-medium">
-                                            Aprobar
-                                        </button>
-                                    </form>
-                                    <span class="text-gray-300">|</span>
-                                    <form method="POST" action="{{ route('admin.reservas.rechazar', $reserva) }}" class="inline">
-                                        @csrf
-                                        <input type="hidden" name="motivo_rechazo" value="Rechazado desde dashboard">
-                                        <button type="submit" 
-                                                onclick="return confirm('¿Rechazar esta reserva?')"
-                                                class="text-red-600 hover:text-red-800 text-sm font-medium">
-                                            Rechazar
-                                        </button>
-                                    </form>
-                                </div>
+                            <td class="px-6 py-4 text-sm font-medium">
+                                <a href="{{ route('admin.reservas.show', $reserva) }}" class="text-indigo-600 hover:text-indigo-900">
+                                    Ver Detalles
+                                </a>
                             </td>
                         </tr>
                         @endforeach

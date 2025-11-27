@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
         // Aquí llamas a tus seeders
         $this->call([
             UserSeeder::class,
-            // OtroSeeder::class,
+            EventoSeeder::class,
         ]);
     }
 }

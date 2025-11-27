@@ -1,112 +1,157 @@
 @extends('layouts.app')
 
-@section('title', 'Reserva #' . $reserva->id)
+@section('title', 'Detalle de Reserva')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
+<div class="py-12">
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        
         <div class="mb-6">
-            <a href="{{ route('admin.reservas.index') }}" class="text-blue-600 hover:text-blue-800">
-                ← Volver a la lista
+            <a href="{{ route('admin.reservas.index') }}" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Volver al listado
             </a>
         </div>
 
-        <!-- Estado -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex justify-between items-start">
-                <h1 class="text-3xl font-bold text-gray-800">Reserva #{{ $reserva->id }}</h1>
-                @if($reserva->estado === 'pendiente')
-                    <span class="px-4 py-2 rounded-full bg-yellow-100 text-yellow-800">PENDIENTE</span>
-                @elseif($reserva->estado === 'aprobada')
-                    <span class="px-4 py-2 rounded-full bg-green-100 text-green-800">APROBADA</span>
-                @else
-                    <span class="px-4 py-2 rounded-full bg-red-100 text-red-800">RECHAZADA</span>
-                @endif
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            
+            <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Reserva #{{ $reserva->id }}
+                </h3>
+                @php
+                    $clases = [
+                        'pendiente' => 'bg-yellow-100 text-yellow-800',
+                        'aprobada' => 'bg-green-100 text-green-800',
+                        'rechazada' => 'bg-red-100 text-red-800',
+                        'cancelada' => 'bg-gray-100 text-gray-800',
+                    ];
+                    $clase = $clases[$reserva->estado] ?? 'bg-gray-100 text-gray-800';
+                @endphp
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $clase }}">
+                    {{ ucfirst($reserva->estado) }}
+                </span>
             </div>
-        </div>
 
-        <!-- Detalles -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Información del Recinto</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-sm text-gray-500">Recinto</label>
-                    <p class="text-lg font-medium">{{ $reserva->recinto->nombre }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Fecha</label>
-                    <p class="text-lg font-medium">{{ $reserva->fecha_reserva->format('d/m/Y') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Horario</label>
-                    <p class="text-lg font-medium">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Personas</label>
-                    <p class="text-lg font-medium">{{ $reserva->cantidad_personas }}</p>
-                </div>
+            <div class="px-6 py-5">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
+                    
+                    <div class="col-span-2 md:col-span-1">
+                        <h4 class="text-md font-bold text-gray-700 mb-4 border-b pb-2">Detalles del Evento</h4>
+                        
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Recinto</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $reserva->recinto->nombre }}</dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Actividad / Deporte</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $reserva->deporte }}</dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Fecha</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Horario</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-bold bg-gray-50 p-2 rounded inline-block">
+                                {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                                {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                            </dd>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 md:col-span-1">
+                        <h4 class="text-md font-bold text-gray-700 mb-4 border-b pb-2">Información del Solicitante</h4>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Nombre / Organización</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $reserva->nombre_organizacion ?? $reserva->representante_nombre }}
+                            </dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">RUT</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $reserva->rut }}</dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Email</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $reserva->email }}</dd>
+                        </div>
+
+                        <div class="mb-4">
+                            <dt class="text-sm font-medium text-gray-500">Teléfono</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $reserva->telefono }}</dd>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 border-t pt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Observaciones del Usuario</dt>
+                                <dd class="mt-1 text-sm text-gray-900 italic">
+                                    {{ $reserva->observaciones ?? 'Sin observaciones' }}
+                                </dd>
+                            </div>
+                            
+                            @if($reserva->motivo_rechazo)
+                            <div class="bg-red-50 p-3 rounded-md border border-red-200">
+                                <dt class="text-sm font-bold text-red-700">Motivo del Rechazo</dt>
+                                <dd class="mt-1 text-sm text-red-600">
+                                    {{ $reserva->motivo_rechazo }}
+                                </dd>
+                            </div>
+                            @endif
+
+                            @if($reserva->aprobada_por)
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Gestionado por</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {{ $reserva->aprobadaPor->name ?? 'Usuario Sistema' }}
+                                </dd>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </dl>
             </div>
-        </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Información de la Organización</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-sm text-gray-500">Organización</label>
-                    <p class="text-lg font-medium">{{ $reserva->nombre_organizacion }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Representante</label>
-                    <p class="text-lg font-medium">{{ $reserva->representante_nombre }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">RUT</label>
-                    <p class="text-lg font-medium">{{ $reserva->rut }}</p>
-                </div>
-                <div>
-                    <label class="text-sm text-gray-500">Email</label>
-                    <p class="text-lg font-medium">{{ $reserva->email }}</p>
-                </div>
-            </div>
-        </div>
+            @if($reserva->estado === 'pendiente')
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                
+                <button type="button" onclick="document.getElementById('form-rechazo').classList.toggle('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
+                    Rechazar
+                </button>
 
-        <!-- Acciones -->
-        @if($reserva->estado === 'pendiente')
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Acciones</h2>
-            <div class="flex gap-4">
-                <form method="POST" action="{{ route('admin.reservas.aprobar', $reserva) }}" class="flex-1">
+                <form action="{{ route('admin.reservas.aprobar', $reserva) }}" method="POST">
                     @csrf
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition" onclick="return confirm('¿Estás seguro de aprobar esta reserva?')">
                         Aprobar Reserva
                     </button>
                 </form>
-                <button onclick="document.getElementById('modal').classList.remove('hidden')" 
-                        class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-md">
-                    Rechazar Reserva
-                </button>
             </div>
-        </div>
-
-        <!-- Modal -->
-        <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                <h3 class="text-xl font-bold mb-4">Motivo del Rechazo</h3>
-                <form method="POST" action="{{ route('admin.reservas.rechazar', $reserva) }}">
+            
+            <div id="form-rechazo" class="hidden bg-gray-100 px-6 py-4 border-t border-gray-200">
+                <form action="{{ route('admin.reservas.rechazar', $reserva) }}" method="POST">
                     @csrf
-                    <textarea name="motivo_rechazo" rows="4" required
-                              class="w-full border rounded-md px-3 py-2 mb-4"></textarea>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
-                                class="flex-1 bg-gray-300 py-2 rounded-md">Cancelar</button>
-                        <button type="submit" class="flex-1 bg-red-600 text-white py-2 rounded-md">
+                    <label for="motivo_rechazo" class="block text-sm font-medium text-gray-700 mb-2">Motivo del rechazo:</label>
+                    <textarea name="motivo_rechazo" id="motivo_rechazo" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" required placeholder="Explique por qué se rechaza la solicitud..."></textarea>
+                    <div class="mt-3 flex justify-end">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
                             Confirmar Rechazo
                         </button>
                     </div>
                 </form>
             </div>
+            @endif
+
         </div>
-        @endif
     </div>
 </div>
 @endsection

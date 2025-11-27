@@ -3,228 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f3f4f6;
-            line-height: 1.6;
-        }
-        .email-container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-        .header-icon {
-            width: 80px;
-            height: 80px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-center;
-            margin: 0 auto 20px;
-            font-size: 40px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .header p {
-            margin: 10px 0 0;
-            opacity: 0.9;
-            font-size: 16px;
-        }
-        .content {
-            padding: 40px 30px;
-        }
-        .greeting {
-            font-size: 18px;
-            color: #374151;
-            margin-bottom: 20px;
-        }
-        .status-badge {
-            display: inline-block;
-            background-color: #e5e7eb;
-            color: #1f2937;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-            margin: 20px 0;
-        }
-        .details-box {
-            background-color: #f9fafb;
-            border-left: 4px solid #6b7280;
-            padding: 25px;
-            margin: 30px 0;
-            border-radius: 8px;
-        }
-        .details-box h3 {
-            margin: 0 0 20px;
-            color: #111827;
-            font-size: 18px;
-        }
-        .detail-item {
-            display: flex;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .detail-item:last-child {
-            border-bottom: none;
-        }
-        .detail-label {
-            font-weight: 600;
-            color: #6b7280;
-            width: 120px;
-            flex-shrink: 0;
-        }
-        .detail-value {
-            color: #111827;
-            font-weight: 500;
-        }
-        .motivo-box {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 8px;
-        }
-        .motivo-box h4 {
-            margin: 0 0 10px;
-            color: #92400e;
-            font-size: 16px;
-        }
-        .motivo-box p {
-            margin: 0;
-            color: #78350f;
-            font-size: 15px;
-        }
-        .info-box {
-            background-color: #dbeafe;
-            border-left: 4px solid #3b82f6;
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 8px;
-        }
-        .info-box p {
-            margin: 0;
-            color: #1e40af;
-            font-size: 15px;
-        }
-        .footer {
-            background-color: #f9fafb;
-            padding: 30px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        .footer strong {
-            color: #111827;
-            display: block;
-            margin-top: 10px;
-        }
-        .divider {
-            height: 1px;
-            background-color: #e5e7eb;
-            margin: 30px 0;
-        }
-    </style>
+    <title>Reserva Cancelada</title>
 </head>
-<body>
-    <div class="email-container">
-        
-        <!-- Header con icono -->
-        <div class="header">
-            <div class="header-icon">
-                ✕
-            </div>
-            <h1>Reserva Cancelada</h1>
-            <p>Confirmación de cancelación</p>
-        </div>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    
+                    <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%); padding: 40px 20px;">
+                            <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; font-size: 30px; color: white; margin-bottom: 15px;">
+                                ✕
+                            </div>
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Reserva Cancelada</h1>
+                            <p style="color: #e5e7eb; margin: 5px 0 0; font-size: 16px;">Confirmación de anulación</p>
+                        </td>
+                    </tr>
 
-        <!-- Contenido -->
-        <div class="content">
-            <p class="greeting">Estimado/a <strong>{{ $reserva->representante_nombre }}</strong>,</p>
-            
-            <p>Te confirmamos que tu reserva ha sido:</p>
-            
-            <div style="text-align: center;">
-                <span class="status-badge">CANCELADA EXITOSAMENTE</span>
-            </div>
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
+                                Estimado/a <strong>{{ $reserva->representante_nombre }}</strong>,
+                            </p>
+                            
+                            <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+                                Te informamos que la reserva solicitada ha sido cancelada exitosamente. A continuación encontrarás los detalles:
+                            </p>
 
-            <!-- Detalles de la reserva cancelada -->
-            <div class="details-box">
-                <h3>📋 Detalles de la Reserva Cancelada</h3>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            
+                                            <tr>
+                                                <td width="35%" style="padding: 8px 0; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                                    🏟️ Recinto:
+                                                </td>
+                                                <td width="65%" style="padding: 8px 0; color: #111827; font-weight: 500; font-size: 14px;">
+                                                    {{ $reserva->recinto->nombre }}
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+
+                                            <tr>
+                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                                    📅 Fecha del Evento:
+                                                </td>
+                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
+                                                    {{ $reserva->fecha_reserva->format('d/m/Y') }}
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+
+                                            <tr>
+                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                                    🕐 Horario:
+                                                </td>
+                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
+                                                    {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                                                    {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+
+                                            <tr>
+                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                                    🏢 Organización:
+                                                </td>
+                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
+                                                    {{ $reserva->nombre_organizacion }}
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+
+                                            <tr>
+                                                <td style="padding: 12px 0 0; color: #ef4444; font-weight: bold; font-size: 14px; vertical-align: top;">
+                                                    📆 Cancelada el:
+                                                </td>
+                                                <td style="padding: 12px 0 0; color: #ef4444; font-weight: 500; font-size: 14px;">
+                                                    {{ $reserva->fecha_cancelacion ? $reserva->fecha_cancelacion->timezone('America/Santiago')->format('d/m/Y H:i') : now()->timezone('America/Santiago')->format('d/m/Y H:i') }}
+                                                </td>
+                                            </tr>
+
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            @if($reserva->motivo_cancelacion)
+                            <div style="margin-top: 25px; background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: bold;">📝 Motivo de la Cancelación:</p>
+                                <p style="margin: 5px 0 0; font-size: 14px; color: #b45309;">{{ $reserva->motivo_cancelacion }}</p>
+                            </div>
+                            @endif
+
+                            <div style="margin-top: 20px; background-color: #eff6ff; border-radius: 6px; padding: 15px;">
+                                <p style="margin: 0; font-size: 13px; color: #1e40af; text-align: center;">
+                                    ℹ️ El horario ha quedado liberado para otras reservas.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                                &copy; {{ date('Y') }} Municipalidad de Arica<br>
+                                Departamento de Deportes y Recreación
+                            </p>
+                        </td>
+                    </tr>
+                </table>
                 
-                <div class="detail-item">
-                    <span class="detail-label">🏟️ Recinto:</span>
-                    <span class="detail-value">{{ $reserva->recinto->nombre }}</span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="detail-label">📅 Fecha:</span>
-                    <span class="detail-value">{{ $reserva->fecha_reserva->format('d/m/Y') }}</span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="detail-label">🕐 Horario:</span>
-                    <span class="detail-value">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="detail-label">🏢 Organización:</span>
-                    <span class="detail-value">{{ $reserva->nombre_organizacion }}</span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="detail-label">📆 Cancelada el:</span>
-                    <span class="detail-value">{{ $reserva->fecha_cancelacion->format('d/m/Y H:i') }}</span>
-                </div>
-            </div>
+                <table border="0" cellpadding="0" cellspacing="0" height="40" width="100%">
+                    <tr><td></td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
-            <!-- Motivo de la cancelación -->
-            @if($reserva->motivo_cancelacion)
-            <div class="motivo-box">
-                <h4>📝 Motivo de la Cancelación</h4>
-                <p>{{ $reserva->motivo_cancelacion }}</p>
-            </div>
-            @endif
-
-            <!-- Información adicional -->
-            <div class="info-box">
-                <p>
-                    <strong>💡 Información importante:</strong><br>
-                    El horario quedará disponible para otras organizaciones. 
-                    Si necesitas realizar una nueva reserva, puedes hacerlo ingresando a nuestro sistema de reservas.
-                </p>
-            </div>
-
-            <div class="divider"></div>
-
-            <p style="color: #6b7280; font-size: 14px; text-align: center;">
-                Si tienes alguna consulta, puedes responder a este correo.
-            </p>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p style="margin: 0;">Saludos cordiales,</p>
-            <strong>Municipalidad de Arica</strong>
-            <p style="margin: 5px 0 0;">Departamento de Deportes y Recreación</p>
-        </div>
-
-    </div>
 </body>
 </html>

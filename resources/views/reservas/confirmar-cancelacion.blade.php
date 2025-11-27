@@ -6,14 +6,12 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-3xl mx-auto">
         
-        <!-- Breadcrumb -->
         <div class="mb-6">
             <a href="{{ route('cancelacion.formulario') }}" class="text-blue-600 hover:text-blue-800">
                 ← Ingresar otro código
             </a>
         </div>
 
-        <!-- Header -->
         <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg shadow-lg p-6 mb-6 text-white">
             <div class="flex items-center">
                 <div class="flex-shrink-0 w-16 h-16 bg-white bg-opacity-30 rounded-full flex items-center justify-center mr-4">
@@ -28,7 +26,6 @@
             </div>
         </div>
 
-        <!-- Detalles de la Reserva -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -56,7 +53,10 @@
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <p class="text-sm text-gray-500 mb-1">Horario</p>
-                    <p class="text-lg font-semibold text-gray-800">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</p>
+                    <p class="text-lg font-semibold text-gray-800">
+                        {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                        {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                    </p>
                 </div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
@@ -71,7 +71,6 @@
             </div>
         </div>
 
-        <!-- Formulario de Confirmación -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Motivo de la Cancelación</h3>
             
@@ -97,7 +96,6 @@
                     <p class="text-xs text-gray-500 mt-1">Máximo 500 caracteres</p>
                 </div>
 
-                <!-- Advertencia Final -->
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
                     <div class="flex">
                         <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -115,7 +113,6 @@
                     </div>
                 </div>
 
-                <!-- Botones -->
                 <div class="flex flex-col sm:flex-row gap-3">
                     <a href="{{ route('cancelacion.formulario') }}" 
                        class="flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors">

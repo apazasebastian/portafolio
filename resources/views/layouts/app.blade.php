@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistema de Reservas Deportivas')</title>
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- Vite -->
     @vite(['resources/js/app.js'])
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- Header -->
     <header class="bg-blue-800 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
@@ -33,12 +29,15 @@
                     <a href="{{ route('calendario') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('calendario') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                         Calendario
                     </a>
-                    <a href="{{ route('cancelacion.formulario') }}" class="hover:text-blue-200 transition-colors">
+                    <a href="{{ route('cancelacion.formulario') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('cancelacion.formulario') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                         Cancelar Reserva
                     </a>
                     @auth
                         <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Administración
+                        </a>
+                        <a href="{{ route('admin.reservas.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.reservas.*') ? 'font-bold border-b-2 border-blue-200' : '' }}">
+                            Reservas
                         </a>
                         <a href="{{ route('admin.estadisticas.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.estadisticas.index') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Estadísticas
@@ -56,7 +55,6 @@
                     @endauth
                 </nav>
 
-                <!-- Menú móvil (hamburguesa) -->
                 <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -64,7 +62,6 @@
                 </button>
             </div>
 
-            <!-- Menú móvil desplegable -->
             <nav id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
                 <a href="{{ route('home') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('home') ? 'font-bold' : '' }}">
                     Inicio
@@ -72,9 +69,15 @@
                 <a href="{{ route('calendario') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('calendario') ? 'font-bold' : '' }}">
                     Calendario
                 </a>
+                <a href="{{ route('cancelacion.formulario') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('cancelacion.formulario') ? 'font-bold' : '' }}">
+                    Cancelar Reserva
+                </a>
                 @auth
                     <a href="{{ route('admin.dashboard') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold' : '' }}">
                         Administración
+                    </a>
+                    <a href="{{ route('admin.reservas.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.reservas.*') ? 'font-bold' : '' }}">
+                        Reservas
                     </a>
                     <a href="{{ route('admin.estadisticas.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.estadisticas.index') ? 'font-bold' : '' }}">
                         Estadísticas
@@ -94,7 +97,6 @@
         </div>
     </header>
 
-    <!-- Mensajes de alerta -->
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 mx-4 mt-4 rounded relative">
             <span class="block sm:inline">{{ session('success') }}</span>
@@ -117,12 +119,10 @@
         </div>
     @endif
 
-    <!-- Contenido principal -->
     <main>
         @yield('content')
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8 mt-12">
         <div class="container mx-auto px-4 text-center">
             <p>&copy; {{ date('Y') }} Municipalidad de Arica - Sistema de Reservas Deportivas</p>
@@ -132,7 +132,6 @@
         </div>
     </footer>
 
-    <!-- Script para menú móvil -->
     <script>
         document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');

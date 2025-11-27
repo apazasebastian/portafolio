@@ -7,6 +7,7 @@ use App\Http\Controllers\CancelacionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminReservaController;
 use App\Http\Controllers\Admin\EstadisticasController;
+use App\Http\Controllers\Admin\IncidenciasController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -121,6 +122,27 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             ->name('aprobar');
         Route::post('/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
             ->name('rechazar');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Gestión de Incidencias
+    |----------------------------------------------------------------------
+    */
+    
+    Route::prefix('incidencias')->name('incidencias.')->group(function () {
+        Route::get('/', [IncidenciasController::class, 'index'])
+            ->name('index');
+        Route::get('/crear/{reservaId}', [IncidenciasController::class, 'crear'])
+            ->name('crear');
+        Route::post('/guardar/{reservaId}', [IncidenciasController::class, 'store'])
+            ->name('store');
+        Route::get('/{incidencia}', [IncidenciasController::class, 'show'])
+            ->name('show');
+        Route::post('/{incidencia}/cambiar-estado', [IncidenciasController::class, 'cambiarEstado'])
+            ->name('cambiar-estado');
+        Route::delete('/{incidencia}', [IncidenciasController::class, 'destroy'])
+            ->name('destroy');
     });
     
 });
