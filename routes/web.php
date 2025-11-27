@@ -6,6 +6,8 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\CancelacionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminReservaController;
+use App\Http\Controllers\Admin\RecintoController;
+use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\IncidenciasController;
 use App\Http\Controllers\AuthController;
@@ -26,6 +28,15 @@ Route::get('/calendario', [CalendarioController::class, 'index'])->name('calenda
 // API para obtener disponibilidad de un recinto en una fecha (usada por JavaScript)
 Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('api.disponibilidad');
+
+/*
+|--------------------------------------------------------------------------
+| Recintos (vista pública usando controlador Admin)
+|--------------------------------------------------------------------------
+*/
+Route::get('/recintos', [RecintoController::class, 'index'])
+    ->name('admin.recintos.index')
+    ->withoutMiddleware(['auth']);
 
 // Reservas públicas
 Route::get('/reservas/crear/{recinto}', [ReservaController::class, 'create'])
@@ -122,6 +133,48 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             ->name('aprobar');
         Route::post('/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
             ->name('rechazar');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Gestión de Recintos (Admin)
+    |----------------------------------------------------------------------
+    */
+    
+    Route::prefix('recintos')->name('recintos.')->group(function () {
+        Route::get('/crear', [RecintoController::class, 'create'])
+            ->name('create');
+        Route::post('/', [RecintoController::class, 'store'])
+            ->name('store');
+        Route::get('/{recinto}/editar', [RecintoController::class, 'edit'])
+            ->name('edit');
+        Route::put('/{recinto}', [RecintoController::class, 'update'])
+            ->name('update');
+        Route::delete('/{recinto}', [RecintoController::class, 'destroy'])
+            ->name('destroy');
+        Route::post('/{recinto}/cambiar-estado', [RecintoController::class, 'cambiarEstado'])
+            ->name('cambiar-estado');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Gestión de Eventos (Carrusel)
+    |----------------------------------------------------------------------
+    */
+    
+    Route::prefix('eventos')->name('eventos.')->group(function () {
+        Route::get('/', [EventoController::class, 'index'])
+            ->name('index');
+        Route::get('/crear', [EventoController::class, 'create'])
+            ->name('create');
+        Route::post('/', [EventoController::class, 'store'])
+            ->name('store');
+        Route::get('/{evento}/editar', [EventoController::class, 'edit'])
+            ->name('edit');
+        Route::put('/{evento}', [EventoController::class, 'update'])
+            ->name('update');
+        Route::delete('/{evento}', [EventoController::class, 'destroy'])
+            ->name('destroy');
     });
 
     /*

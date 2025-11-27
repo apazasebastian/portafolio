@@ -100,117 +100,69 @@
     </div>
     @endif
 
-    <!-- Calendarios por Recinto -->
+    <!-- Calendario Semanal -->
     <div class="mb-12">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-800">Calendario de Disponibilidad</h2>
-            
-            <!-- Selector de Recinto -->
-            <div class="relative">
-                <button id="recintoDropdownBtn" 
-                        class="flex items-center space-x-2 bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-lg px-6 py-3 font-semibold text-gray-700 transition-colors shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                    <span id="recintoNombre">{{ $recintos->first()->nombre ?? 'Seleccionar Recinto' }}</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-
-                <!-- Dropdown Menu -->
-                <div id="recintoDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
-                    @foreach($recintos as $recinto)
-                    <button onclick="cambiarRecinto({{ $recinto->id }}, '{{ $recinto->nombre }}')" 
-                            class="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors first:rounded-t-lg last:rounded-b-lg flex items-center space-x-3">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                        <span class="font-medium text-gray-700">{{ $recinto->nombre }}</span>
-                    </button>
-                    @endforeach
-                </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Disponibilidad Próximos 7 Días</h2>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                @for($i = 0; $i < 7; $i++)
+                    @php
+                        $fecha = now()->addDays($i);
+                        $fechaString = $fecha->format('Y-m-d');
+                        $esHoy = $fecha->isToday();
+                    @endphp
+                    
+                    <div class="border rounded-lg p-4 {{ $esHoy ? 'ring-2 ring-blue-500' : '' }}">
+                        <div class="text-center mb-3">
+                            <div class="font-semibold text-gray-800">
+                                {{ $fecha->locale('es')->format('D') }}
+                                @if($esHoy) <span class="text-blue-600">(Hoy)</span> @endif
+                            </div>
+                            <div class="text-sm text-gray-600">{{ $fecha->format('d/m') }}</div>
+                        </div>
+                        
+                        @if($recintos->count() > 0)
+                            @foreach($recintos as $recinto)
+                                @php
+                                    $diasCerrados = is_array($recinto->dias_cerrados) 
+                                        ? $recinto->dias_cerrados 
+                                        : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : []);
+                                    
+                                    $esDiaCerrado = in_array(strtolower($fecha->format('l')), $diasCerrados ?? []);
+                                    $tieneReservas = false; // Puedes implementar lógica para verificar reservas
+                                @endphp
+                                
+                                <button onclick="verDisponibilidad('{{ $fechaString }}', {{ $recinto->id }}, '{{ $recinto->nombre }}')"
+                                    class="w-full text-xs mb-1 p-2 rounded transition-all hover:shadow-md {{ 
+                                    $esDiaCerrado ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 
+                                    ($tieneReservas ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200') 
+                                }}">
+                                    <div class="font-medium">{{ Str::limit($recinto->nombre, 15) }}</div>
+                                    @if($esDiaCerrado)
+                                        <span class="block text-xs mt-1">🔒 Cerrado</span>
+                                    @elseif($tieneReservas)
+                                        <span class="block text-xs mt-1">📅 Ocupado</span>
+                                    @else
+                                        <span class="block text-xs mt-1">✅ Disponible</span>
+                                    @endif
+                                </button>
+                            @endforeach
+                        @else
+                            <div class="text-xs text-gray-500 text-center">
+                                Sin recintos
+                            </div>
+                        @endif
+                    </div>
+                @endfor
             </div>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Mes Actual -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">
-                    {{ $mesActual->locale('es')->isoFormat('MMMM YYYY') }}
-                </h3>
-                
-                <!-- Días de la semana -->
-                <div class="grid grid-cols-7 gap-2 mb-2">
-                    @foreach(['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as $dia)
-                    <div class="text-center font-semibold text-gray-600 text-sm py-2">
-                        {{ $dia }}
-                    </div>
-                    @endforeach
-                </div>
-
-                <!-- Días del mes -->
-                <div class="grid grid-cols-7 gap-2">
-                    @foreach($diasMesActual as $dia)
-                        @if($dia === null)
-                            <div class="aspect-square"></div>
-                        @else
-                            @php
-                                $esHoy = $dia->isToday();
-                                $esPasado = $dia->isPast() && !$esHoy;
-                            @endphp
-                            <button onclick="verDisponibilidad('{{ $dia->format('Y-m-d') }}')"
-                                class="aspect-square flex items-center justify-center rounded-lg border transition-colors
-                                {{ $esHoy ? 'bg-blue-600 text-white font-bold border-blue-600' : '' }}
-                                {{ $esPasado ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white hover:bg-blue-50 hover:border-blue-400 border-gray-300 cursor-pointer' }}"
-                                {{ $esPasado ? 'disabled' : '' }}>
-                                {{ $dia->day }}
-                            </button>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Mes Siguiente -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">
-                    {{ $mesSiguiente->locale('es')->isoFormat('MMMM YYYY') }}
-                </h3>
-                
-                <!-- Días de la semana -->
-                <div class="grid grid-cols-7 gap-2 mb-2">
-                    @foreach(['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as $dia)
-                    <div class="text-center font-semibold text-gray-600 text-sm py-2">
-                        {{ $dia }}
-                    </div>
-                    @endforeach
-                </div>
-
-                <!-- Días del mes -->
-                <div class="grid grid-cols-7 gap-2">
-                    @foreach($diasMesSiguiente as $dia)
-                        @if($dia === null)
-                            <div class="aspect-square"></div>
-                        @else
-                            <button onclick="verDisponibilidad('{{ $dia->format('Y-m-d') }}')"
-                                class="aspect-square flex items-center justify-center rounded-lg border bg-white hover:bg-blue-50 hover:border-blue-400 border-gray-300 transition-colors cursor-pointer">
-                                {{ $dia->day }}
-                            </button>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
         <!-- Leyenda -->
         <div class="mt-6 flex justify-center items-center flex-wrap gap-6 text-sm">
             <div class="flex items-center">
                 <div class="w-4 h-4 bg-blue-600 rounded mr-2"></div>
                 <span class="text-gray-600">Día actual</span>
-            </div>
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-gray-100 border border-gray-300 rounded mr-2"></div>
-                <span class="text-gray-600">Días pasados</span>
             </div>
             <div class="flex items-center">
                 <div class="w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></div>
@@ -296,7 +248,6 @@ let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel-slide');
 const indicators = document.querySelectorAll('.carousel-indicator');
 const totalSlides = slides.length;
-let recintoSeleccionado = {{ $recintos->first()->id ?? 'null' }};
 
 // Carrusel
 function showSlide(index) {
@@ -338,40 +289,15 @@ if (totalSlides > 1) {
     setInterval(nextSlide, 5000);
 }
 
-// Dropdown de recintos
-document.getElementById('recintoDropdownBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('recintoDropdown').classList.toggle('hidden');
-});
-
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('recintoDropdown');
-    const btn = document.getElementById('recintoDropdownBtn');
-    if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-        dropdown.classList.add('hidden');
-    }
-});
-
-function cambiarRecinto(id, nombre) {
-    recintoSeleccionado = id;
-    document.getElementById('recintoNombre').textContent = nombre;
-    document.getElementById('recintoDropdown').classList.add('hidden');
-}
-
 // Modal de disponibilidad
-function verDisponibilidad(fecha) {
-    if (!recintoSeleccionado) {
-        alert('Por favor selecciona un recinto primero');
-        return;
-    }
-
+function verDisponibilidad(fecha, recintoId, recintoNombre) {
     // Mostrar modal
     document.getElementById('modalDisponibilidad').classList.remove('hidden');
     document.getElementById('modalLoading').classList.remove('hidden');
     document.getElementById('modalContent').classList.add('hidden');
 
     // Hacer petición AJAX
-    fetch(`{{ route('api.disponibilidad') }}?recinto_id=${recintoSeleccionado}&fecha=${fecha}`, {
+    fetch(`{{ route('api.disponibilidad') }}?recinto_id=${recintoId}&fecha=${fecha}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
@@ -384,7 +310,7 @@ function verDisponibilidad(fecha) {
         return response.json();
     })
     .then(data => {
-        mostrarDisponibilidad(data, fecha);
+        mostrarDisponibilidad(data, fecha, recintoId);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -393,7 +319,7 @@ function verDisponibilidad(fecha) {
     });
 }
 
-function mostrarDisponibilidad(data, fechaOriginal) {
+function mostrarDisponibilidad(data, fechaOriginal, recintoId) {
     // Ocultar loading
     document.getElementById('modalLoading').classList.add('hidden');
     document.getElementById('modalContent').classList.remove('hidden');
@@ -460,7 +386,6 @@ function mostrarDisponibilidad(data, fechaOriginal) {
             icon = '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
             
             if (franja.reserva) {
-                // Mostrar organización y deporte
                 estadoHtml = `
                     <p class="text-sm ${textColor} font-semibold">Reservado por ${franja.reserva.nombre_organizacion}</p>
                     <p class="text-xs ${textColor} mt-1">
@@ -492,8 +417,8 @@ function mostrarDisponibilidad(data, fechaOriginal) {
         `;
     }).join('');
 
-    // Botón de reserva - usar la fecha original que ya viene en formato correcto
-    document.getElementById('btnReservar').href = `/reservas/crear/${recintoSeleccionado}?fecha=${fechaOriginal}`;
+    // Botón de reserva
+    document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fechaOriginal}`;
 }
 
 function cerrarModal() {

@@ -36,6 +36,12 @@
                         <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Administración
                         </a>
+                        <a href="{{ route('admin.recintos.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.recintos.*') ? 'font-bold border-b-2 border-blue-200' : '' }}">
+                            Recintos
+                        </a>
+                        <a href="{{ route('admin.eventos.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.eventos.*') ? 'font-bold border-b-2 border-blue-200' : '' }}">
+                            Eventos
+                        </a>
                         <a href="{{ route('admin.reservas.index') }}" class="hover:text-blue-200 transition-colors {{ request()->routeIs('admin.reservas.*') ? 'font-bold border-b-2 border-blue-200' : '' }}">
                             Reservas
                         </a>
@@ -75,6 +81,12 @@
                 @auth
                     <a href="{{ route('admin.dashboard') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.dashboard') ? 'font-bold' : '' }}">
                         Administración
+                    </a>
+                    <a href="{{ route('admin.recintos.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.recintos.*') ? 'font-bold' : '' }}">
+                        Recintos
+                    </a>
+                    <a href="{{ route('admin.eventos.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.eventos.*') ? 'font-bold' : '' }}">
+                        Eventos
                     </a>
                     <a href="{{ route('admin.reservas.index') }}" class="block py-2 hover:text-blue-200 transition-colors {{ request()->routeIs('admin.reservas.*') ? 'font-bold' : '' }}">
                         Reservas
