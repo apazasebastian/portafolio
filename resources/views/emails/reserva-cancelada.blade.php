@@ -39,7 +39,7 @@
                                             
                                             <tr>
                                                 <td width="35%" style="padding: 8px 0; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                    🏟️ Recinto:
+                                                     Recinto:
                                                 </td>
                                                 <td width="65%" style="padding: 8px 0; color: #111827; font-weight: 500; font-size: 14px;">
                                                     {{ $reserva->recinto->nombre }}
@@ -49,7 +49,7 @@
 
                                             <tr>
                                                 <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                    📅 Fecha del Evento:
+                                                     Fecha del Evento:
                                                 </td>
                                                 <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
                                                     {{ $reserva->fecha_reserva->format('d/m/Y') }}
@@ -59,7 +59,7 @@
 
                                             <tr>
                                                 <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                    🕐 Horario:
+                                                     Horario:
                                                 </td>
                                                 <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
                                                     {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
@@ -70,7 +70,7 @@
 
                                             <tr>
                                                 <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                    🏢 Organización:
+                                                     Organización:
                                                 </td>
                                                 <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
                                                     {{ $reserva->nombre_organizacion }}
@@ -80,7 +80,7 @@
 
                                             <tr>
                                                 <td style="padding: 12px 0 0; color: #ef4444; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                    📆 Cancelada el:
+                                                     Cancelada el:
                                                 </td>
                                                 <td style="padding: 12px 0 0; color: #ef4444; font-weight: 500; font-size: 14px;">
                                                     {{ $reserva->fecha_cancelacion ? $reserva->fecha_cancelacion->timezone('America/Santiago')->format('d/m/Y H:i') : now()->timezone('America/Santiago')->format('d/m/Y H:i') }}
@@ -94,14 +94,14 @@
 
                             @if($reserva->motivo_cancelacion)
                             <div style="margin-top: 25px; background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
-                                <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: bold;">📝 Motivo de la Cancelación:</p>
+                                <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: bold;"> Motivo de la Cancelación:</p>
                                 <p style="margin: 5px 0 0; font-size: 14px; color: #b45309;">{{ $reserva->motivo_cancelacion }}</p>
                             </div>
                             @endif
 
                             <div style="margin-top: 20px; background-color: #eff6ff; border-radius: 6px; padding: 15px;">
                                 <p style="margin: 0; font-size: 13px; color: #1e40af; text-align: center;">
-                                    ℹ️ El horario ha quedado liberado para otras reservas.
+                                     El horario ha quedado liberado para otras reservas.
                                 </p>
                             </div>
 

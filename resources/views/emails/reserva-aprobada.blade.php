@@ -7,7 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px;">✅ Tu solicitud ha sido confirmada</h1>
+        <h1 style="margin: 0; font-size: 28px;"> Tu solicitud ha sido confirmada</h1>
     </div>
     
     <div style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
@@ -20,12 +20,12 @@
         </p>
         
         <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <span style="font-size: 24px; font-weight: bold;">✅ APROBADA</span>
+            <span style="font-size: 24px; font-weight: bold;"> APROBADA</span>
         </div>
 
         <!-- Detalles de la Reserva -->
         <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-top: 30px;">
-            📋 Detalles de tu Reserva
+             Detalles de tu Reserva
         </h2>
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -40,7 +40,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <strong>📅 Fecha:</strong>
+                        <strong> Fecha:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
                         {{-- CORRECCIÓN CLAVE: Usar format('d/m/Y') en la fecha --}}
@@ -49,7 +49,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <strong>⏰ Horario:</strong>
+                        <strong> Horario:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
                         {{-- CORRECCIÓN CLAVE: Usar format('H:i') en las horas --}}
@@ -78,7 +78,7 @@
 
         <!-- Código de Cancelación -->
         <h2 style="color: #333; border-bottom: 2px solid #f59e0b; padding-bottom: 10px; margin-top: 30px;">
-            🔑 Código de Cancelación
+             Código de Cancelación
         </h2>
         
         @if($reserva->codigo_cancelacion)
@@ -110,7 +110,7 @@
         @else
             <div style="background-color: #fee2e2; border: 2px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 8px;">
                 <p style="color: #dc2626; font-weight: bold; margin: 0;">
-                    ⚠️ Error: No se pudo generar el código de cancelación. 
+                     Error: No se pudo generar el código de cancelación. 
                     Por favor, contacta al administrador si necesitas cancelar tu reserva.
                 </p>
             </div>
@@ -118,7 +118,7 @@
 
         <!-- Instrucciones Importantes -->
         <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-top: 30px;">
-            ⚠️ Instrucciones Importantes
+             Instrucciones Importantes
         </h2>
         
         <ul style="background-color: white; padding: 20px 20px 20px 40px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -130,7 +130,7 @@
 
         <!-- Información de Contacto -->
         <div style="background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin-top: 30px; text-align: center;">
-            <h3 style="color: #333; margin-top: 0;">📞 ¿Necesitas ayuda?</h3>
+            <h3 style="color: #333; margin-top: 0;"> ¿Necesitas ayuda?</h3>
             <p style="margin: 5px 0;">Contáctanos:</p>
             <p style="margin: 5px 0;"><strong>Teléfono:</strong> +56 58 220 5522</p>
             <p style="margin: 5px 0;"><strong>Email:</strong> deportes@municipalidaddearica.cl</p>

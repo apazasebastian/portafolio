@@ -97,7 +97,10 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $reserva->fecha_reserva->format('d/m/Y') }}</div>
-                                <div class="text-sm text-gray-500">{{ $reserva->hora_inicio }} - {{ $reserva->hora_fin }}</div>
+                                <div class="text-sm text-gray-500">
+                                    {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                                    {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $reserva->cantidad_personas }}</td>
                             <td class="px-6 py-4 text-sm font-medium">

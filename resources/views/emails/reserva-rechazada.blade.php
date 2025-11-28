@@ -164,25 +164,25 @@
             </div>
 
             <div class="reason-box">
-                <h3>📝 Motivo del rechazo</h3>
+                <h3> Motivo del rechazo</h3>
                 <p>{{ $reserva->motivo_rechazo }}</p>
             </div>
 
             <div class="details-box">
-                <h3>📋 Detalles de tu Solicitud</h3>
+                <h3> Detalles de tu Solicitud</h3>
                 
                 <div class="detail-item">
-                    <span class="detail-label">🏟️ Recinto:</span>
+                    <span class="detail-label"> Recinto:</span>
                     <span class="detail-value">{{ $reserva->recinto->nombre }}</span>
                 </div>
                 
                 <div class="detail-item">
-                    <span class="detail-label">📅 Fecha:</span>
+                    <span class="detail-label"> Fecha:</span>
                     <span class="detail-value">{{ $reserva->fecha_reserva->format('d/m/Y') }}</span>
                 </div>
                 
                 <div class="detail-item">
-                    <span class="detail-label">🕐 Horario:</span>
+                    <span class="detail-label"> Horario:</span>
                     <span class="detail-value">
                         {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
                         {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
@@ -190,14 +190,14 @@
                 </div>
                 
                 <div class="detail-item">
-                    <span class="detail-label">🏢 Organización:</span>
+                    <span class="detail-label"> Organización:</span>
                     <span class="detail-value">{{ $reserva->nombre_organizacion }}</span>
                 </div>
             </div>
 
             <div class="help-box">
                 <p>
-                    💡 <strong>¿Necesitas ayuda?</strong><br>
+                     <strong>¿Necesitas ayuda?</strong><br>
                     Puedes realizar una nueva solicitud considerando el motivo del rechazo, 
                     o contactarnos respondiendo a este correo para más información.
                 </p>
