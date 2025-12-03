@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
-use Illuminate\Support\Str; // Necesario para generar el código aleatorio
+use Illuminate\Support\Str;
 
 class Reserva extends Model
 {
@@ -31,7 +31,6 @@ class Reserva extends Model
         'observaciones',
         'motivo_rechazo',
         'acepta_reglamento',
-        // Nuevos campos para la cancelación
         'codigo_cancelacion',
         'fecha_cancelacion',
         'cancelada_por',
@@ -45,7 +44,6 @@ class Reserva extends Model
         'hora_fin' => 'datetime:H:i',
         'fecha_respuesta' => 'datetime',
         'acepta_reglamento' => 'boolean',
-        // Casts para los nuevos campos
         'fecha_cancelacion' => 'datetime',
         'cancelada_por_usuario' => 'boolean'
     ];
@@ -62,24 +60,34 @@ class Reserva extends Model
         return $this->belongsTo(User::class, 'aprobada_por');
     }
 
-    /**
-     * Relación con Organizacion por nombre_organizacion
-     * Si tienes una tabla organizaciones con nombre único, ajusta según sea necesario
-     */
     public function organizacion()
     {
         return $this->belongsTo(Organizacion::class, 'nombre_organizacion', 'nombre');
     }
 
-    /**
-     * Relación con incidencias (problemas post-uso, daños, etc.)
-     */
     public function incidencias()
     {
         return $this->hasMany(Incidencia::class);
     }
 
-    // --- ACCESORES Y FORMATEO ---
+    // --- SCOPES ---
+
+    public function scopePendientes($query)
+    {
+        return $query->where('estado', 'pendiente');
+    }
+
+    public function scopeAprobadas($query)
+    {
+        return $query->where('estado', 'aprobada');
+    }
+
+    public function scopeRechazadas($query)
+    {
+        return $query->where('estado', 'rechazada');
+    }
+
+    // --- ACCESORES ---
 
     public function getRutFormateadoAttribute()
     {
@@ -97,82 +105,73 @@ class Reserva extends Model
         $inicio = Carbon::parse($this->hora_inicio);
         $fin = Carbon::parse($this->hora_fin);
         
-        return $inicio->diffInHours($fin) . ' horas';
+        $horas = $inicio->diffInHours($fin);
+        return $horas . ' hora' . ($horas != 1 ? 's' : '');
     }
 
-    // --- SCOPES ---
-
-    public function scopePendientes($query)
-    {
-        return $query->where('estado', 'pendiente');
-    }
-
-    public function scopeAprobadas($query)
-    {
-        return $query->where('estado', 'aprobada');
-    }
-
-    public function scopeFuturas($query)
-    {
-        return $query->where('fecha_reserva', '>=', now()->toDateString());
-    }
-
-    // --- LÓGICA DE NEGOCIO ---
-
-    public function esEditable()
-    {
-        return $this->estado === 'pendiente' && 
-               $this->fecha_reserva > now()->toDateString();
-    }
-
-    public function aprobar($userId, $observaciones = null)
-    {
-        $this->update([
-            'estado' => 'aprobada',
-            'aprobada_por' => $userId,
-            'fecha_respuesta' => now(),
-            'observaciones' => $observaciones
-        ]);
-    }
-
-    public function rechazar($userId, $motivo)
-    {
-        $this->update([
-            'estado' => 'rechazada',
-            'aprobada_por' => $userId,
-            'fecha_respuesta' => now(),
-            'motivo_rechazo' => $motivo
-        ]);
-    }
-
-    // --- FUNCIONES DE CANCELACIÓN ---
+    // --- MÉTODOS DE VALIDACIÓN ---
 
     /**
-     * Busca una reserva por su código único de cancelación.
+     * Verifica si la reserva ya finalizó (fecha y hora de término pasaron)
      */
-    public static function buscarPorCodigo($codigo)
+    public function haFinalizado()
     {
-        return self::where('codigo_cancelacion', $codigo)->first();
-    }
-
-    /**
-     * Verifica si la reserva cumple las condiciones para ser cancelada.
-     */
-    public function esCancelable()
-    {
-        // 1. No se puede cancelar si ya fue cancelada
-        if (!is_null($this->fecha_cancelacion)) {
+        if ($this->estado !== 'aprobada') {
             return false;
         }
 
-        // 2. No se puede cancelar si ya fue rechazada por administración
+        try {
+            $fechaHoraFin = $this->fecha_reserva->copy()->setTimeFrom($this->hora_fin);
+            return $fechaHoraFin->isPast();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si se puede reportar incidencia
+     * (reserva finalizada y aprobada)
+     */
+    public function puedeReportarIncidencia()
+    {
+        return $this->estado === 'aprobada' && $this->haFinalizado();
+    }
+
+    /**
+     * Verifica si ya tiene incidencias reportadas
+     */
+    public function tieneIncidencias()
+    {
+        return $this->incidencias()->count() > 0;
+    }
+
+    /**
+     * Obtiene la cantidad de incidencias reportadas
+     */
+    public function cantidadIncidencias()
+    {
+        return $this->incidencias()->count();
+    }
+
+    /**
+     * Buscar reserva por código de cancelación
+     */
+    public static function buscarPorCodigo($codigo)
+    {
+        return static::where('codigo_cancelacion', $codigo)->first();
+    }
+
+    public function puedeCancelar()
+    {
+        if ($this->fecha_cancelacion) {
+            return false;
+        }
+
         if ($this->estado === 'rechazada') {
             return false;
         }
 
-        // 3. Validar que la fecha/hora de la reserva sea en el futuro
         try {
-            // Creamos una copia para no modificar la fecha original
             $fechaHoraInicio = $this->fecha_reserva->copy()->setTimeFrom($this->hora_inicio);
             return $fechaHoraInicio->isFuture();
         } catch (\Exception $e) {
@@ -181,22 +180,22 @@ class Reserva extends Model
     }
 
     /**
-     * Ejecuta la cancelación de la reserva.
+     * Alias de puedeCancelar() para compatibilidad
      */
+    public function esCancelable()
+    {
+        return $this->puedeCancelar();
+    }
+
     public function cancelar($motivo = null, $canceladaPorUsuario = true)
     {
         $this->update([
             'fecha_cancelacion' => now(),
             'motivo_cancelacion' => $motivo,
             'cancelada_por_usuario' => $canceladaPorUsuario,
-            // Opcional: Si quieres liberar el cupo visualmente, puedes descomentar la siguiente línea
-            // 'estado' => 'rechazada' 
         ]);
     }
 
-    /**
-     * Cancela la reserva iniciada por el usuario
-     */
     public function cancelarPorUsuario($motivo = null)
     {
         return $this->cancelar($motivo, true);
@@ -208,10 +207,8 @@ class Reserva extends Model
     {
         parent::boot();
 
-        // Genera el código automáticamente ANTES de crear una reserva nueva
         static::creating(function ($reserva) {
             if (empty($reserva->codigo_cancelacion)) {
-                // Genera un código con formato: XXXXXXXX-XXXXXXXX (8 caracteres - guión - 8 caracteres)
                 $parte1 = Str::upper(Str::random(8));
                 $parte2 = Str::upper(Str::random(8));
                 $reserva->codigo_cancelacion = $parte1 . '-' . $parte2;

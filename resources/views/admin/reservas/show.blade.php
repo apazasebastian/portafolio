@@ -7,11 +7,11 @@
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         
         <div class="mb-6">
-            <a href="{{ route('admin.reservas.index') }}" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Volver al listado
+                Volver al Dashboard
             </a>
         </div>
 

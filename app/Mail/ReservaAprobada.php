@@ -14,7 +14,7 @@ class ReservaAprobada extends Mailable
     public $reserva;
 
     /**
-     * Create a new message instance.
+     * Crea un nuevo mensaje en la instancia.
      */
     public function __construct(Reserva $reserva)
     {
@@ -22,7 +22,7 @@ class ReservaAprobada extends Mailable
     }
 
     /**
-     * Build the message.
+     * Contruye.
      */
     public function build()
     {

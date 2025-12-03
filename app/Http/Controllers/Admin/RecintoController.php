@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class RecintoController extends Controller
 {
     /**
-     * Mostrar listado de recintos
+     * Mostrar listado de recintos / segunda etapa pendiente.
      */
     public function index()
     {
@@ -28,7 +28,7 @@ class RecintoController extends Controller
     }
 
     /**
-     * Guardar nuevo recinto
+     * Guardar nuevo recinto / Falta probar
      */
     public function store(Request $request)
     {
@@ -102,7 +102,7 @@ class RecintoController extends Controller
     }
 
     /**
-     * Actualizar recinto
+     * Actualizar recinto / se debe realizar un php tinker link, es para la visualizacion
      */
     public function update(Request $request, Recinto $recinto)
     {

@@ -13,7 +13,7 @@ class EstadisticasController extends Controller
 {
     public function aplicarFiltros(Request $request)
     {
-        // Convertir a entero si no está vacío
+        // Convertir a entero si no está vacío / Aun falta agregar controles de filtros, pendiente
         $recintoId = $request->input('recinto_id') ? (int)$request->input('recinto_id') : null;
         
         session([

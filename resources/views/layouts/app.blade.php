@@ -286,14 +286,7 @@
                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Eventos
                         </a>
-                        <a href="{{ route('admin.reservas.index') }}" 
-                           class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.reservas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Reservas
-                        </a>
-                        <a href="{{ route('admin.estadisticas.index') }}" 
-                           class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.estadisticas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Estadísticas
-                        </a>
+
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
                             @csrf

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
-use App\Models\Recinto; // Importante para los filtros
+use App\Models\Recinto; // Importante para los filtros * Esto sera para la segunda etapa, pero fue agregado de todas formas
 use App\Mail\ReservaAprobada;
 use App\Mail\ReservaRechazada;
 use Illuminate\Http\Request;
@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\Mail;
 class AdminReservaController extends Controller
 {
     /**
-     * Mostrar listado de reservas con filtros activos.
+     * Mostrar listado de reservas con filtros activos, aun falta el de cancelada, pendiente
      */
     public function index(Request $request)
     {
         // Iniciamos la consulta cargando la relación con el recinto
         $query = Reserva::with(['recinto']);
 
-        // 1. Filtro por Estado (Pendiente, Aprobada, Rechazada, Cancelada)
+        // 1. Filtro por Estado (Pendiente, Aprobada, Rechazada, Cancelada) /El cancelada aun no funciona, falta agregar, esta pendiente
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }

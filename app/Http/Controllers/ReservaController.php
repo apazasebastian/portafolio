@@ -20,7 +20,7 @@ class ReservaController extends Controller
     $validated = $request->validate([
         'recinto_id' => 'required|exists:recintos,id',
         'deporte' => 'required|string|max:50',
-        'rut' => ['required', 'string', 'max:12', new ValidRut], // ← LÍNEA MODIFICADA
+        'rut' => ['required', 'string', 'max:12', new ValidRut], // ← LÍNEA MODIFICADA * No esta pendiente
         'nombre_organizacion' => 'required|string|max:255',
         'representante_nombre' => 'required|string|max:255',
         'email' => 'required|email',
