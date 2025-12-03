@@ -32,7 +32,7 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <strong>🏟️ Recinto:</strong>
+                        <strong> Recinto:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
                         {{ $reserva->recinto->nombre }}
@@ -58,7 +58,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <strong>👥 Personas:</strong>
+                        <strong> Personas:</strong>
                     </td>
                     <td style="padding: 10px 0; border-bottom: 1px solid #eee;">
                         {{-- CORRECCIÓN DE NOMBRE DE CAMPO --}}
@@ -67,7 +67,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 10px 0;">
-                        <strong>🏢 Organización:</strong>
+                        <strong> Organización:</strong>
                     </td>
                     <td style="padding: 10px 0;">
                         {{ $reserva->nombre_organizacion }}

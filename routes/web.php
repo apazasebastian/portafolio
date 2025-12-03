@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\IncidenciasController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController; // ← NUEVO
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -77,6 +78,32 @@ Route::get('/cancelacion-exitosa', [CancelacionController::class, 'exito'])
 Route::get('/admin/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/admin/login', [AuthController::class, 'login']);
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| Recuperación de Contraseña (NUEVO)
+|--------------------------------------------------------------------------
+*/
+
+// Formulario para solicitar recuperación de contraseña
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->middleware('guest')
+    ->name('password.request');
+
+// Enviar email con link de recuperación
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->middleware('guest')
+    ->name('password.email');
+
+// Formulario para establecer nueva contraseña
+Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])
+    ->middleware('guest')
+    ->name('password.reset');
+
+// Procesar nueva contraseña
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])
+    ->middleware('guest')
+    ->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
