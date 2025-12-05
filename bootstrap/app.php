@@ -16,7 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //
+        // ⚠️ REGISTRAR MIDDLEWARE PERSONALIZADO (NUEVO) ⚠️
+        $middleware->alias([
+            'jefeRecintos' => \App\Http\Middleware\EnsureUserIsJefeRecintos::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

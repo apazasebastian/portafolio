@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Incidencia;
 use App\Models\Reserva;
+use App\Models\AuditLog; // ← NUEVO
 use Illuminate\Http\Request;
 
 class IncidenciasController extends Controller
@@ -63,6 +64,19 @@ class IncidenciasController extends Controller
             'descripcion' => $validated['descripcion'],
             'estado' => 'reportada',
         ]);
+
+        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        AuditLog::log(
+            action: 'crear_incidencia',
+            description: "Creó incidencia de tipo '{$this->getNombreTipo($validated['tipo'])}' para la reserva #{$reserva->id} en {$reserva->recinto->nombre}",
+            auditable: $incidencia,
+            newValues: [
+                'tipo' => $validated['tipo'],
+                'descripcion' => $validated['descripcion'],
+                'estado' => 'reportada',
+                'reserva_id' => $reserva->id,
+            ]
+        );
         
         return redirect()->route('admin.incidencias.show', $incidencia)
             ->with('success', 'Incidencia reportada correctamente.');
@@ -86,10 +100,22 @@ class IncidenciasController extends Controller
         $validated = $request->validate([
             'estado' => 'required|in:reportada,en_revision,resuelta',
         ]);
+
+        // Guardar estado anterior
+        $oldEstado = $incidencia->estado;
         
         $incidencia->update([
             'estado' => $validated['estado'],
         ]);
+
+        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        AuditLog::log(
+            action: 'cambiar_estado_incidencia',
+            description: "Cambió el estado de la incidencia #{$incidencia->id} de '{$this->getNombreEstado($oldEstado)}' a '{$this->getNombreEstado($validated['estado'])}'",
+            auditable: $incidencia,
+            oldValues: ['estado' => $oldEstado],
+            newValues: ['estado' => $validated['estado']]
+        );
         
         return redirect()->back()
             ->with('success', 'Estado de la incidencia actualizado correctamente.');
@@ -101,9 +127,54 @@ class IncidenciasController extends Controller
     public function destroy(Incidencia $incidencia)
     {
         $reservaId = $incidencia->reserva_id;
+        $incidenciaId = $incidencia->id;
+        $tipo = $incidencia->tipo;
+        $descripcion = $incidencia->descripcion;
+        $estado = $incidencia->estado;
+
+        // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR ⚠️
+        AuditLog::log(
+            action: 'eliminar_incidencia',
+            description: "Eliminó la incidencia #{$incidenciaId} (Tipo: {$this->getNombreTipo($tipo)}, Estado: {$this->getNombreEstado($estado)})",
+            auditable: null, // Ya no existe el objeto
+            oldValues: [
+                'id' => $incidenciaId,
+                'tipo' => $tipo,
+                'descripcion' => $descripcion,
+                'estado' => $estado,
+                'reserva_id' => $reservaId,
+            ]
+        );
+
         $incidencia->delete();
         
         return redirect()->route('admin.incidencias.crear', $reservaId)
             ->with('success', 'Incidencia eliminada correctamente.');
+    }
+
+    /**
+     * Obtener nombre legible del tipo de incidencia
+     */
+    private function getNombreTipo($tipo)
+    {
+        return match($tipo) {
+            'problema_posuso' => 'Problema Post-Uso',
+            'dano' => 'Daño en Instalaciones',
+            'otro' => 'Otro',
+            default => $tipo,
+        };
+    }
+
+    /**
+     * Obtener nombre legible del estado
+     */
+    private function getNombreEstado($estado)
+    {
+        return match($estado) {
+            'reportada' => 'Reportada',
+            'en_revision' => 'En Revisión',
+            'resuelta' => 'Resuelta',
+            default => $estado,
+        };
     }
 }

@@ -3,6 +3,61 @@
 @section('title', 'Panel Administrativo - Reservas Deportivas')
 
 @section('content')
+
+<!-- ⚠️ MENSAJE DE ERROR CON AUTO-CIERRE (NUEVO) ⚠️ -->
+@if(session('error'))
+    <div id="error-alert" class="fixed top-4 right-4 z-50 max-w-md animate-fade-in">
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow-2xl p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-bold text-red-800">Acceso Denegado</h3>
+                        <p class="text-sm text-red-700 mt-1">{{ session('error') }}</p>
+                        <p class="text-xs text-red-600 mt-1">Cerrando en <span id="timer">5</span>s...</p>
+                    </div>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        class="text-red-400 hover:text-red-600 ml-4">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let seconds = 5;
+        const timer = document.getElementById('timer');
+        const alert = document.getElementById('error-alert');
+        
+        const countdown = setInterval(() => {
+            seconds--;
+            timer.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 1000);
+    </script>
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+@endif
+
 <div class="container mx-auto px-4 py-8">
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Panel Administrativo</h1>
@@ -304,7 +359,7 @@
     </div>
 
     <!-- Enlaces útiles -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-{{ auth()->user()->role === 'jefe_recintos' ? '5' : '4' }} gap-6">
         <a href="{{ route('calendario') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
             <svg class="w-12 h-12 mx-auto mb-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -328,6 +383,17 @@
             <h3 class="font-semibold text-gray-800">Estadísticas</h3>
             <p class="text-gray-600 text-sm mt-1">Reportes y análisis</p>
         </a>
+
+        <!-- ⚠️ LINK DE AUDITORÍA - SOLO JEFE DE RECINTOS (NUEVO) ⚠️ -->
+        @if(auth()->user()->role === 'jefe_recintos')
+            <a href="{{ route('admin.auditoria.index') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
+                <svg class="w-12 h-12 mx-auto mb-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h3 class="font-semibold text-gray-800">Auditoría</h3>
+                <p class="text-gray-600 text-sm mt-1">Registro de acciones</p>
+            </a>
+        @endif
         
         <div class="bg-white p-6 rounded-lg text-center shadow-md border border-gray-200">
             <svg class="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

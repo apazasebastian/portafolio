@@ -10,8 +10,10 @@ use App\Http\Controllers\Admin\RecintoController;
 use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\IncidenciasController;
+use App\Http\Controllers\Admin\AuditoriaController; // ← NUEVO
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Auth\ForgotPasswordController; // ← NUEVO
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Middleware\EnsureUserIsJefeRecintos; // ← NUEVO
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,7 +83,7 @@ Route::post('/admin/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| Recuperación de Contraseña (NUEVO)
+| Recuperación de Contraseña
 |--------------------------------------------------------------------------
 */
 
@@ -152,14 +154,19 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     */
     
     Route::prefix('reservas')->name('reservas.')->group(function () {
+        // Todas las rutas de visualización - Todos pueden ver
         Route::get('/', [AdminReservaController::class, 'index'])
             ->name('index');
         Route::get('/{reserva}', [AdminReservaController::class, 'show'])
             ->name('show');
-        Route::post('/{reserva}/aprobar', [AdminReservaController::class, 'aprobar'])
-            ->name('aprobar');
-        Route::post('/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
-            ->name('rechazar');
+        
+        // ⚠️ RUTAS PROTEGIDAS - SOLO JEFE DE RECINTOS ⚠️
+        Route::middleware([EnsureUserIsJefeRecintos::class])->group(function () {
+            Route::post('/{reserva}/aprobar', [AdminReservaController::class, 'aprobar'])
+                ->name('aprobar');
+            Route::post('/{reserva}/rechazar', [AdminReservaController::class, 'rechazar'])
+                ->name('rechazar');
+        });
     });
 
     /*
@@ -206,7 +213,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     /*
     |----------------------------------------------------------------------
-    | Gestión de Incidencias
+    | Gestión de Incidencias - Todos los usuarios autenticados
     |----------------------------------------------------------------------
     */
     
@@ -223,6 +230,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             ->name('cambiar-estado');
         Route::delete('/{incidencia}', [IncidenciasController::class, 'destroy'])
             ->name('destroy');
+    });
+    
+    /*
+    |----------------------------------------------------------------------
+    | Auditoría - SOLO JEFE DE RECINTOS (NUEVO)
+    |----------------------------------------------------------------------
+    */
+    
+    Route::middleware([EnsureUserIsJefeRecintos::class])->prefix('auditoria')->name('auditoria.')->group(function () {
+        // Listado de logs de auditoría
+        Route::get('/', [AuditoriaController::class, 'index'])
+            ->name('index');
+        
+        // Detalles de un log específico
+        Route::get('/{log}', [AuditoriaController::class, 'show'])
+            ->name('show');
     });
     
 });
