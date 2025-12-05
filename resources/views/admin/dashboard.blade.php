@@ -4,7 +4,7 @@
 
 @section('content')
 
-<!-- ⚠️ MENSAJE DE ERROR CON AUTO-CIERRE (NUEVO) ⚠️ -->
+<!-- ⚠️ MENSAJE DE ERROR CON AUTO-CIERRE ⚠️ -->
 @if(session('error'))
     <div id="error-alert" class="fixed top-4 right-4 z-50 max-w-md animate-fade-in">
         <div class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow-2xl p-4">
@@ -59,9 +59,24 @@
 @endif
 
 <div class="container mx-auto px-4 py-8">
+    <!-- Header con Título y Botón de Exportación -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Panel Administrativo</h1>
-        <p class="text-gray-600">Gestión de reservas de recintos deportivos</p>
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Panel Administrativo</h1>
+                <p class="text-gray-600">Gestión de reservas de recintos deportivos</p>
+            </div>
+            
+            <div>
+                <a href="{{ route('admin.dashboard.exportar', request()->query()) }}" 
+                   class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Exportar Reservas
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Estadísticas -->
@@ -123,7 +138,170 @@
         </div>
     </div>
 
-    <!-- Sección de Reservas Completa -->
+    <!-- ⚠️ CALENDARIO INTERACTIVO CON VUE.JS (NUEVO) ⚠️ -->
+    <div class="bg-white rounded-lg shadow-md mb-8" id="calendar-app">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+            <!-- CALENDARIO (2/3 del espacio) -->
+            <div class="lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Calendario de Reservas</h2>
+                    <div class="flex items-center gap-2">
+                        <button @click="prevMonth" class="p-2 hover:bg-gray-100 rounded transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <span class="text-base font-semibold text-gray-700 min-w-[140px] text-center">
+                            @{{ currentMonthName }} @{{ currentYear }}
+                        </span>
+                        <button @click="nextMonth" class="p-2 hover:bg-gray-100 rounded transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Días de la semana -->
+                <div class="grid grid-cols-7 gap-1 mb-1">
+                    <div v-for="day in ['D', 'L', 'M', 'Mi', 'J', 'V', 'S']" 
+                         class="text-center font-semibold text-gray-600 text-sm py-1">
+                        @{{ day }}
+                    </div>
+                </div>
+
+                <!-- Días del mes -->
+                <div class="grid grid-cols-7 gap-1">
+                    <div v-for="day in calendarDays" 
+                         :key="day.date"
+                         @click="selectDay(day)"
+                         :class="[
+                             'min-h-[60px] p-1 rounded border cursor-pointer transition-all',
+                             day.isCurrentMonth ? 'bg-white hover:bg-blue-50 border-gray-200' : 'bg-gray-50 text-gray-400 border-gray-100',
+                             day.isToday ? 'border-2 border-blue-500 bg-blue-50' : '',
+                             selectedDay && selectedDay.date === day.date ? 'ring-2 ring-blue-400 bg-blue-50' : '',
+                             day.reservas.length > 0 ? 'font-semibold' : ''
+                         ]">
+                        <div class="text-xs mb-1" :class="day.isToday ? 'text-blue-600 font-bold' : ''">
+                            @{{ day.day }}
+                        </div>
+                        <div v-if="day.reservas.length > 0" class="flex flex-col gap-0.5">
+                            <div class="flex gap-0.5">
+                                <div v-if="day.pendientes > 0" 
+                                     class="w-2 h-2 rounded-full bg-yellow-400" 
+                                     :title="`${day.pendientes} pendiente(s)`"></div>
+                                <div v-if="day.aprobadas > 0" 
+                                     class="w-2 h-2 rounded-full bg-green-400"
+                                     :title="`${day.aprobadas} aprobada(s)`"></div>
+                            </div>
+                            <div class="text-[10px] text-gray-600">
+                                @{{ day.reservas.length }} reserva@{{ day.reservas.length !== 1 ? 's' : '' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="flex items-center gap-4 mt-4 text-xs text-gray-600">
+                    <div class="flex items-center gap-1">
+                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                        <span>Pendientes</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                        <span>Aprobadas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL LATERAL DE RESERVAS (1/3 del espacio) -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <span v-if="selectedDay">
+                            Reservas del @{{ selectedDay.day }} de @{{ currentMonthName }}
+                        </span>
+                        <span v-else class="text-gray-500">
+                            Selecciona un día
+                        </span>
+                    </h3>
+
+                    <!-- Filtros rápidos -->
+                    <div v-if="selectedDay && selectedDay.reservas.length > 0" class="flex gap-2 mb-4">
+                        <button @click="filtroEstado = 'todas'" 
+                                :class="['px-3 py-1 text-xs font-medium rounded transition-colors',
+                                         filtroEstado === 'todas' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']">
+                            Todas (@{{ selectedDay.reservas.length }})
+                        </button>
+                        <button v-if="selectedDay.pendientes > 0"
+                                @click="filtroEstado = 'pendiente'" 
+                                :class="['px-3 py-1 text-xs font-medium rounded transition-colors',
+                                         filtroEstado === 'pendiente' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200']">
+                            Pendientes (@{{ selectedDay.pendientes }})
+                        </button>
+                        <button v-if="selectedDay.aprobadas > 0"
+                                @click="filtroEstado = 'aprobada'" 
+                                :class="['px-3 py-1 text-xs font-medium rounded transition-colors',
+                                         filtroEstado === 'aprobada' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700 hover:bg-green-200']">
+                            Aprobadas (@{{ selectedDay.aprobadas }})
+                        </button>
+                    </div>
+
+                    <!-- Lista de reservas del día -->
+                    <div v-if="selectedDay" class="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div v-if="reservasFiltradas.length === 0" class="text-center py-8 text-gray-500 text-sm">
+                            No hay reservas para este día
+                        </div>
+
+                        <div v-for="reserva in reservasFiltradas" 
+                             :key="reserva.id"
+                             class="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-blue-300 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-medium text-sm text-gray-900">
+                                    @{{ reserva.organizacion || 'Sin organización' }}
+                                </div>
+                                <span :class="[
+                                    'px-2 py-0.5 text-xs font-medium rounded-full',
+                                    reserva.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                    reserva.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
+                                    'bg-red-100 text-red-800'
+                                ]">
+                                    @{{ reserva.estado }}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                    @{{ reserva.recinto }}
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    @{{ reserva.hora_inicio }} - @{{ reserva.hora_fin }}
+                                </div>
+                            </div>
+                            <a :href="`/admin/reservas/${reserva.id}`" 
+                               class="mt-2 block text-center text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                Ver detalles →
+                            </a>
+                        </div>
+                    </div>
+
+                    <div v-else class="text-center py-8 text-gray-400 text-sm">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Selecciona un día para ver las reservas
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Reservas Completa (con tabla) -->
     <div class="bg-white rounded-lg shadow-md mb-8">
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <div class="flex justify-between items-center">
@@ -384,7 +562,6 @@
             <p class="text-gray-600 text-sm mt-1">Reportes y análisis</p>
         </a>
 
-        <!-- ⚠️ LINK DE AUDITORÍA - SOLO JEFE DE RECINTOS (NUEVO) ⚠️ -->
         @if(auth()->user()->role === 'jefe_recintos')
             <a href="{{ route('admin.auditoria.index') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
                 <svg class="w-12 h-12 mx-auto mb-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,4 +587,113 @@
         </div>
     </div>
 </div>
+
+<!-- ⚠️ SCRIPT DE VUE.JS PARA EL CALENDARIO (NUEVO) ⚠️ -->
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            selectedDay: null,
+            filtroEstado: 'todas',
+            reservas: @json($todasReservasCalendario ?? []),
+            meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+        }
+    },
+    computed: {
+        currentMonthName() {
+            return this.meses[this.currentMonth];
+        },
+        calendarDays() {
+            const year = this.currentYear;
+            const month = this.currentMonth;
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const lastDateOfMonth = lastDay.getDate();
+            const lastDateOfPrevMonth = prevLastDay.getDate();
+            
+            const days = [];
+            
+            // Días del mes anterior
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = lastDateOfPrevMonth - i;
+                const date = new Date(year, month - 1, day);
+                days.push(this.createDayObject(date, false));
+            }
+            
+            // Días del mes actual
+            for (let day = 1; day <= lastDateOfMonth; day++) {
+                const date = new Date(year, month, day);
+                days.push(this.createDayObject(date, true));
+            }
+            
+            // Días del siguiente mes
+            const remainingDays = 35 - days.length;
+            for (let day = 1; day <= remainingDays; day++) {
+                const date = new Date(year, month + 1, day);
+                days.push(this.createDayObject(date, false));
+            }
+            
+            return days;
+        },
+        reservasFiltradas() {
+            if (!this.selectedDay) return [];
+            
+            if (this.filtroEstado === 'todas') {
+                return this.selectedDay.reservas;
+            }
+            
+            return this.selectedDay.reservas.filter(r => r.estado === this.filtroEstado);
+        }
+    },
+    methods: {
+        createDayObject(date, isCurrentMonth) {
+            const dateStr = date.toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
+            const reservasDelDia = this.reservas.filter(r => r.fecha === dateStr);
+            
+            return {
+                date: dateStr,
+                day: date.getDate(),
+                isCurrentMonth,
+                isToday: dateStr === today,
+                reservas: reservasDelDia,
+                pendientes: reservasDelDia.filter(r => r.estado === 'pendiente').length,
+                aprobadas: reservasDelDia.filter(r => r.estado === 'aprobada').length
+            };
+        },
+        prevMonth() {
+            if (this.currentMonth === 0) {
+                this.currentMonth = 11;
+                this.currentYear--;
+            } else {
+                this.currentMonth--;
+            }
+            this.selectedDay = null;
+        },
+        nextMonth() {
+            if (this.currentMonth === 11) {
+                this.currentMonth = 0;
+                this.currentYear++;
+            } else {
+                this.currentMonth++;
+            }
+            this.selectedDay = null;
+        },
+        selectDay(day) {
+            if (day.isCurrentMonth) {
+                this.selectedDay = day;
+                this.filtroEstado = 'todas';
+            }
+        }
+    }
+}).mount('#calendar-app');
+</script>
 @endsection

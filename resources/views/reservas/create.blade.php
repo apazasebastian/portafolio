@@ -249,6 +249,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <!-- ⚠️ CAMPO DE FECHA ACTUALIZADO CON LÍMITE DE 60 DÍAS ⚠️ -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             <span class="text-red-500">*</span> Fecha
@@ -256,8 +257,21 @@
                         <input type="date" name="fecha_reserva" 
                                value="{{ old('fecha_reserva') }}" 
                                min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
+                               max="{{ $fechaMaxima }}"
                                required
                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        
+                        <!-- Mensaje informativo -->
+                        <div class="flex items-start mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                            <svg class="w-4 h-4 mr-2 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div class="text-xs text-blue-700">
+                                <p class="font-medium">Rango disponible:</p>
+                                <p class="mt-0.5">Desde mañana hasta <strong>{{ \Carbon\Carbon::parse($fechaMaxima)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}</strong> (60 días)</p>
+                            </div>
+                        </div>
+                        
                         @error('fecha_reserva')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror

@@ -119,6 +119,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
     
+    // Exportar reservas del dashboard
+    Route::get('/dashboard/exportar', [DashboardController::class, 'exportar'])
+        ->name('dashboard.exportar');
+    
     /*
     |----------------------------------------------------------------------
     | Rutas de Estadísticas y Reportes (SECCIÓN 6)
@@ -242,6 +246,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Listado de logs de auditoría
         Route::get('/', [AuditoriaController::class, 'index'])
             ->name('index');
+        
+        // Exportar logs de auditoría
+        Route::get('/exportar', [AuditoriaController::class, 'exportar'])
+            ->name('exportar');
         
         // Detalles de un log específico
         Route::get('/{log}', [AuditoriaController::class, 'show'])

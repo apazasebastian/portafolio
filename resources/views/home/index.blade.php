@@ -211,24 +211,35 @@
                 </h2>
             </div>
             <div class="bg-white border border-gray-200 rounded-b-lg p-6 shadow-md">
+                <!-- ⚠️ CALENDARIO ACTUALIZADO CON DÍAS EN ESPAÑOL ⚠️ -->
                 <div class="grid grid-cols-2 md:grid-cols-7 gap-2">
+                    @php
+                        // Array de días en español
+                        $diasEspanol = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                    @endphp
+                    
                     @for($i = 0; $i < 7; $i++)
                         @php
                             $fecha = now()->addDays($i);
                             $fechaString = $fecha->format('Y-m-d');
                             $esHoy = $fecha->isToday();
+                            // Obtener el día de la semana en español
+                            $indiceDia = $fecha->dayOfWeek;
+                            $nombreDia = $diasEspanol[$indiceDia];
                         @endphp
                         
                         <div class="border-2 rounded-lg p-3 {{ $esHoy ? 'border-primary bg-blue-50' : 'border-gray-200' }}">
                             <div class="text-center mb-2">
+                                <!-- Nombre del día en ESPAÑOL -->
                                 <div class="text-xs font-bold text-gray-500 uppercase">
-                                    {{ $fecha->locale('es')->format('D') }}
+                                    {{ $nombreDia }}
                                 </div>
                                 <div class="text-xl font-bold {{ $esHoy ? 'text-primary' : 'text-gray-800' }}">
                                     {{ $fecha->format('d') }}
                                 </div>
+                                <!-- Mes en español -->
                                 <div class="text-xs text-gray-500">
-                                    {{ $fecha->locale('es')->format('M') }}
+                                    {{ $fecha->locale('es')->translatedFormat('M') }}
                                 </div>
                             </div>
                             
