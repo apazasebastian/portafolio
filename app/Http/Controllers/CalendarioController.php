@@ -18,7 +18,7 @@ class CalendarioController extends Controller
         $fechaInicio = Carbon::now()->startOfDay();
         $fechaFin = Carbon::now()->addDays(30)->endOfDay();
         
-        // Obtener reservas aprobadas para el período (excluyendo canceladas)
+        // ⚠️ CORREGIDO: Obtener reservas APROBADAS para el período (las pendientes no se muestran en el calendario público)
         $reservas = Reserva::with('recinto')
             ->aprobadas()
             ->whereNull('fecha_cancelacion') // Excluir las que fueron canceladas
@@ -61,10 +61,10 @@ class CalendarioController extends Controller
         $horaInicio = $horarios['inicio'] ?? '08:00';
         $horaFin = $horarios['fin'] ?? '23:00';
         
-        // Obtener reservas aprobadas y NO CANCELADAS para ese día
+        // ⚠️ CORREGIDO: Obtener reservas APROBADAS y PENDIENTES (no canceladas ni rechazadas)
         $reservas = Reserva::where('recinto_id', $recintoId)
             ->where('fecha_reserva', $fecha)
-            ->where('estado', 'aprobada')
+            ->whereIn('estado', ['aprobada', 'pendiente']) // ← LÍNEA CLAVE
             ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
             ->orderBy('hora_inicio')
             ->get();
@@ -87,11 +87,14 @@ class CalendarioController extends Controller
                 
                 if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
                     $ocupada = true;
+                    
+                    // ⚠️ MEJORADO: Mostrar estado de la reserva
                     $reservaInfo = [
                         'nombre_organizacion' => $reserva->nombre_organizacion,
                         'deporte' => $reserva->deporte ?? 'No especificado',
                         'hora_inicio' => $reserva->hora_inicio,
-                        'hora_fin' => $reserva->hora_fin
+                        'hora_fin' => $reserva->hora_fin,
+                        'estado' => $reserva->estado, // ← AGREGADO
                     ];
                     break;
                 }

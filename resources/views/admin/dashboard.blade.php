@@ -4,7 +4,7 @@
 
 @section('content')
 
-<!-- ⚠️ MENSAJE DE ERROR CON AUTO-CIERRE ⚠️ -->
+<!--  MENSAJE DE ERROR CON AUTO-CIERRE  -->
 @if(session('error'))
     <div id="error-alert" class="fixed top-4 right-4 z-50 max-w-md animate-fade-in">
         <div class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow-2xl p-4">
@@ -138,7 +138,7 @@
         </div>
     </div>
 
-    <!-- ⚠️ CALENDARIO INTERACTIVO CON VUE.JS (NUEVO) ⚠️ -->
+    <!--  CALENDARIO INTERACTIVO CON VUE.JS (NUEVO)  -->
     <div class="bg-white rounded-lg shadow-md mb-8" id="calendar-app">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
             <!-- CALENDARIO (2/3 del espacio) -->
@@ -588,7 +588,7 @@
     </div>
 </div>
 
-<!-- ⚠️ SCRIPT DE VUE.JS PARA EL CALENDARIO (NUEVO) ⚠️ -->
+<!--  SCRIPT DE VUE.JS PARA EL CALENDARIO (NUEVO)  -->
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
 <script>
 const { createApp } = Vue;

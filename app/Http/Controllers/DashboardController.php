@@ -62,7 +62,7 @@ class DashboardController extends Controller
         // Obtener recintos para el filtro
         $recintos = Recinto::all();
 
-        // ⚠️ DATOS PARA EL CALENDARIO INTERACTIVO (NUEVO) ⚠️
+        //  DATOS PARA EL CALENDARIO INTERACTIVO (NUEVO) 
         $todasReservasCalendario = Reserva::with('recinto')
             ->select('id', 'recinto_id', 'nombre_organizacion', 'fecha_reserva', 'hora_inicio', 'hora_fin', 'estado')
             ->whereYear('fecha_reserva', now()->year)

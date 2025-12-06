@@ -78,7 +78,7 @@ class HomeController extends Controller
         // Obtener reservas aprobadas y NO CANCELADAS para ese día con información de organización y deporte
         $reservas = Reserva::where('recinto_id', $recintoId)
             ->where('fecha_reserva', $fecha)
-            ->where('estado', 'aprobada')
+            ->whereIn('estado', ['aprobada', 'pendiente'])
             ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
             ->orderBy('hora_inicio')
             ->get();

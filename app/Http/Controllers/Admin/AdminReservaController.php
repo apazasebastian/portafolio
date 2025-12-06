@@ -81,7 +81,7 @@ class AdminReservaController extends Controller
         $reserva->aprobada_por = auth()->id();
         $reserva->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        //  REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             action: 'aprobar_reserva',
             description: "Aprobó la reserva #{$reserva->id} de {$reserva->nombre_organizacion} para {$reserva->recinto->nombre} el día {$reserva->fecha_reserva->format('d/m/Y')}",
@@ -126,7 +126,7 @@ class AdminReservaController extends Controller
         $reserva->motivo_rechazo = $request->motivo_rechazo;
         $reserva->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        // REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             action: 'rechazar_reserva',
             description: "Rechazó la reserva #{$reserva->id} de {$reserva->nombre_organizacion} para {$reserva->recinto->nombre}. Motivo: {$request->motivo_rechazo}",

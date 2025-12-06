@@ -40,10 +40,20 @@ class EstadisticasController extends Controller
             ? Carbon::createFromFormat('Y-m-d', $request->input('fecha_fin'))->endOfDay()
             : now()->endOfDay();
 
+        // ⚠️ COMPARATIVA ENTRE PERIODOS (NUEVO) ⚠️
+        $periodoComparacion = $request->input('periodo_comparacion');
+        $datosComparacion = null;
+        
+        if ($periodoComparacion) {
+            $datosComparacion = $this->obtenerComparativaPeriodos($fechaInicio, $fechaFin, $periodoComparacion);
+        }
+
         $params = [
             'fechaInicio' => $fechaInicio->format('Y-m-d'),
             'fechaFin' => $fechaFin->format('Y-m-d'),
             'nombrePeriodo' => $this->getNombrePeriodo($fechaInicio, $fechaFin),
+            'periodoComparacion' => $periodoComparacion,
+            'datosComparacion' => $datosComparacion,
         ];
 
         $totalReservas = $this->getTotalReservas($fechaInicio, $fechaFin);
@@ -52,12 +62,16 @@ class EstadisticasController extends Controller
         $reservasRechazadas = $this->getReservasRechazadas($fechaInicio, $fechaFin);
         $tasaAprobacion = $totalReservas > 0 ? round(($reservasAprobadas / $totalReservas) * 100) : 0;
 
+        // ⚠️ TASA DE RECHAZO (NUEVO) ⚠️
+        $tasaRechazo = $totalReservas > 0 ? round(($reservasRechazadas / $totalReservas) * 100) : 0;
+
         $params += [
             'totalReservas' => $totalReservas,
             'reservasAprobadas' => $reservasAprobadas,
             'reservasPendientes' => $reservasPendientes,
             'reservasRechazadas' => $reservasRechazadas,
             'tasaAprobacion' => $tasaAprobacion,
+            'tasaRechazo' => $tasaRechazo,
         ];
 
         $params += [
@@ -75,6 +89,76 @@ class EstadisticasController extends Controller
         ];
 
         return view('admin.estadisticas.index', $params);
+    }
+
+    // ⚠️ NUEVO MÉTODO: COMPARATIVA ENTRE PERIODOS ⚠️
+    private function obtenerComparativaPeriodos($fechaInicio, $fechaFin, $periodoComparacion)
+    {
+        // Calcular fechas del periodo de comparación
+        $diasDiferencia = $fechaInicio->diffInDays($fechaFin);
+        
+        switch ($periodoComparacion) {
+            case 'mes_anterior':
+                $fechaInicioComp = $fechaInicio->copy()->subMonth()->startOfMonth();
+                $fechaFinComp = $fechaInicio->copy()->subMonth()->endOfMonth();
+                break;
+            case 'trimestre_anterior':
+                $fechaInicioComp = $fechaInicio->copy()->subMonths(3);
+                $fechaFinComp = $fechaFin->copy()->subMonths(3);
+                break;
+            case 'año_anterior':
+                $fechaInicioComp = $fechaInicio->copy()->subYear();
+                $fechaFinComp = $fechaFin->copy()->subYear();
+                break;
+            default:
+                // Periodo personalizado (mismo rango de días hacia atrás)
+                $fechaInicioComp = $fechaInicio->copy()->subDays($diasDiferencia + 1);
+                $fechaFinComp = $fechaInicio->copy()->subDay();
+        }
+
+        // Obtener datos del periodo actual
+        $actual = [
+            'total' => $this->getTotalReservas($fechaInicio, $fechaFin),
+            'aprobadas' => $this->getReservasAprobadas($fechaInicio, $fechaFin),
+            'rechazadas' => $this->getReservasRechazadas($fechaInicio, $fechaFin),
+            'pendientes' => $this->getReservasPendientes($fechaInicio, $fechaFin),
+        ];
+
+        // Obtener datos del periodo de comparación
+        $comparacion = [
+            'total' => $this->getTotalReservas($fechaInicioComp, $fechaFinComp),
+            'aprobadas' => $this->getReservasAprobadas($fechaInicioComp, $fechaFinComp),
+            'rechazadas' => $this->getReservasRechazadas($fechaInicioComp, $fechaFinComp),
+            'pendientes' => $this->getReservasPendientes($fechaInicioComp, $fechaFinComp),
+        ];
+
+        // Calcular diferencias y porcentajes
+        $diferencias = [
+            'total' => $actual['total'] - $comparacion['total'],
+            'aprobadas' => $actual['aprobadas'] - $comparacion['aprobadas'],
+            'rechazadas' => $actual['rechazadas'] - $comparacion['rechazadas'],
+            'pendientes' => $actual['pendientes'] - $comparacion['pendientes'],
+        ];
+
+        $porcentajes = [
+            'total' => $comparacion['total'] > 0 ? round((($actual['total'] - $comparacion['total']) / $comparacion['total']) * 100, 1) : 0,
+            'aprobadas' => $comparacion['aprobadas'] > 0 ? round((($actual['aprobadas'] - $comparacion['aprobadas']) / $comparacion['aprobadas']) * 100, 1) : 0,
+            'rechazadas' => $comparacion['rechazadas'] > 0 ? round((($actual['rechazadas'] - $comparacion['rechazadas']) / $comparacion['rechazadas']) * 100, 1) : 0,
+            'pendientes' => $comparacion['pendientes'] > 0 ? round((($actual['pendientes'] - $comparacion['pendientes']) / $comparacion['pendientes']) * 100, 1) : 0,
+        ];
+
+        return [
+            'periodo_actual' => [
+                'nombre' => $this->getNombrePeriodo($fechaInicio, $fechaFin),
+                'datos' => $actual,
+            ],
+            'periodo_comparacion' => [
+                'nombre' => $this->getNombrePeriodo($fechaInicioComp, $fechaFinComp),
+                'datos' => $comparacion,
+            ],
+            'diferencias' => $diferencias,
+            'porcentajes' => $porcentajes,
+        ];
     }
 
     private function applyFilters($query)
