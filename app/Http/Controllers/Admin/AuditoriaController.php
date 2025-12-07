@@ -73,7 +73,7 @@ class AuditoriaController extends Controller
     }
 
     /**
-     * Exportar logs de auditoría a Excel (CSV)
+     * ⚠️ ACTUALIZADO: Exportar logs de auditoría a Excel (CSV) + REGISTRAR EN AUDITORÍA
      */
     public function exportar(Request $request)
     {
@@ -98,6 +98,7 @@ class AuditoriaController extends Controller
             }
 
             $logs = $query->get();
+            $totalRegistros = $logs->count();
 
             $csvFileName = 'auditoria_' . Carbon::now()->format('d-m-Y-His') . '.csv';
             
@@ -105,6 +106,37 @@ class AuditoriaController extends Controller
                 'Content-Type' => 'text/csv; charset=utf-8',
                 'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
             ];
+
+            // ⚠️ REGISTRAR EXPORTACIÓN EN AUDITORÍA ⚠️
+            $filtrosAplicados = [];
+            if ($request->filled('user_id')) {
+                $usuario = User::find($request->user_id);
+                $filtrosAplicados[] = "Usuario: {$usuario->name}";
+            }
+            if ($request->filled('action')) {
+                $filtrosAplicados[] = "Acción: {$request->action}";
+            }
+            if ($request->filled('fecha_desde')) {
+                $filtrosAplicados[] = "Desde: {$request->fecha_desde}";
+            }
+            if ($request->filled('fecha_hasta')) {
+                $filtrosAplicados[] = "Hasta: {$request->fecha_hasta}";
+            }
+            if ($request->filled('buscar')) {
+                $filtrosAplicados[] = "Búsqueda: {$request->buscar}";
+            }
+
+            $descripcionFiltros = empty($filtrosAplicados) 
+                ? 'sin filtros' 
+                : 'con filtros: ' . implode(', ', $filtrosAplicados);
+
+            AuditLog::log(
+                'exportar_excel',
+                "Exportación de auditoría a Excel ({$totalRegistros} registros) {$descripcionFiltros}",
+                null,
+                null,
+                null
+            );
 
             $callback = function () use ($logs) {
                 $file = fopen('php://output', 'w');

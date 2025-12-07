@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Recinto;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -79,6 +80,19 @@ class RecintoController extends Controller
 
         $recinto->save();
 
+        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        AuditLog::log(
+            'crear_recinto',
+            "Recinto '{$recinto->nombre}' creado con capacidad de {$recinto->capacidad_maxima} personas",
+            $recinto,
+            null,
+            [
+                'nombre' => $recinto->nombre,
+                'capacidad_maxima' => $recinto->capacidad_maxima,
+                'activo' => $recinto->activo,
+            ]
+        );
+
         return redirect()->route('admin.recintos.index')
             ->with('success', 'Recinto creado exitosamente');
     }
@@ -131,6 +145,13 @@ class RecintoController extends Controller
             'imagen.max' => 'La imagen no debe pesar más de 2MB',
         ]);
 
+        // ⚠️ GUARDAR VALORES ORIGINALES ANTES DE ACTUALIZAR ⚠️
+        $valoresOriginales = [
+            'nombre' => $recinto->nombre,
+            'capacidad_maxima' => $recinto->capacidad_maxima,
+            'activo' => $recinto->activo,
+        ];
+
         // Preparar horarios en formato array
         $horarios = [
             'inicio' => $validated['horario_inicio'],
@@ -166,6 +187,19 @@ class RecintoController extends Controller
 
         $recinto->save();
 
+        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        AuditLog::log(
+            'editar_recinto',
+            "Recinto '{$recinto->nombre}' actualizado",
+            $recinto,
+            $valoresOriginales,
+            [
+                'nombre' => $recinto->nombre,
+                'capacidad_maxima' => $recinto->capacidad_maxima,
+                'activo' => $recinto->activo,
+            ]
+        );
+
         return redirect()->route('admin.recintos.index')
             ->with('success', 'Recinto actualizado exitosamente');
     }
@@ -182,6 +216,23 @@ class RecintoController extends Controller
             return redirect()->route('admin.recintos.index')
                 ->with('error', 'No se puede eliminar el recinto porque tiene reservas asociadas. Desactívalo en su lugar.');
         }
+
+        // ⚠️ GUARDAR NOMBRE ANTES DE ELIMINAR ⚠️
+        $nombre = $recinto->nombre;
+        $capacidad = $recinto->capacidad_maxima;
+
+        // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR ⚠️
+        AuditLog::log(
+            'eliminar_recinto',
+            "Recinto '{$nombre}' eliminado (capacidad: {$capacidad})",
+            $recinto,
+            [
+                'nombre' => $recinto->nombre,
+                'capacidad_maxima' => $recinto->capacidad_maxima,
+                'activo' => $recinto->activo,
+            ],
+            null
+        );
 
         // Eliminar imagen si existe
         if ($recinto->imagen_url) {
@@ -203,8 +254,25 @@ class RecintoController extends Controller
             'activo' => 'required|boolean',
         ]);
 
+        // ⚠️ GUARDAR ESTADO ORIGINAL ⚠️
+        $estadoOriginal = $recinto->activo;
+
         $recinto->activo = $validated['activo'];
         $recinto->save();
+
+        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        $accion = $validated['activo'] ? 'activar_recinto' : 'desactivar_recinto';
+        $descripcion = $validated['activo'] 
+            ? "Recinto '{$recinto->nombre}' activado" 
+            : "Recinto '{$recinto->nombre}' desactivado";
+
+        AuditLog::log(
+            $accion,
+            $descripcion,
+            $recinto,
+            ['activo' => $estadoOriginal],
+            ['activo' => $validated['activo']]
+        );
 
         return redirect()->route('admin.recintos.index')
             ->with('success', 'Estado del recinto actualizado exitosamente');

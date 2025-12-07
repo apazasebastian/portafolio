@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reserva;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use DB;
@@ -316,6 +317,12 @@ class EstadisticasController extends Controller
                 'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
             ];
 
+            // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE RETORNAR ⚠️
+            AuditLog::log(
+                'exportar_excel',
+                "Exportación de estadísticas a Excel (período: {$fechaInicio} a {$fechaFin}, {$reservas->count()} registros)"
+            );
+
             $callback = function () use ($reservas) {
                 $file = fopen('php://output', 'w');
                 fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
@@ -371,6 +378,12 @@ class EstadisticasController extends Controller
 
             $desde = Carbon::parse($fechaInicio)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
             $hasta = Carbon::parse($fechaFin)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+
+            // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE RETORNAR ⚠️
+            AuditLog::log(
+                'exportar_pdf',
+                "Exportación de estadísticas a PDF (período: {$fechaInicio} a {$fechaFin}, {$totalReservas} registros)"
+            );
 
             $pdf = Pdf::loadView('admin.estadisticas.pdf', compact(
                 'reservas',
