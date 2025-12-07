@@ -89,7 +89,7 @@
             </div>
             
             <div class="alert">
-                <strong>⚠️ Importante:</strong>
+                <strong> Importante:</strong>
                 <ul style="margin: 10px 0 0; padding-left: 20px;">
                     <li>Este enlace expirará en <strong>60 minutos</strong></li>
                     <li>Si no solicitaste este cambio, ignora este correo</li>
