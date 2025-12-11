@@ -117,10 +117,10 @@
                         </div>
                     </div>
 
-                    <!-- Días Cerrados -->
-                    <div class="mt-4">
+                    <!-- Días Cerrados Completos -->
+                    <div class="mt-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Días Cerrados (opcional)
+                            Días Cerrados Completos
                         </label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             @php
@@ -133,20 +133,102 @@
                                     'saturday' => 'Sábado',
                                     'sunday' => 'Domingo'
                                 ];
-                                $diasCerradosActuales = old('dias_cerrados', $diasCerrados ?? []);
+                                
+                                // Obtener días cerrados completos
+                                $diasCerradosData = $diasCerrados ?? [];
+                                $diasCompletosActuales = is_array($diasCerradosData) && isset($diasCerradosData['dias_completos']) 
+                                    ? $diasCerradosData['dias_completos'] 
+                                    : (is_array($diasCerradosData) && !isset($diasCerradosData['dias_completos']) && !isset($diasCerradosData['rangos_bloqueados'])
+                                        ? $diasCerradosData 
+                                        : []);
                             @endphp
                             @foreach($dias as $valor => $nombre)
                                 <label class="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-50">
                                     <input type="checkbox" 
-                                           name="dias_cerrados[]" 
+                                           name="dias_cerrados_completos[]" 
                                            value="{{ $valor }}"
-                                           {{ in_array($valor, $diasCerradosActuales) ? 'checked' : '' }}
+                                           {{ in_array($valor, $diasCompletosActuales) ? 'checked' : '' }}
                                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     <span class="text-sm text-gray-700">{{ $nombre }}</span>
                                 </label>
                             @endforeach
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Selecciona los días en que el recinto permanecerá cerrado</p>
+                        <p class="text-xs text-gray-500 mt-2">Días en que el recinto estará cerrado todo el día</p>
+                    </div>
+
+                    <!-- ⚠️ NUEVO: Bloqueos de Horarios por Fecha Específica ⚠️ -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Bloqueos de Horarios Específicos (por fecha)
+                            </label>
+                            <button type="button" 
+                                    onclick="agregarBloqueo()"
+                                    class="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg transition">
+                                + Agregar Bloqueo
+                            </button>
+                        </div>
+
+                        <div id="bloqueosContainer" class="space-y-3">
+                            @php
+                                $rangos = is_array($diasCerradosData) && isset($diasCerradosData['rangos_bloqueados']) 
+                                    ? $diasCerradosData['rangos_bloqueados'] 
+                                    : [];
+                            @endphp
+                            
+                            @foreach($rangos as $index => $rango)
+                                <div class="bloqueo-item border border-gray-200 rounded-lg p-4 bg-gray-50" data-index="{{ $index }}">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                        <!-- ⚠️ CAMBIO: Fecha específica en lugar de día de semana ⚠️ -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">📅 Fecha</label>
+                                            <input type="date" 
+                                                   name="bloqueos[{{ $index }}][fecha]" 
+                                                   value="{{ $rango['fecha'] ?? '' }}"
+                                                   min="{{ now()->format('Y-m-d') }}"
+                                                   class="w-full text-sm border-gray-300 rounded-lg"
+                                                   required>
+                                        </div>
+
+                                        <!-- Hora Inicio -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+                                            <input type="time" 
+                                                   name="bloqueos[{{ $index }}][hora_inicio]" 
+                                                   value="{{ $rango['hora_inicio'] ?? '' }}"
+                                                   class="w-full text-sm border-gray-300 rounded-lg"
+                                                   required>
+                                        </div>
+
+                                        <!-- Hora Fin -->
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+                                            <input type="time" 
+                                                   name="bloqueos[{{ $index }}][hora_fin]" 
+                                                   value="{{ $rango['hora_fin'] ?? '' }}"
+                                                   class="w-full text-sm border-gray-300 rounded-lg"
+                                                   required>
+                                        </div>
+
+                                        <!-- Motivo y Eliminar -->
+                                        <div class="flex gap-2">
+                                            <input type="text" 
+                                                   name="bloqueos[{{ $index }}][motivo]" 
+                                                   value="{{ $rango['motivo'] ?? '' }}"
+                                                   placeholder="Motivo (opcional)"
+                                                   class="flex-1 text-sm border-gray-300 rounded-lg">
+                                            <button type="button" 
+                                                    onclick="eliminarBloqueo(this)"
+                                                    class="text-red-600 hover:text-red-800 px-2">
+                                                ✗
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <p class="text-xs text-gray-500 mt-2">Bloquea fechas específicas con horarios determinados (ej: 24/12/2025 12:00-23:00 por evento especial)</p>
                     </div>
                 </div>
 
@@ -273,8 +355,45 @@
     </form>
 </div>
 
-<!-- JavaScript para preview de imagen -->
+<!-- ⚠️ JAVASCRIPT ACTUALIZADO PARA FECHAS ⚠️ -->
 <script>
+let bloqueoIndex = {{ count($rangos) }};
+
+function agregarBloqueo() {
+    const container = document.getElementById('bloqueosContainer');
+    const fechaMinima = new Date().toISOString().split('T')[0]; // Fecha de hoy
+    
+    const html = `
+        <div class="bloqueo-item border border-gray-200 rounded-lg p-4 bg-gray-50" data-index="${bloqueoIndex}">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">📅 Fecha</label>
+                    <input type="date" name="bloqueos[${bloqueoIndex}][fecha]" min="${fechaMinima}" class="w-full text-sm border-gray-300 rounded-lg" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+                    <input type="time" name="bloqueos[${bloqueoIndex}][hora_inicio]" class="w-full text-sm border-gray-300 rounded-lg" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+                    <input type="time" name="bloqueos[${bloqueoIndex}][hora_fin]" class="w-full text-sm border-gray-300 rounded-lg" required>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" name="bloqueos[${bloqueoIndex}][motivo]" placeholder="Motivo (opcional)" class="flex-1 text-sm border-gray-300 rounded-lg">
+                    <button type="button" onclick="eliminarBloqueo(this)" class="text-red-600 hover:text-red-800 px-2">✗</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', html);
+    bloqueoIndex++;
+}
+
+function eliminarBloqueo(button) {
+    button.closest('.bloqueo-item').remove();
+}
+
 // Preview de nueva imagen
 document.getElementById('imagenInput').addEventListener('change', function(e) {
     const file = e.target.files[0];

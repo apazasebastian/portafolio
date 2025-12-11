@@ -13,35 +13,99 @@
         </p>
     </div>
 
-    <!-- Lista de Recintos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @foreach($recintos as $recinto)
-        @php
-            $horarios = is_array($recinto->horarios_disponibles) 
-                ? $recinto->horarios_disponibles 
-                : json_decode($recinto->horarios_disponibles, true);
+<!-- Lista de Recintos -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    @foreach($recintos as $recinto)
+    @php
+        $horarios = is_array($recinto->horarios_disponibles) 
+            ? $recinto->horarios_disponibles 
+            : json_decode($recinto->horarios_disponibles, true);
+        
+        $diasCerrados = is_array($recinto->dias_cerrados) 
+            ? $recinto->dias_cerrados 
+            : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+        
+        // ⚠️ PROCESAR NUEVA ESTRUCTURA CON FECHAS ESPECÍFICAS ⚠️
+        $diasCompletosArray = [];
+        $rangosBloqueados = [];
+        
+        if (is_array($diasCerrados)) {
+            if (isset($diasCerrados['dias_completos'])) {
+                $diasCompletosArray = $diasCerrados['dias_completos'];
+            } elseif (!isset($diasCerrados['rangos_bloqueados'])) {
+                // Retrocompatibilidad
+                $diasCompletosArray = $diasCerrados;
+            }
             
-            $diasCerrados = is_array($recinto->dias_cerrados) 
-                ? $recinto->dias_cerrados 
-                : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
-        @endphp
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $recinto->nombre }}</h3>
-            <p class="text-gray-600 text-sm mb-4">{{ $recinto->descripcion }}</p>
-            <div class="text-sm text-gray-500 mb-4">
-                <p><strong>Capacidad:</strong> {{ $recinto->capacidad_maxima }} personas</p>
-                <p><strong>Horario:</strong> {{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</p>
-                @if($diasCerrados && count($diasCerrados) > 0)
-                    <p class="text-red-600"><strong>Cerrado:</strong> Lunes (mantenimiento)</p>
-                @endif
-            </div>
-            <a href="{{ route('reservas.create', $recinto) }}" 
-               class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
-                Solicitar Reserva
-            </a>
+            if (isset($diasCerrados['rangos_bloqueados'])) {
+                $rangosBloqueados = $diasCerrados['rangos_bloqueados'];
+            }
+        }
+        
+        // Nombres de días en español
+        $nombresDias = [
+            'monday' => 'Lunes',
+            'tuesday' => 'Martes',
+            'wednesday' => 'Miércoles',
+            'thursday' => 'Jueves',
+            'friday' => 'Viernes',
+            'saturday' => 'Sábado',
+            'sunday' => 'Domingo'
+        ];
+    @endphp
+    
+    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $recinto->nombre }}</h3>
+        <p class="text-gray-600 text-sm mb-4">{{ $recinto->descripcion }}</p>
+        
+        <div class="text-sm text-gray-500 mb-4 space-y-2">
+            <p><strong>Capacidad:</strong> {{ $recinto->capacidad_maxima }} personas</p>
+            <p><strong>Horario:</strong> {{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</p>
+            
+            @if(count($diasCompletosArray) > 0 || count($rangosBloqueados) > 0)
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <p class="text-red-600 font-semibold mb-1">Cerrado:</p>
+                    <ul class="ml-3 space-y-0.5 text-xs">
+                        {{-- Días completos cerrados --}}
+                        @foreach($diasCompletosArray as $dia)
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-1">•</span>
+                                <span>{{ $nombresDias[$dia] ?? ucfirst($dia) }} (día completo)</span>
+                            </li>
+                        @endforeach
+                        
+                        {{-- ⚠️ BLOQUEOS CON FECHAS ESPECÍFICAS ⚠️ --}}
+                        @foreach($rangosBloqueados as $bloqueo)
+                            <li class="flex items-start">
+                                <span class="text-orange-500 mr-1">•</span>
+                                <span>
+                                    @if(isset($bloqueo['fecha']))
+                                        {{-- Formato: 24/12/2025 12:00-23:00 --}}
+                                        {{ \Carbon\Carbon::parse($bloqueo['fecha'])->format('d/m/Y') }}
+                                        {{ $bloqueo['hora_inicio'] }}-{{ $bloqueo['hora_fin'] }}
+                                    @else
+                                        {{-- Retrocompatibilidad con formato antiguo (día de semana) --}}
+                                        {{ $nombresDias[$bloqueo['dia']] ?? ucfirst($bloqueo['dia']) }} 
+                                        {{ $bloqueo['hora_inicio'] }}-{{ $bloqueo['hora_fin'] }}
+                                    @endif
+                                    @if(!empty($bloqueo['motivo']))
+                                        <span class="text-gray-500">({{ $bloqueo['motivo'] }})</span>
+                                    @endif
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
-        @endforeach
+        
+        <a href="{{ route('reservas.create', $recinto) }}" 
+           class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+            Solicitar Reserva
+        </a>
     </div>
+    @endforeach
+</div>
 
     <!-- Calendarios Mensuales -->
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -322,7 +386,8 @@ function verDisponibilidadRecinto(recintoId, recintoNombre) {
     })
     .then(data => {
         console.log('Respuesta API:', data);
-        mostrarDisponibilidad(data, recintoId);
+        // ⚠️ CORREGIDO: Pasar los 3 parámetros correctamente ⚠️
+        mostrarDisponibilidad(data, recintoId, fechaSeleccionadaGlobal);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -337,50 +402,98 @@ function mostrarError(mensaje) {
     document.getElementById('errorMessage').textContent = mensaje;
 }
 
-function mostrarDisponibilidad(data, recintoId) {
-    // Verificar estructura de datos
-    if (!data.horarios || !Array.isArray(data.horarios)) {
-        console.error('Estructura de datos inválida:', data);
-        mostrarError('La respuesta del servidor no tiene el formato esperado.');
-        return;
-    }
-
-    // Ocultar loading
+function mostrarDisponibilidad(data, recintoId, fecha) {
     document.getElementById('modalLoading').classList.add('hidden');
     document.getElementById('modalContent').classList.remove('hidden');
 
-    // Actualizar header
-    document.getElementById('modalRecintoNombre').textContent = data.recinto || 'Recinto';
-    document.getElementById('modalFecha').textContent = data.fecha || new Date().toLocaleDateString();
+    document.getElementById('modalRecintoNombre').textContent = data.recinto;
+    document.getElementById('modalFecha').textContent = data.fecha;
 
-    // Estado general
     const estadoDiv = document.getElementById('estadoGeneral');
-    const disponibles = data.horarios.filter(h => h.disponible).length;
-    const total = data.horarios.length;
+    estadoDiv.innerHTML = ''; // Limpiar contenido previo
     
-    estadoDiv.innerHTML = `
-        <div class="grid grid-cols-3 gap-4 text-center">
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <p class="text-2xl font-bold text-blue-600">${total}</p>
-                <p class="text-sm text-gray-600">Franjas Totales</p>
+    // ⚠️ Mostrar bloqueos de horarios si existen ⚠️
+    if (data.bloqueos_dia && data.bloqueos_dia.length > 0) {
+        let bloqueosList = data.bloqueos_dia.map(b => 
+            `<li class="text-orange-700">• ${b.hora_inicio} - ${b.hora_fin} ${b.motivo ? '(' + b.motivo + ')' : ''}</li>`
+        ).join('');
+        
+        estadoDiv.innerHTML += `
+            <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded mb-4">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-orange-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="font-bold text-orange-800">Horarios Bloqueados:</p>
+                        <ul class="text-sm mt-1">${bloqueosList}</ul>
+                    </div>
+                </div>
             </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-                <p class="text-2xl font-bold text-green-600">${disponibles}</p>
-                <p class="text-sm text-gray-600">Disponibles</p>
+        `;
+    }
+    
+    if (data.cerrado) {
+        estadoDiv.innerHTML += `
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="font-bold text-yellow-800">Recinto Cerrado (Día Completo)</p>
+                        <p class="text-yellow-700 text-sm">${data.motivo_cierre}</p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-                <p class="text-2xl font-bold text-red-600">${total - disponibles}</p>
-                <p class="text-sm text-gray-600">Ocupadas</p>
+        `;
+    }
+    
+    // Solo mostrar estadísticas si NO está cerrado
+    if (!data.cerrado) {
+        const disponibles = data.horarios.filter(f => f.disponible).length;
+        const total = data.horarios.length;
+        const bloqueados = data.horarios.filter(f => f.bloqueada).length;
+        const ocupados = data.horarios.filter(f => f.reserva).length;
+        
+        estadoDiv.innerHTML += `
+            <div class="grid grid-cols-4 gap-3 text-center">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-blue-600">${data.horario_general.inicio} - ${data.horario_general.fin}</p>
+                    <p class="text-xs text-gray-600">Horario</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-green-600">${disponibles}</p>
+                    <p class="text-xs text-gray-600">Disponibles</p>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-orange-600">${bloqueados}</p>
+                    <p class="text-xs text-gray-600">Bloqueados</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-red-600">${ocupados}</p>
+                    <p class="text-xs text-gray-600">Ocupados</p>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    }
 
-    // Franjas horarias
     const franjasDiv = document.getElementById('franjasHorarias');
-    franjasDiv.innerHTML = data.horarios.map(horario => {
+    franjasDiv.innerHTML = data.horarios.map(franja => {
         let bgColor, textColor, icon, estadoHtml;
         
-        if (horario.disponible) {
+        // ⚠️ Bloqueado > Cerrado > Ocupado > Disponible ⚠️
+        if (franja.bloqueada) {
+            bgColor = 'bg-orange-50 border-orange-200';
+            textColor = 'text-orange-700';
+            icon = '<svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            estadoHtml = '<p class="text-sm ' + textColor + ' font-semibold">🔧 Bloqueado: ' + (franja.motivo_bloqueo || 'No disponible') + '</p>';
+        } else if (data.cerrado) {
+            bgColor = 'bg-yellow-50 border-yellow-200';
+            textColor = 'text-yellow-700';
+            icon = '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
+            estadoHtml = '<p class="text-sm ' + textColor + '">Cerrado por mantenimiento</p>';
+        } else if (franja.disponible) {
             bgColor = 'bg-green-50 border-green-200';
             textColor = 'text-green-700';
             icon = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
@@ -389,7 +502,22 @@ function mostrarDisponibilidad(data, recintoId) {
             bgColor = 'bg-red-50 border-red-200';
             textColor = 'text-red-700';
             icon = '<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-            estadoHtml = '<p class="text-sm ' + textColor + '">No disponible</p>';
+            
+            if (franja.reserva) {
+                estadoHtml = `
+                    <p class="text-sm ${textColor} font-semibold">Reservado por ${franja.reserva.nombre_organizacion}</p>
+                    <p class="text-xs ${textColor} mt-1">
+                        <span class="inline-flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                            </svg>
+                            ${franja.reserva.deporte}
+                        </span>
+                    </p>
+                `;
+            } else {
+                estadoHtml = '<p class="text-sm ' + textColor + '">No disponible</p>';
+            }
         }
 
         return `
@@ -398,7 +526,7 @@ function mostrarDisponibilidad(data, recintoId) {
                     <div class="flex items-center space-x-3">
                         ${icon}
                         <div>
-                            <p class="font-bold ${textColor}">${horario.hora_inicio} - ${horario.hora_fin}</p>
+                            <p class="font-bold ${textColor}">${franja.hora_inicio} - ${franja.hora_fin}</p>
                             ${estadoHtml}
                         </div>
                     </div>
@@ -407,8 +535,8 @@ function mostrarDisponibilidad(data, recintoId) {
         `;
     }).join('');
 
-    // Botón de reserva
-    document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fechaSeleccionadaGlobal}`;
+    // ⚠️ CORREGIDO: Usar el parámetro fecha en lugar de fechaOriginal ⚠️
+    document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fecha}`;
 }
 
 function cerrarModal() {

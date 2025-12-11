@@ -29,7 +29,7 @@ class RecintoController extends Controller
     }
 
     /**
-     * Guardar nuevo recinto / Falta probar
+     * Guardar nuevo recinto
      */
     public function store(Request $request)
     {
@@ -40,8 +40,13 @@ class RecintoController extends Controller
             'activo' => 'required|boolean',
             'horario_inicio' => 'required|date_format:H:i',
             'horario_fin' => 'required|date_format:H:i|after:horario_inicio',
-            'dias_cerrados' => 'nullable|array',
-            'dias_cerrados.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'dias_cerrados_completos' => 'nullable|array',
+            'dias_cerrados_completos.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'bloqueos' => 'nullable|array',
+            'bloqueos.*.fecha' => 'required|date|after_or_equal:today',
+            'bloqueos.*.hora_inicio' => 'required|date_format:H:i',
+            'bloqueos.*.hora_fin' => 'required|date_format:H:i|after:bloqueos.*.hora_inicio',
+            'bloqueos.*.motivo' => 'nullable|string|max:100',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'nombre.required' => 'El nombre del recinto es obligatorio',
@@ -52,6 +57,7 @@ class RecintoController extends Controller
             'horario_fin.required' => 'El horario de fin es obligatorio',
             'horario_fin.after' => 'El horario de fin debe ser después del horario de inicio',
             'activo.required' => 'El estado es obligatorio',
+            'bloqueos.*.fecha.after_or_equal' => 'La fecha del bloqueo debe ser hoy o posterior',
             'imagen.image' => 'El archivo debe ser una imagen',
             'imagen.mimes' => 'La imagen debe ser formato: jpeg, png, jpg',
             'imagen.max' => 'La imagen no debe pesar más de 2MB',
@@ -63,6 +69,26 @@ class RecintoController extends Controller
             'fin' => $validated['horario_fin']
         ];
 
+        // ⚠️ PREPARAR ESTRUCTURA CON FECHAS ESPECÍFICAS ⚠️
+        $diasCerrados = [
+            'dias_completos' => $validated['dias_cerrados_completos'] ?? [],
+            'rangos_bloqueados' => []
+        ];
+
+        // Procesar bloqueos de horarios con fechas específicas
+        if ($request->has('bloqueos') && is_array($request->bloqueos)) {
+            foreach ($request->bloqueos as $bloqueo) {
+                if (isset($bloqueo['fecha']) && isset($bloqueo['hora_inicio']) && isset($bloqueo['hora_fin'])) {
+                    $diasCerrados['rangos_bloqueados'][] = [
+                        'fecha' => $bloqueo['fecha'], // ⚠️ FECHA ESPECÍFICA ⚠️
+                        'hora_inicio' => $bloqueo['hora_inicio'],
+                        'hora_fin' => $bloqueo['hora_fin'],
+                        'motivo' => $bloqueo['motivo'] ?? ''
+                    ];
+                }
+            }
+        }
+
         // Crear el recinto
         $recinto = new Recinto();
         $recinto->nombre = $validated['nombre'];
@@ -70,7 +96,7 @@ class RecintoController extends Controller
         $recinto->capacidad_maxima = $validated['capacidad_maxima'];
         $recinto->activo = $validated['activo'];
         $recinto->horarios_disponibles = $horarios;
-        $recinto->dias_cerrados = $validated['dias_cerrados'] ?? [];
+        $recinto->dias_cerrados = $diasCerrados;
 
         // Manejar la imagen si existe
         if ($request->hasFile('imagen')) {
@@ -80,7 +106,7 @@ class RecintoController extends Controller
 
         $recinto->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        // Registrar en auditoría
         AuditLog::log(
             'crear_recinto',
             "Recinto '{$recinto->nombre}' creado con capacidad de {$recinto->capacidad_maxima} personas",
@@ -116,7 +142,7 @@ class RecintoController extends Controller
     }
 
     /**
-     * Actualizar recinto / se debe realizar un php tinker link, es para la visualizacion
+     * ⚠️ ACTUALIZADO: Actualizar recinto con fechas específicas ⚠️
      */
     public function update(Request $request, Recinto $recinto)
     {
@@ -127,8 +153,13 @@ class RecintoController extends Controller
             'activo' => 'required|boolean',
             'horario_inicio' => 'required|date_format:H:i',
             'horario_fin' => 'required|date_format:H:i|after:horario_inicio',
-            'dias_cerrados' => 'nullable|array',
-            'dias_cerrados.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'dias_cerrados_completos' => 'nullable|array',
+            'dias_cerrados_completos.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'bloqueos' => 'nullable|array',
+            'bloqueos.*.fecha' => 'required|date|after_or_equal:today',
+            'bloqueos.*.hora_inicio' => 'required|date_format:H:i',
+            'bloqueos.*.hora_fin' => 'required|date_format:H:i',
+            'bloqueos.*.motivo' => 'nullable|string|max:100',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'eliminar_imagen' => 'nullable|boolean',
         ], [
@@ -140,12 +171,13 @@ class RecintoController extends Controller
             'horario_fin.required' => 'El horario de fin es obligatorio',
             'horario_fin.after' => 'El horario de fin debe ser después del horario de inicio',
             'activo.required' => 'El estado es obligatorio',
+            'bloqueos.*.fecha.after_or_equal' => 'La fecha del bloqueo debe ser hoy o posterior',
             'imagen.image' => 'El archivo debe ser una imagen',
             'imagen.mimes' => 'La imagen debe ser formato: jpeg, png, jpg',
             'imagen.max' => 'La imagen no debe pesar más de 2MB',
         ]);
 
-        // ⚠️ GUARDAR VALORES ORIGINALES ANTES DE ACTUALIZAR ⚠️
+        // Guardar valores originales antes de actualizar
         $valoresOriginales = [
             'nombre' => $recinto->nombre,
             'capacidad_maxima' => $recinto->capacidad_maxima,
@@ -158,13 +190,33 @@ class RecintoController extends Controller
             'fin' => $validated['horario_fin']
         ];
 
+        // ⚠️ PREPARAR ESTRUCTURA CON FECHAS ESPECÍFICAS ⚠️
+        $diasCerrados = [
+            'dias_completos' => $validated['dias_cerrados_completos'] ?? [],
+            'rangos_bloqueados' => []
+        ];
+
+        // Procesar bloqueos de horarios con fechas específicas
+        if ($request->has('bloqueos') && is_array($request->bloqueos)) {
+            foreach ($request->bloqueos as $bloqueo) {
+                if (isset($bloqueo['fecha']) && isset($bloqueo['hora_inicio']) && isset($bloqueo['hora_fin'])) {
+                    $diasCerrados['rangos_bloqueados'][] = [
+                        'fecha' => $bloqueo['fecha'], // ⚠️ FECHA ESPECÍFICA ⚠️
+                        'hora_inicio' => $bloqueo['hora_inicio'],
+                        'hora_fin' => $bloqueo['hora_fin'],
+                        'motivo' => $bloqueo['motivo'] ?? ''
+                    ];
+                }
+            }
+        }
+
         // Actualizar campos
         $recinto->nombre = $validated['nombre'];
         $recinto->descripcion = $validated['descripcion'] ?? null;
         $recinto->capacidad_maxima = $validated['capacidad_maxima'];
         $recinto->activo = $validated['activo'];
         $recinto->horarios_disponibles = $horarios;
-        $recinto->dias_cerrados = $validated['dias_cerrados'] ?? [];
+        $recinto->dias_cerrados = $diasCerrados; // ← ESTRUCTURA ACTUALIZADA
 
         // Eliminar imagen si se solicita
         if ($request->has('eliminar_imagen') && $request->eliminar_imagen) {
@@ -187,7 +239,7 @@ class RecintoController extends Controller
 
         $recinto->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        // Registrar en auditoría
         AuditLog::log(
             'editar_recinto',
             "Recinto '{$recinto->nombre}' actualizado",
@@ -217,11 +269,11 @@ class RecintoController extends Controller
                 ->with('error', 'No se puede eliminar el recinto porque tiene reservas asociadas. Desactívalo en su lugar.');
         }
 
-        // ⚠️ GUARDAR NOMBRE ANTES DE ELIMINAR ⚠️
+        // Guardar nombre antes de eliminar
         $nombre = $recinto->nombre;
         $capacidad = $recinto->capacidad_maxima;
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR ⚠️
+        // Registrar en auditoría antes de eliminar
         AuditLog::log(
             'eliminar_recinto',
             "Recinto '{$nombre}' eliminado (capacidad: {$capacidad})",
@@ -254,13 +306,13 @@ class RecintoController extends Controller
             'activo' => 'required|boolean',
         ]);
 
-        // ⚠️ GUARDAR ESTADO ORIGINAL ⚠️
+        // Guardar estado original
         $estadoOriginal = $recinto->activo;
 
         $recinto->activo = $validated['activo'];
         $recinto->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        // Registrar en auditoría
         $accion = $validated['activo'] ? 'activar_recinto' : 'desactivar_recinto';
         $descripcion = $validated['activo'] 
             ? "Recinto '{$recinto->nombre}' activado" 

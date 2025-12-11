@@ -37,15 +37,15 @@ class Recinto extends Model
     }
 
     /**
-     * ⚠️ CORREGIDO: Ahora verifica APROBADAS y PENDIENTES ⚠️
-     * Verifica si el recinto está disponible en una fecha y horario específico
+     * ⚠️ ACTUALIZADO: Verifica disponibilidad con fechas específicas ⚠️
      */
     public function disponibleEn($fecha, $horaInicio, $horaFin)
     {
         $fechaCarbon = Carbon::parse($fecha);
         $diaSemana = strtolower($fechaCarbon->format('l'));
+        $fechaString = $fechaCarbon->format('Y-m-d');
 
-        // Convertir dias_cerrados a array si es necesario
+        // Obtener días cerrados
         $diasCerrados = $this->dias_cerrados;
         if (is_string($diasCerrados)) {
             $diasCerrados = json_decode($diasCerrados, true) ?? [];
@@ -53,9 +53,33 @@ class Recinto extends Model
             $diasCerrados = [];
         }
 
-        // Verificar si es día cerrado
-        if (in_array($diaSemana, $diasCerrados)) {
+        // ⚠️ VERIFICAR DÍAS COMPLETOS CERRADOS ⚠️
+        $diasCompletos = [];
+        if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
+            $diasCompletos = $diasCerrados['dias_completos'];
+        } elseif (!isset($diasCerrados['dias_completos']) && !isset($diasCerrados['rangos_bloqueados'])) {
+            // Retrocompatibilidad: si no tiene la nueva estructura, usar el array completo
+            $diasCompletos = $diasCerrados;
+        }
+
+        if (in_array($diaSemana, $diasCompletos)) {
             return false;
+        }
+
+        // ⚠️ VERIFICAR BLOQUEOS POR FECHA ESPECÍFICA ⚠️
+        if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
+            foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
+                // Verificar si el bloqueo es para esta fecha específica
+                if (isset($bloqueo['fecha']) && $bloqueo['fecha'] === $fechaString) {
+                    $bloqueInicio = $bloqueo['hora_inicio'] ?? '00:00';
+                    $bloqueFin = $bloqueo['hora_fin'] ?? '23:59';
+                    
+                    // Verificar si hay solapamiento entre el horario solicitado y el bloqueado
+                    if ($this->hayConflictoHorario($horaInicio, $horaFin, $bloqueInicio, $bloqueFin)) {
+                        return false;
+                    }
+                }
+            }
         }
 
         // Verificar si está dentro del horario del recinto
@@ -66,25 +90,19 @@ class Recinto extends Model
             return false;
         }
 
-        // ⚠️ CORRECCIÓN CRÍTICA ⚠️
-        // Verificar conflictos con reservas APROBADAS o PENDIENTES (no rechazadas ni canceladas)
+        // Verificar conflictos con reservas APROBADAS o PENDIENTES
         $conflictos = $this->reservas()
             ->where('fecha_reserva', $fecha)
-            ->whereIn('estado', ['aprobada', 'pendiente']) // ← LÍNEA CLAVE MODIFICADA
-            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
+            ->whereIn('estado', ['aprobada', 'pendiente'])
+            ->whereNull('fecha_cancelacion')
             ->where(function($query) use ($horaInicio, $horaFin) {
                 $query->where(function($q) use ($horaInicio, $horaFin) {
-                    // El inicio de la reserva existente está antes o en el inicio solicitado
-                    // Y el fin de la reserva existente está después del inicio solicitado
                     $q->where('hora_inicio', '<=', $horaInicio)
                       ->where('hora_fin', '>', $horaInicio);
                 })->orWhere(function($q) use ($horaInicio, $horaFin) {
-                    // El inicio de la reserva existente está antes del fin solicitado
-                    // Y el fin de la reserva existente está después o en el fin solicitado
                     $q->where('hora_inicio', '<', $horaFin)
                       ->where('hora_fin', '>=', $horaFin);
                 })->orWhere(function($q) use ($horaInicio, $horaFin) {
-                    // La reserva existente está completamente dentro del rango solicitado
                     $q->where('hora_inicio', '>=', $horaInicio)
                       ->where('hora_fin', '<=', $horaFin);
                 });
@@ -95,6 +113,21 @@ class Recinto extends Model
     }
 
     /**
+     * Verifica si dos rangos de horarios se solapan
+     */
+    private function hayConflictoHorario($inicio1, $fin1, $inicio2, $fin2)
+    {
+        // Convertir a timestamps para comparación fácil
+        $t1_inicio = strtotime($inicio1);
+        $t1_fin = strtotime($fin1);
+        $t2_inicio = strtotime($inicio2);
+        $t2_fin = strtotime($fin2);
+
+        // Hay conflicto si los rangos se solapan
+        return ($t1_inicio < $t2_fin && $t1_fin > $t2_inicio);
+    }
+
+    /**
      * Obtener las reservas del día (aprobadas y no canceladas)
      */
     public function reservasDelDia($fecha)
@@ -102,7 +135,7 @@ class Recinto extends Model
         return $this->reservas()
             ->where('fecha_reserva', $fecha)
             ->where('estado', 'aprobada')
-            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
+            ->whereNull('fecha_cancelacion')
             ->orderBy('hora_inicio')
             ->get();
     }
@@ -113,5 +146,28 @@ class Recinto extends Model
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
+    }
+
+    /**
+     * ⚠️ ACTUALIZADO: Obtener bloqueos para una fecha específica ⚠️
+     */
+    public function getBloqueosPorFecha($fecha)
+    {
+        $fechaString = Carbon::parse($fecha)->format('Y-m-d');
+        $diasCerrados = $this->dias_cerrados;
+        
+        if (!is_array($diasCerrados) || !isset($diasCerrados['rangos_bloqueados'])) {
+            return [];
+        }
+
+        $bloqueos = [];
+        foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
+            // Solo incluir bloqueos de esta fecha específica
+            if (isset($bloqueo['fecha']) && $bloqueo['fecha'] === $fechaString) {
+                $bloqueos[] = $bloqueo;
+            }
+        }
+
+        return $bloqueos;
     }
 }

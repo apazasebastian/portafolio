@@ -11,17 +11,14 @@ class CalendarioController extends Controller
 {
     public function index()
     {
-        // Obtener todos los recintos activos
         $recintos = Recinto::activos()->get();
         
-        // Obtener fecha actual y próximos 30 días
         $fechaInicio = Carbon::now()->startOfDay();
         $fechaFin = Carbon::now()->addDays(30)->endOfDay();
         
-        // ⚠️ CORREGIDO: Obtener reservas APROBADAS para el período (las pendientes no se muestran en el calendario público)
         $reservas = Reserva::with('recinto')
             ->aprobadas()
-            ->whereNull('fecha_cancelacion') // Excluir las que fueron canceladas
+            ->whereNull('fecha_cancelacion')
             ->whereBetween('fecha_reserva', [$fechaInicio, $fechaFin])
             ->get()
             ->groupBy(['recinto_id', 'fecha_reserva']);
@@ -29,6 +26,9 @@ class CalendarioController extends Controller
         return view('calendario.index', compact('recintos', 'reservas', 'fechaInicio', 'fechaFin'));
     }
     
+    /**
+     * ⚠️ ACTUALIZADO: API de disponibilidad con fechas específicas ⚠️
+     */
     public function disponibilidad(Request $request)
     {
         $recintoId = $request->get('recinto_id');
@@ -44,14 +44,33 @@ class CalendarioController extends Controller
         }
         
         $fechaCarbon = Carbon::parse($fecha);
-        $diaSemana = strtolower($fechaCarbon->format('l')); // monday, tuesday, etc.
+        $diaSemana = strtolower($fechaCarbon->format('l'));
+        $fechaString = $fechaCarbon->format('Y-m-d');
         
-        // Verificar si el recinto está cerrado ese día
+        // Obtener días cerrados
         $diasCerrados = is_array($recinto->dias_cerrados) 
             ? $recinto->dias_cerrados 
             : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : []);
         
-        $esDiaCerrado = in_array($diaSemana, $diasCerrados ?? []);
+        // Verificar si es día completo cerrado
+        $diasCompletos = [];
+        if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
+            $diasCompletos = $diasCerrados['dias_completos'];
+        } elseif (!isset($diasCerrados['dias_completos']) && !isset($diasCerrados['rangos_bloqueados'])) {
+            $diasCompletos = $diasCerrados;
+        }
+        
+        $esDiaCerrado = in_array($diaSemana, $diasCompletos);
+        
+        // ⚠️ OBTENER BLOQUEOS PARA ESTA FECHA ESPECÍFICA ⚠️
+        $bloqueosFecha = [];
+        if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
+            foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
+                if (isset($bloqueo['fecha']) && $bloqueo['fecha'] === $fechaString) {
+                    $bloqueosFecha[] = $bloqueo;
+                }
+            }
+        }
         
         // Obtener horarios disponibles
         $horarios = is_array($recinto->horarios_disponibles) 
@@ -61,15 +80,15 @@ class CalendarioController extends Controller
         $horaInicio = $horarios['inicio'] ?? '08:00';
         $horaFin = $horarios['fin'] ?? '23:00';
         
-        // ⚠️ CORREGIDO: Obtener reservas APROBADAS y PENDIENTES (no canceladas ni rechazadas)
+        // Obtener reservas
         $reservas = Reserva::where('recinto_id', $recintoId)
             ->where('fecha_reserva', $fecha)
-            ->whereIn('estado', ['aprobada', 'pendiente']) // ← LÍNEA CLAVE
-            ->whereNull('fecha_cancelacion') // Excluir reservas canceladas
+            ->whereIn('estado', ['aprobada', 'pendiente'])
+            ->whereNull('fecha_cancelacion')
             ->orderBy('hora_inicio')
             ->get();
         
-        // Generar franjas horarias cada hora
+        // Generar franjas horarias
         $franjasHorarias = [];
         $horaActual = Carbon::parse($horaInicio);
         $horaFinCarbon = Carbon::parse($horaFin);
@@ -78,32 +97,48 @@ class CalendarioController extends Controller
             $siguienteHora = $horaActual->copy()->addHour();
             
             $ocupada = false;
+            $bloqueada = false;
             $reservaInfo = null;
+            $motivoBloqueo = null;
             
-            // Verificar si esta franja está ocupada
-            foreach ($reservas as $reserva) {
-                $reservaInicio = Carbon::parse($reserva->hora_inicio);
-                $reservaFin = Carbon::parse($reserva->hora_fin);
+            // Verificar bloqueos para esta fecha específica
+            foreach ($bloqueosFecha as $bloqueo) {
+                $bloqueInicio = Carbon::parse($bloqueo['hora_inicio']);
+                $bloqueFin = Carbon::parse($bloqueo['hora_fin']);
                 
-                if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
-                    $ocupada = true;
-                    
-                    // ⚠️ MEJORADO: Mostrar estado de la reserva
-                    $reservaInfo = [
-                        'nombre_organizacion' => $reserva->nombre_organizacion,
-                        'deporte' => $reserva->deporte ?? 'No especificado',
-                        'hora_inicio' => $reserva->hora_inicio,
-                        'hora_fin' => $reserva->hora_fin,
-                        'estado' => $reserva->estado, // ← AGREGADO
-                    ];
+                if ($horaActual->lt($bloqueFin) && $siguienteHora->gt($bloqueInicio)) {
+                    $bloqueada = true;
+                    $motivoBloqueo = $bloqueo['motivo'] ?? 'Bloqueado';
                     break;
+                }
+            }
+            
+            // Verificar reservas
+            if (!$bloqueada) {
+                foreach ($reservas as $reserva) {
+                    $reservaInicio = Carbon::parse($reserva->hora_inicio);
+                    $reservaFin = Carbon::parse($reserva->hora_fin);
+                    
+                    if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
+                        $ocupada = true;
+                        $reservaInfo = [
+                            'nombre_organizacion' => $reserva->nombre_organizacion,
+                            'deporte' => $reserva->deporte ?? 'No especificado',
+                            'hora_inicio' => $reserva->hora_inicio,
+                            'hora_fin' => $reserva->hora_fin,
+                            'estado' => $reserva->estado,
+                        ];
+                        break;
+                    }
                 }
             }
             
             $franjasHorarias[] = [
                 'hora_inicio' => $horaActual->format('H:i'),
                 'hora_fin' => $siguienteHora->format('H:i'),
-                'disponible' => !$ocupada && !$esDiaCerrado,
+                'disponible' => !$ocupada && !$esDiaCerrado && !$bloqueada,
+                'bloqueada' => $bloqueada,
+                'motivo_bloqueo' => $motivoBloqueo,
                 'reserva' => $reservaInfo
             ];
             
@@ -120,7 +155,8 @@ class CalendarioController extends Controller
                 'fin' => $horaFin
             ],
             'horarios' => $franjasHorarias,
-            'total_reservas' => $reservas->count()
+            'total_reservas' => $reservas->count(),
+            'bloqueos_dia' => $bloqueosFecha
         ]);
     }
 }
