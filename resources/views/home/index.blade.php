@@ -167,22 +167,12 @@
                             Recintos Disponibles
                         </h3>
                         <ul class="ml-7 space-y-1 text-gray-700">
+                            @foreach($recintos as $recinto)
                             <li class="flex items-center">
                                 <span class="text-primary mr-2">•</span>
-                                Epicentro 1
+                                {{ $recinto->nombre }}
                             </li>
-                            <li class="flex items-center">
-                                <span class="text-primary mr-2">•</span>
-                                Epicentro 2
-                            </li>
-                            <li class="flex items-center">
-                                <span class="text-primary mr-2">•</span>
-                                Fortín Sotomayor
-                            </li>
-                            <li class="flex items-center">
-                                <span class="text-primary mr-2">•</span>
-                                Piscina Olímpica
-                            </li>
+                            @endforeach
                         </ul>
                     </div>
 
@@ -200,7 +190,7 @@
             </div>
         </div>
 
-        <!-- Calendario Semanal (Derecha - en lugar del video) -->
+        <!-- ⚠️ CALENDARIO SEMANAL MEJORADO (Derecha) ⚠️ -->
         <div>
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-t-lg">
                 <h2 class="text-xl font-bold flex items-center">
@@ -211,10 +201,9 @@
                 </h2>
             </div>
             <div class="bg-white border border-gray-200 rounded-b-lg p-6 shadow-md">
-                <!-- ⚠️ CALENDARIO ACTUALIZADO CON DÍAS EN ESPAÑOL ⚠️ -->
-                <div class="grid grid-cols-2 md:grid-cols-7 gap-2">
+                <!-- Grid de días (estilo mensual) -->
+                <div class="grid grid-cols-7 gap-3">
                     @php
-                        // Array de días en español
                         $diasEspanol = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                     @endphp
                     
@@ -223,69 +212,46 @@
                             $fecha = now()->addDays($i);
                             $fechaString = $fecha->format('Y-m-d');
                             $esHoy = $fecha->isToday();
-                            // Obtener el día de la semana en español
                             $indiceDia = $fecha->dayOfWeek;
                             $nombreDia = $diasEspanol[$indiceDia];
                         @endphp
                         
-                        <div class="border-2 rounded-lg p-3 {{ $esHoy ? 'border-primary bg-blue-50' : 'border-gray-200' }}">
-                            <div class="text-center mb-2">
-                                <!-- Nombre del día en ESPAÑOL -->
-                                <div class="text-xs font-bold text-gray-500 uppercase">
-                                    {{ $nombreDia }}
-                                </div>
-                                <div class="text-xl font-bold {{ $esHoy ? 'text-primary' : 'text-gray-800' }}">
-                                    {{ $fecha->format('d') }}
-                                </div>
-                                <!-- Mes en español -->
-                                <div class="text-xs text-gray-500">
-                                    {{ $fecha->locale('es')->translatedFormat('M') }}
-                                </div>
+                        <button onclick="verDisponibilidadSemanal('{{ $fechaString }}')"
+                                class="aspect-square flex flex-col items-center justify-center rounded-lg border-2 transition-all hover:shadow-md
+                                {{ $esHoy ? 'bg-blue-50 border-blue-600' : 'bg-white border-gray-300 hover:border-blue-400' }}">
+                            <!-- Día de la semana -->
+                            <div class="text-xs font-bold text-gray-500 uppercase mb-1">
+                                {{ $nombreDia }}
                             </div>
-                            
-                            @if($recintos->count() > 0)
-                                @foreach($recintos as $recinto)
-                                    @php
-                                        $diasCerrados = is_array($recinto->dias_cerrados) 
-                                            ? $recinto->dias_cerrados 
-                                            : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : []);
-                                        
-                                        $esDiaCerrado = in_array(strtolower($fecha->format('l')), $diasCerrados ?? []);
-                                        $tieneReservas = false;
-                                    @endphp
-                                    
-                                    <button onclick="verDisponibilidad('{{ $fechaString }}', {{ $recinto->id }}, '{{ $recinto->nombre }}')"
-                                        class="w-full text-xs mb-1 p-1.5 rounded transition-all hover:shadow-md {{ 
-                                        $esDiaCerrado ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 
-                                        ($tieneReservas ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200') 
-                                    }}">
-                                        <div class="font-medium truncate" title="{{ $recinto->nombre }}">
-                                            {{ Str::limit($recinto->nombre, 10) }}
-                                        </div>
-                                    </button>
-                                @endforeach
-                            @endif
-                        </div>
+                            <!-- Número del día -->
+                            <div class="text-2xl font-bold {{ $esHoy ? 'text-blue-600' : 'text-gray-800' }}">
+                                {{ $fecha->format('d') }}
+                            </div>
+                            <!-- Mes -->
+                            <div class="text-xs text-gray-500 mt-1">
+                                {{ $fecha->locale('es')->translatedFormat('M') }}
+                            </div>
+                        </button>
                     @endfor
                 </div>
                 
                 <!-- Leyenda -->
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="flex items-center">
-                            <div class="w-3 h-3 bg-green-100 border border-green-300 rounded mr-2"></div>
+                            <div class="w-3 h-3 bg-green-50 border-2 border-green-300 rounded mr-2"></div>
                             <span class="text-gray-600">Disponible</span>
                         </div>
                         <div class="flex items-center">
-                            <div class="w-3 h-3 bg-red-100 border border-red-300 rounded mr-2"></div>
+                            <div class="w-3 h-3 bg-orange-50 border-2 border-orange-300 rounded mr-2"></div>
+                            <span class="text-gray-600">Bloqueado</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-red-50 border-2 border-red-300 rounded mr-2"></div>
                             <span class="text-gray-600">Ocupado</span>
                         </div>
                         <div class="flex items-center">
-                            <div class="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded mr-2"></div>
-                            <span class="text-gray-600">Mantenimiento</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-3 h-3 bg-primary rounded mr-2"></div>
+                            <div class="w-3 h-3 bg-blue-50 border-2 border-blue-600 rounded mr-2"></div>
                             <span class="text-gray-600">Hoy</span>
                         </div>
                     </div>
@@ -293,14 +259,44 @@
             </div>
         </div>
     </div>
+</div>
 
-
+<!-- Modal de Selección de Recinto -->
+<div id="modalSeleccionRecinto" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-xl">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">Selecciona un Recinto</h3>
+                    <p class="text-blue-100" id="fechaSeleccionada">Fecha seleccionada</p>
+                </div>
+                <button onclick="cerrarModalRecinto()" class="text-white hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-6 space-y-3" id="listaRecintos">
+            @foreach($recintos as $recinto)
+            <button onclick="verDisponibilidadRecinto({{ $recinto->id }}, '{{ $recinto->nombre }}')"
+                    class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-400 rounded-lg transition-colors flex items-center space-x-3">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <span class="font-medium text-gray-700">{{ $recinto->nombre }}</span>
+            </button>
+            @endforeach
+        </div>
+    </div>
+</div>
 
 <!-- Modal de Disponibilidad -->
 <div id="modalDisponibilidad" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <!-- Header -->
-        <div class="sticky top-0 bg-gradient-to-r from-primary to-secondary text-white p-6 rounded-t-lg">
+        <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-xl">
             <div class="flex justify-between items-start">
                 <div>
                     <h3 class="text-2xl font-bold mb-1" id="modalRecintoNombre">Cargando...</h3>
@@ -316,7 +312,7 @@
 
         <!-- Loading State -->
         <div id="modalLoading" class="p-8 text-center">
-            <svg class="animate-spin h-12 w-12 text-primary mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -337,10 +333,22 @@
             <!-- Botón de Reserva -->
             <div class="mt-6">
                 <a id="btnReservar" href="#" 
-                   class="block w-full text-center bg-primary hover:bg-blue-900 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                   class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
                     Solicitar Reserva
                 </a>
             </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="modalError" class="hidden p-6 text-center">
+            <svg class="w-12 h-12 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-red-600 font-semibold mb-2">Error al cargar la disponibilidad</p>
+            <p class="text-gray-600 text-sm mb-4" id="errorMessage"></p>
+            <button onclick="cerrarModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                Cerrar
+            </button>
         </div>
     </div>
 </div>
@@ -352,6 +360,7 @@ let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel-slide');
 const indicators = document.querySelectorAll('.carousel-indicator');
 const totalSlides = slides.length;
+let fechaSeleccionadaGlobal = null;
 
 // Carrusel
 function showSlide(index) {
@@ -393,13 +402,35 @@ if (totalSlides > 1) {
     setInterval(nextSlide, 5000);
 }
 
-// Modal de disponibilidad
-function verDisponibilidad(fecha, recintoId, recintoNombre) {
+// ⚠️ NUEVAS FUNCIONES ESTILO CALENDARIO MENSUAL ⚠️
+
+function verDisponibilidadSemanal(fecha) {
+    fechaSeleccionadaGlobal = fecha;
+    const fechaFormateada = new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    document.getElementById('fechaSeleccionada').textContent = fechaFormateada;
+    document.getElementById('modalSeleccionRecinto').classList.remove('hidden');
+}
+
+function cerrarModalRecinto() {
+    document.getElementById('modalSeleccionRecinto').classList.add('hidden');
+}
+
+function verDisponibilidadRecinto(recintoId, recintoNombre) {
+    cerrarModalRecinto();
+    
+    // Mostrar modal de disponibilidad
     document.getElementById('modalDisponibilidad').classList.remove('hidden');
     document.getElementById('modalLoading').classList.remove('hidden');
     document.getElementById('modalContent').classList.add('hidden');
+    document.getElementById('modalError').classList.add('hidden');
 
-    fetch(`{{ route('api.disponibilidad') }}?recinto_id=${recintoId}&fecha=${fecha}`, {
+    // Hacer petición AJAX
+    fetch(`{{ route('api.disponibilidad') }}?recinto_id=${recintoId}&fecha=${fechaSeleccionadaGlobal}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
@@ -412,16 +443,23 @@ function verDisponibilidad(fecha, recintoId, recintoNombre) {
         return response.json();
     })
     .then(data => {
-        mostrarDisponibilidad(data, fecha, recintoId);
+        console.log('Respuesta API:', data);
+        mostrarDisponibilidad(data, recintoId, fechaSeleccionadaGlobal);
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error al cargar la disponibilidad: ' + error.message);
-        cerrarModal();
+        mostrarError('No se pudo cargar la disponibilidad. Por favor, intenta nuevamente.');
     });
 }
 
-function mostrarDisponibilidad(data, fechaOriginal, recintoId) {
+function mostrarError(mensaje) {
+    document.getElementById('modalLoading').classList.add('hidden');
+    document.getElementById('modalContent').classList.add('hidden');
+    document.getElementById('modalError').classList.remove('hidden');
+    document.getElementById('errorMessage').textContent = mensaje;
+}
+
+function mostrarDisponibilidad(data, recintoId, fecha) {
     document.getElementById('modalLoading').classList.add('hidden');
     document.getElementById('modalContent').classList.remove('hidden');
 
@@ -429,36 +467,69 @@ function mostrarDisponibilidad(data, fechaOriginal, recintoId) {
     document.getElementById('modalFecha').textContent = data.fecha;
 
     const estadoDiv = document.getElementById('estadoGeneral');
+    estadoDiv.innerHTML = '';
+    
+    // Mostrar bloqueos de horarios si existen
+    if (data.bloqueos_dia && data.bloqueos_dia.length > 0) {
+        let bloqueosList = data.bloqueos_dia.map(b => 
+            `<li class="text-orange-700">• ${b.hora_inicio} - ${b.hora_fin} ${b.motivo ? '(' + b.motivo + ')' : ''}</li>`
+        ).join('');
+        
+        estadoDiv.innerHTML += `
+            <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded mb-4">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-orange-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="font-bold text-orange-800">Horarios Bloqueados:</p>
+                        <ul class="text-sm mt-1">${bloqueosList}</ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
     if (data.cerrado) {
-        estadoDiv.innerHTML = `
+        estadoDiv.innerHTML += `
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                 <div class="flex items-center">
                     <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                     <div>
-                        <p class="font-bold text-yellow-800">Recinto Cerrado</p>
+                        <p class="font-bold text-yellow-800">Recinto Cerrado (Día Completo)</p>
                         <p class="text-yellow-700 text-sm">${data.motivo_cierre}</p>
                     </div>
                 </div>
             </div>
         `;
-    } else {
+    }
+    
+    // Solo mostrar estadísticas si NO está cerrado
+    if (!data.cerrado) {
         const disponibles = data.horarios.filter(f => f.disponible).length;
         const total = data.horarios.length;
-        estadoDiv.innerHTML = `
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-primary">${data.horario_general.inicio} - ${data.horario_general.fin}</p>
-                    <p class="text-sm text-gray-600">Horario</p>
+        const bloqueados = data.horarios.filter(f => f.bloqueada).length;
+        const ocupados = data.horarios.filter(f => f.reserva).length;
+        
+        estadoDiv.innerHTML += `
+            <div class="grid grid-cols-4 gap-3 text-center">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-blue-600">${data.horario_general.inicio} - ${data.horario_general.fin}</p>
+                    <p class="text-xs text-gray-600">Horario</p>
                 </div>
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-green-600">${disponibles}/${total}</p>
-                    <p class="text-sm text-gray-600">Franjas Disponibles</p>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-green-600">${disponibles}</p>
+                    <p class="text-xs text-gray-600">Disponibles</p>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <p class="text-2xl font-bold text-red-600">${data.total_reservas}</p>
-                    <p class="text-sm text-gray-600">Reservas</p>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-orange-600">${bloqueados}</p>
+                    <p class="text-xs text-gray-600">Bloqueados</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-lg">
+                    <p class="text-xl font-bold text-red-600">${ocupados}</p>
+                    <p class="text-xs text-gray-600">Ocupados</p>
                 </div>
             </div>
         `;
@@ -468,7 +539,12 @@ function mostrarDisponibilidad(data, fechaOriginal, recintoId) {
     franjasDiv.innerHTML = data.horarios.map(franja => {
         let bgColor, textColor, icon, estadoHtml;
         
-        if (data.cerrado) {
+        if (franja.bloqueada) {
+            bgColor = 'bg-orange-50 border-orange-200';
+            textColor = 'text-orange-700';
+            icon = '<svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            estadoHtml = '<p class="text-sm ' + textColor + ' font-semibold"> Bloqueado: ' + (franja.motivo_bloqueo || 'No disponible') + '</p>';
+        } else if (data.cerrado) {
             bgColor = 'bg-yellow-50 border-yellow-200';
             textColor = 'text-yellow-700';
             icon = '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
@@ -515,22 +591,31 @@ function mostrarDisponibilidad(data, fechaOriginal, recintoId) {
         `;
     }).join('');
 
-    document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fechaOriginal}`;
+    document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fecha}`;
 }
 
 function cerrarModal() {
     document.getElementById('modalDisponibilidad').classList.add('hidden');
 }
 
+// Cerrar modal con ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
+        cerrarModal();
+        cerrarModalRecinto();
+    }
+});
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('modalDisponibilidad')?.addEventListener('click', function(e) {
+    if (e.target === this) {
         cerrarModal();
     }
 });
 
-document.getElementById('modalDisponibilidad').addEventListener('click', function(e) {
+document.getElementById('modalSeleccionRecinto')?.addEventListener('click', function(e) {
     if (e.target === this) {
-        cerrarModal();
+        cerrarModalRecinto();
     }
 });
 </script>
