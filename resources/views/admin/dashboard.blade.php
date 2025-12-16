@@ -312,26 +312,27 @@
             </div>
         </div>
 
+        
         <!-- Sistema de Pestañas/Filtros Rápidos -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('admin.dashboard') }}?filtro=todas" 
+                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'todas'])) }}" 
                    class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro', 'todas') == 'todas' ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
                     Todas <span class="text-xs ml-1">({{ $todasReservas }})</span>
                 </a>
-                <a href="{{ route('admin.dashboard') }}?filtro=pendientes" 
+                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'pendientes'])) }}" 
                    class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'pendientes' ? 'bg-yellow-500 text-white border-yellow-600' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
                     Pendientes <span class="text-xs ml-1">({{ $reservasPendientes }})</span>
                 </a>
-                <a href="{{ route('admin.dashboard') }}?filtro=aprobadas" 
+                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'aprobadas'])) }}" 
                    class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'aprobadas' ? 'bg-green-600 text-white border-green-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
                     Aprobadas <span class="text-xs ml-1">({{ $contadorAprobadas }})</span>
                 </a>
-                <a href="{{ route('admin.dashboard') }}?filtro=rechazadas" 
+                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'rechazadas'])) }}" 
                    class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'rechazadas' ? 'bg-red-600 text-white border-red-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
                     Rechazadas <span class="text-xs ml-1">({{ $contadorRechazadas }})</span>
                 </a>
-                <a href="{{ route('admin.dashboard') }}?filtro=canceladas" 
+                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'canceladas'])) }}" 
                    class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'canceladas' ? 'bg-gray-600 text-white border-gray-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
                     Canceladas <span class="text-xs ml-1">({{ $contadorCanceladas }})</span>
                 </a>
@@ -545,15 +546,15 @@
             <h3 class="font-semibold text-gray-800">Calendario Público</h3>
             <p class="text-gray-600 text-sm mt-1">Ver disponibilidad</p>
         </a>
-        
-        <a href="{{ route('admin.recintos.index') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
-            <svg class="w-12 h-12 mx-auto mb-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            <h3 class="font-semibold text-gray-800">Gestión de Recintos</h3>
-            <p class="text-gray-600 text-sm mt-1">Administrar instalaciones</p>
-        </a>
-        
+        @if(auth()->user()->role !== 'encargado_recinto')
+            <a href="{{ route('admin.recintos.index') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
+                <svg class="w-12 h-12 mx-auto mb-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <h3 class="font-semibold text-gray-800">Gestión de Recintos</h3>
+                <p class="text-gray-600 text-sm mt-1">Administrar instalaciones</p>
+            </a>
+        @endif
         <a href="{{ route('admin.estadisticas.index') }}" class="bg-white hover:bg-gray-50 p-6 rounded-lg text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
             <svg class="w-12 h-12 mx-auto mb-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>

@@ -41,7 +41,7 @@ class EstadisticasController extends Controller
             ? Carbon::createFromFormat('Y-m-d', $request->input('fecha_fin'))->endOfDay()
             : now()->endOfDay();
 
-        // ⚠️ COMPARATIVA ENTRE PERIODOS (NUEVO) ⚠️
+        //  COMPARATIVA ENTRE PERIODOS (NUEVO) 
         $periodoComparacion = $request->input('periodo_comparacion');
         $datosComparacion = null;
         
@@ -63,7 +63,7 @@ class EstadisticasController extends Controller
         $reservasRechazadas = $this->getReservasRechazadas($fechaInicio, $fechaFin);
         $tasaAprobacion = $totalReservas > 0 ? round(($reservasAprobadas / $totalReservas) * 100) : 0;
 
-        // ⚠️ TASA DE RECHAZO (NUEVO) ⚠️
+        //  TASA DE RECHAZO (NUEVO) 
         $tasaRechazo = $totalReservas > 0 ? round(($reservasRechazadas / $totalReservas) * 100) : 0;
 
         $params += [
@@ -92,7 +92,7 @@ class EstadisticasController extends Controller
         return view('admin.estadisticas.index', $params);
     }
 
-    // ⚠️ NUEVO MÉTODO: COMPARATIVA ENTRE PERIODOS ⚠️
+    //  NUEVO MÉTODO: COMPARATIVA ENTRE PERIODOS 
     private function obtenerComparativaPeriodos($fechaInicio, $fechaFin, $periodoComparacion)
     {
         // Calcular fechas del periodo de comparación
@@ -317,7 +317,7 @@ class EstadisticasController extends Controller
                 'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
             ];
 
-            // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE RETORNAR ⚠️
+            //  REGISTRAR EN AUDITORÍA ANTES DE RETORNAR 
             AuditLog::log(
                 'exportar_excel',
                 "Exportación de estadísticas a Excel (período: {$fechaInicio} a {$fechaFin}, {$reservas->count()} registros)"

@@ -73,7 +73,7 @@ class AuditoriaController extends Controller
     }
 
     /**
-     * ⚠️ ACTUALIZADO: Exportar logs de auditoría a Excel (CSV) + REGISTRAR EN AUDITORÍA
+     *  ACTUALIZADO: Exportar logs de auditoría a Excel (CSV) + REGISTRAR EN AUDITORÍA
      */
     public function exportar(Request $request)
     {

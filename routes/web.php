@@ -10,10 +10,10 @@ use App\Http\Controllers\Admin\RecintoController;
 use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\IncidenciasController;
-use App\Http\Controllers\Admin\AuditoriaController; // ← NUEVO
+use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Middleware\EnsureUserIsJefeRecintos; // ← NUEVO
+use App\Http\Middleware\EnsureUserIsJefeRecintos;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -164,7 +164,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/{reserva}', [AdminReservaController::class, 'show'])
             ->name('show');
         
-        // ⚠️ RUTAS PROTEGIDAS - SOLO JEFE DE RECINTOS ⚠️
+        // RUTAS PROTEGIDAS - SOLO JEFE DE RECINTOS
         Route::middleware([EnsureUserIsJefeRecintos::class])->group(function () {
             Route::post('/{reserva}/aprobar', [AdminReservaController::class, 'aprobar'])
                 ->name('aprobar');
@@ -175,11 +175,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     /*
     |----------------------------------------------------------------------
-    | Gestión de Recintos (Admin)
+    | Gestión de Recintos (Admin) - SOLO JEFE DE RECINTOS Y ADMINS
     |----------------------------------------------------------------------
     */
     
-    Route::prefix('recintos')->name('recintos.')->group(function () {
+    Route::middleware([EnsureUserIsJefeRecintos::class])->prefix('recintos')->name('recintos.')->group(function () {
         Route::get('/crear', [RecintoController::class, 'create'])
             ->name('create');
         Route::post('/', [RecintoController::class, 'store'])
@@ -196,11 +196,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     /*
     |----------------------------------------------------------------------
-    | Gestión de Eventos (Carrusel)
+    | Gestión de Eventos (Carrusel) - SOLO JEFE DE RECINTOS Y ADMINS
     |----------------------------------------------------------------------
     */
     
-    Route::prefix('eventos')->name('eventos.')->group(function () {
+    Route::middleware([EnsureUserIsJefeRecintos::class])->prefix('eventos')->name('eventos.')->group(function () {
         Route::get('/', [EventoController::class, 'index'])
             ->name('index');
         Route::get('/crear', [EventoController::class, 'create'])
@@ -238,7 +238,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     
     /*
     |----------------------------------------------------------------------
-    | Auditoría - SOLO JEFE DE RECINTOS (NUEVO)
+    | Auditoría - SOLO JEFE DE RECINTOS
     |----------------------------------------------------------------------
     */
     

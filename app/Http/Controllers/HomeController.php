@@ -43,7 +43,7 @@ class HomeController extends Controller
     }
     
     /**
-     * ⚠️ ACTUALIZADO: API de disponibilidad con fechas específicas ⚠️
+     *  ACTUALIZADO: API de disponibilidad con fechas específicas 
      */
     public function obtenerDisponibilidad(Request $request)
     {
@@ -78,7 +78,7 @@ class HomeController extends Controller
         
         $esDiaCerrado = in_array($diaSemana, $diasCompletos);
         
-        // ⚠️ OBTENER BLOQUEOS PARA ESTA FECHA ESPECÍFICA ⚠️
+        //  OBTENER BLOQUEOS PARA ESTA FECHA ESPECÍFICA 
         $bloqueosFecha = [];
         if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
             foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {

@@ -33,7 +33,7 @@ class ReservaController extends Controller
             'representante_nombre' => 'required|string|max:255',
             'email' => 'required|email',
             'email_confirmacion' => 'required|email|same:email',
-            // ⚠️ VALIDACIÓN DE TELÉFONO CHILENO ACTUALIZADA ⚠️
+            //  VALIDACIÓN DE TELÉFONO CHILENO ACTUALIZADA 
             'telefono' => ['nullable', 'string', 'max:20', new ValidTelefonoChileno],
             'direccion' => 'nullable|string|max:500',
             'region' => 'nullable|string|max:100',

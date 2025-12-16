@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\AuditLog;
 use App\Mail\ReservaAprobada;
 use App\Mail\ReservaRechazada;
-use App\Notifications\ReservaAprobadaEncargado; // ⚠️ NUEVA NOTIFICACIÓN ⚠️
+use App\Notifications\ReservaAprobadaEncargado; //  NUEVA NOTIFICACIÓN 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
@@ -62,7 +62,7 @@ class AdminReservaController extends Controller
     }
 
     /**
-     * ⚠️ ACTUALIZADO: Aprobar reserva y notificar a solicitante + encargado ⚠️
+     *  ACTUALIZADO: Aprobar reserva y notificar a solicitante + encargado 
      */
     public function aprobar(Reserva $reserva)
     {
@@ -93,7 +93,7 @@ class AdminReservaController extends Controller
         $reserva->aprobada_por = auth()->id();
         $reserva->save();
 
-        // ✅ 1. ENVIAR CORREO AL SOLICITANTE
+        //  1. ENVIAR CORREO AL SOLICITANTE
         try {
             Mail::to($reserva->email)->send(new ReservaAprobada($reserva));
             \Log::info("Correo de aprobación enviado al solicitante: {$reserva->email}");
@@ -101,7 +101,7 @@ class AdminReservaController extends Controller
             \Log::error('Error enviando correo de aprobación al solicitante: ' . $e->getMessage());
         }
 
-        // ✅ 2. ENVIAR NOTIFICACIÓN AL ENCARGADO DEL RECINTO (NUEVO)
+        //  2. ENVIAR NOTIFICACIÓN AL ENCARGADO DEL RECINTO (NUEVO)
         try {
             $encargado = User::where('role', 'encargado_recinto')
                 ->where('recinto_asignado_id', $reserva->recinto_id)
@@ -118,7 +118,7 @@ class AdminReservaController extends Controller
             \Log::error('Error al enviar notificación al encargado: ' . $e->getMessage());
         }
 
-        // ✅ 3. REGISTRAR EN AUDITORÍA
+        //  3. REGISTRAR EN AUDITORÍA
         AuditLog::log(
             action: 'aprobar_reserva',
             description: "Aprobó la reserva #{$reserva->id} de {$reserva->nombre_organizacion} para {$reserva->recinto->nombre} el día {$reserva->fecha_reserva->format('d/m/Y')}",

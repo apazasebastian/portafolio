@@ -27,7 +27,7 @@ class CalendarioController extends Controller
     }
     
     /**
-     * ⚠️ ACTUALIZADO: API de disponibilidad con fechas específicas ⚠️
+     *  ACTUALIZADO: API de disponibilidad con fechas específicas 
      */
     public function disponibilidad(Request $request)
     {

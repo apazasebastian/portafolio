@@ -65,7 +65,7 @@ class IncidenciasController extends Controller
             'estado' => 'reportada',
         ]);
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        //  REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             action: 'crear_incidencia',
             description: "Creó incidencia de tipo '{$this->getNombreTipo($validated['tipo'])}' para la reserva #{$reserva->id} en {$reserva->recinto->nombre}",
@@ -108,7 +108,7 @@ class IncidenciasController extends Controller
             'estado' => $validated['estado'],
         ]);
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        //  REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             action: 'cambiar_estado_incidencia',
             description: "Cambió el estado de la incidencia #{$incidencia->id} de '{$this->getNombreEstado($oldEstado)}' a '{$this->getNombreEstado($validated['estado'])}'",
@@ -132,7 +132,7 @@ class IncidenciasController extends Controller
         $descripcion = $incidencia->descripcion;
         $estado = $incidencia->estado;
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR ⚠️
+        //  REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR 
         AuditLog::log(
             action: 'eliminar_incidencia',
             description: "Eliminó la incidencia #{$incidenciaId} (Tipo: {$this->getNombreTipo($tipo)}, Estado: {$this->getNombreEstado($estado)})",

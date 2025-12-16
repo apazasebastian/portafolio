@@ -66,7 +66,7 @@ class EventoController extends Controller
 
         $evento->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        //  REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             'crear_evento',
             "Evento '{$evento->titulo}' creado para el " . \Carbon\Carbon::parse($evento->fecha_evento)->format('d/m/Y'),
@@ -114,7 +114,7 @@ class EventoController extends Controller
             'imagen.max' => 'La imagen no debe pesar más de 2MB',
         ]);
 
-        // ⚠️ GUARDAR VALORES ORIGINALES ANTES DE ACTUALIZAR ⚠️
+        //  GUARDAR VALORES ORIGINALES ANTES DE ACTUALIZAR 
         $valoresOriginales = [
             'titulo' => $evento->titulo,
             'fecha_evento' => $evento->fecha_evento,
@@ -148,7 +148,7 @@ class EventoController extends Controller
 
         $evento->save();
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ⚠️
+        //  REGISTRAR EN AUDITORÍA 
         AuditLog::log(
             'editar_evento',
             "Evento '{$evento->titulo}' actualizado",
@@ -170,11 +170,11 @@ class EventoController extends Controller
      */
     public function destroy(Evento $evento)
     {
-        // ⚠️ GUARDAR TÍTULO ANTES DE ELIMINAR ⚠️
+        //  GUARDAR TÍTULO ANTES DE ELIMINAR 
         $titulo = $evento->titulo;
         $fecha = $evento->fecha_evento;
 
-        // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR ⚠️
+        //  REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR 
         AuditLog::log(
             'eliminar_evento',
             "Evento '{$titulo}' eliminado",
