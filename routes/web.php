@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\IncidenciasController;
 use App\Http\Controllers\Admin\AuditoriaController;
+use App\Http\Controllers\Admin\ReporteOrganizacionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Middleware\EnsureUserIsJefeRecintos;
@@ -34,12 +35,12 @@ Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'
 
 /*
 |--------------------------------------------------------------------------
-| Recintos (vista pública usando controlador Admin)
+| Recintos (Protegido - SOLO JEFE DE RECINTOS) 🔐
 |--------------------------------------------------------------------------
 */
-Route::get('/recintos', [RecintoController::class, 'index'])
-    ->name('admin.recintos.index')
-    ->withoutMiddleware(['auth']);
+Route::middleware(['auth', EnsureUserIsJefeRecintos::class])
+    ->get('/recintos', [RecintoController::class, 'index'])
+    ->name('admin.recintos.index');
 
 // Reservas públicas
 Route::get('/reservas/crear/{recinto}', [ReservaController::class, 'create'])
@@ -149,6 +150,29 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Exportación a PDF
         Route::get('/exportar-pdf', [EstadisticasController::class, 'exportarPdf'])
             ->name('exportar-pdf');
+    });
+    
+    /*
+    |----------------------------------------------------------------------
+    | Reportes - Módulo de Reportes por Organización
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('reportes')->name('reportes.')->group(function () {
+        // Vista principal del reporte histórico por organización
+        Route::get('/organizacion', [ReporteOrganizacionController::class, 'index'])
+            ->name('organizacion');
+        
+        // API para buscar organizaciones (autocompletado)
+        Route::get('/buscar', [ReporteOrganizacionController::class, 'buscarOrganizaciones'])
+            ->name('buscar');
+        
+        // API para generar reporte JSON
+        Route::post('/generar', [ReporteOrganizacionController::class, 'generarReporte'])
+            ->name('generar');
+        
+        // Exportar reporte a PDF
+        Route::post('/exportar', [ReporteOrganizacionController::class, 'exportarPDF'])
+            ->name('exportar');
     });
     
     /*

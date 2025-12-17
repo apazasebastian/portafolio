@@ -305,8 +305,8 @@
         </div>
 
         <!-- Cards de Tasas -->
-        <div class="lg:col-span-2">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+        <div class="lg:col-span-2 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 h-full w-full">
                 <!-- Tasa de Aprobación -->
                 <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
                     <div class="flex items-center justify-between mb-4">
@@ -399,27 +399,27 @@
                     @endif
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Análisis adicional -->
-            <div class="mt-4 bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-indigo-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                    </svg>
-                    <div class="text-sm text-indigo-800">
-                        <p class="font-semibold mb-1">Análisis del Periodo:</p>
-                        <ul class="list-disc list-inside space-y-1">
-                            <li>Total de solicitudes procesadas: <strong>{{ $reservasAprobadas + $reservasRechazadas }}</strong></li>
-                            <li>Solicitudes pendientes: <strong>{{ $reservasPendientes }}</strong> ({{ $totalReservas > 0 ? round(($reservasPendientes / $totalReservas) * 100, 1) : 0 }}%)</li>
-                            @if($tasaRechazo > 30)
-                                <li class="text-red-700 font-semibold">⚠️ Alta tasa de rechazo - revisar criterios de aprobación</li>
-                            @endif
-                            @if($reservasPendientes > ($totalReservas * 0.3))
-                                <li class="text-yellow-700 font-semibold">⚠️ Muchas solicitudes pendientes - agilizar proceso</li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
+    <!-- Análisis adicional - REALMENTE AFUERA DEL GRID DE 3 COLUMNAS -->
+    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded mt-6">
+        <div class="flex items-start">
+            <svg class="w-5 h-5 text-indigo-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div class="text-sm text-indigo-800">
+                <p class="font-semibold mb-1">Análisis del Periodo:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>Total de solicitudes procesadas: <strong>{{ $reservasAprobadas + $reservasRechazadas }}</strong></li>
+                    <li>Solicitudes pendientes: <strong>{{ $reservasPendientes }}</strong> ({{ $totalReservas > 0 ? round(($reservasPendientes / $totalReservas) * 100, 1) : 0 }}%)</li>
+                    @if($tasaRechazo > 30)
+                        <li class="text-red-700 font-semibold">⚠️ Alta tasa de rechazo - revisar criterios de aprobación</li>
+                    @endif
+                    @if($reservasPendientes > ($totalReservas * 0.3))
+                        <li class="text-yellow-700 font-semibold">⚠️ Muchas solicitudes pendientes - agilizar proceso</li>
+                    @endif
+                </ul>
             </div>
         </div>
     </div>
@@ -726,6 +726,98 @@ if (ctxAprobacionRechazo) {
                 </div>
                 <h3 class="text-lg font-semibold text-blue-800 mb-2">Información</h3>
                 <p class="text-sm text-gray-700">Los reportes incluyen todos los datos del período seleccionado. Puedes aplicar filtros de fechas antes de descargar.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN: REPORTES ESPECIALES -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                Reportes Especiales
+            </h2>
+            <p class="text-gray-600 text-sm">Accede a análisis detallados y reportes personalizados</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Reporte Histórico por Organización -->
+            <a href="{{ route('admin.reportes.organizacion') }}" 
+            class="group bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 p-6 rounded-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-indigo-100 p-4 rounded-full group-hover:bg-indigo-200 transition-colors">
+                        <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-indigo-900 mb-2 text-center">Reporte Histórico por Organización</h3>
+                <p class="text-sm text-gray-700 text-center mb-4">
+                    Análisis completo del historial de uso de cada organización con gráficos interactivos
+                </p>
+                <div class="flex items-center justify-center text-indigo-600 font-medium text-sm group-hover:text-indigo-800">
+                    <span>Acceder al Reporte</span>
+                    <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Reporte por Recinto (Futuro) -->
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 p-6 rounded-lg opacity-75">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-blue-100 p-4 rounded-full">
+                        <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-blue-900 mb-2 text-center">Reporte por Recinto</h3>
+                <p class="text-sm text-gray-700 text-center mb-4">
+                    Estadísticas de uso y mantenimiento por instalación deportiva
+                </p>
+                <div class="flex items-center justify-center">
+                    <span class="inline-block bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
+                        Próximamente
+                    </span>
+                </div>
+            </div>
+
+            <!-- Análisis de Tendencias (Futuro) -->
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 p-6 rounded-lg opacity-75">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-green-100 p-4 rounded-full">
+                        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-green-900 mb-2 text-center">Análisis de Tendencias</h3>
+                <p class="text-sm text-gray-700 text-center mb-4">
+                    Predicciones y patrones de uso para mejor planificación
+                </p>
+                <div class="flex items-center justify-center">
+                    <span class="inline-block bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
+                        Próximamente
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Info adicional -->
+        <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        <strong>Tip:</strong> El reporte histórico por organización te permite analizar en detalle el comportamiento y uso de cada entidad registrada en el sistema.
+                    </p>
+                </div>
             </div>
         </div>
     </div>

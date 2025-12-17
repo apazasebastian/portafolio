@@ -5,26 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistema de Reservas Deportivas')</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1e3a8a', // Azul oscuro institucional
-                        secondary: '#3b82f6', // Azul medio
-                        accent: '#f59e0b', // Naranja/amarillo para acentos
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind compilado localmente (NO desde CDN) -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     @vite(['resources/js/app.js'])
     
     <style>
+        /* ==========================================
+        PREVENIR QUE SVG SE AMPLIFIQUEN
+        ========================================== */
+        
+        /* Regla universal para SVGs */
+        svg {
+            flex-shrink: 0 !important;
+            overflow: visible !important;
+        }
+        
+        /* Clases de Tailwind para tamaños de iconos */
+        .w-3 {
+            width: 0.75rem !important;
+            height: 0.75rem !important;
+            min-width: 0.75rem !important;
+            max-width: 0.75rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-4 {
+            width: 1rem !important;
+            height: 1rem !important;
+            min-width: 1rem !important;
+            max-width: 1rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-5 {
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            min-width: 1.25rem !important;
+            max-width: 1.25rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-6 {
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+            min-width: 1.5rem !important;
+            max-width: 1.5rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-7 {
+            width: 1.75rem !important;
+            height: 1.75rem !important;
+            min-width: 1.75rem !important;
+            max-width: 1.75rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-8 {
+            width: 2rem !important;
+            height: 2rem !important;
+            min-width: 2rem !important;
+            max-width: 2rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-10 {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            min-width: 2.5rem !important;
+            max-width: 2.5rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-12 {
+            width: 3rem !important;
+            height: 3rem !important;
+            min-width: 3rem !important;
+            max-width: 3rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-16 {
+            width: 4rem !important;
+            height: 4rem !important;
+            min-width: 4rem !important;
+            max-width: 4rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .w-20 {
+            width: 5rem !important;
+            height: 5rem !important;
+            min-width: 5rem !important;
+            max-width: 5rem !important;
+            flex-shrink: 0 !important;
+        }
+        
+        /* Proteger elementos decorativos de fondo */
+        .bg-decorativo {
+            position: fixed !important;
+            pointer-events: none !important;
+            z-index: 0 !important;
+            max-width: 250px !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
+        }
+        
+        .bg-decorativo-left {
+            left: -50px !important;
+            top: 0 !important;
+            width: 250px !important;
+            height: 100vh !important;
+        }
+        
+        .bg-decorativo-right {
+            right: -50px !important;
+            top: 0 !important;
+            width: 250px !important;
+            height: 100vh !important;
+        }
+        
+        /* Restringir viewBox durante transiciones */
+        .bg-decorativo svg,
+        .forma-flotante-1,
+        .forma-flotante-2,
+        .forma-flotante-3,
+        .forma-flotante-4 {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 250px !important;
+            max-height: 100vh !important;
+        }
+        
         /* Fuente más profesional */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,27 +154,6 @@
         
         .nav-link:hover {
             transform: translateY(-2px);
-        }
-
-        /* Elementos decorativos de fondo */
-        .bg-decorativo {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .bg-decorativo-left {
-            left: -50px;
-            top: 0;
-            width: 250px;
-            height: 100vh;
-        }
-
-        .bg-decorativo-right {
-            right: -50px;
-            top: 0;
-            width: 250px;
-            height: 100vh;
         }
 
         /* Contenedor principal con z-index */
@@ -159,8 +253,8 @@
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-4">
-                    <span class="flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <span class="flex items-center flex-shrink-0">
+                        <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink: 0;">
                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                         </svg>
                         <span class="hidden sm:inline">Contacto: </span>+56 58 2205500
@@ -239,9 +333,10 @@
                     <a href="{{ route('home') }}" class="flex items-center space-x-3">
                         <!-- Logo de la Municipalidad -->
                         <img src="{{ asset('storage/logos/logo-header.png') }}" 
-                             alt="Municipalidad de Arica" 
-                             class="h-16 w-auto"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            alt="Municipalidad de Arica" 
+                            class="h-16 w-auto"
+                            style="max-height: 64px; max-width: none; height: 64px; width: auto; flex-shrink: 0;"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <!-- Fallback: Icono SVG si no hay logo -->
                         <div class="w-16 h-16 bg-primary rounded-full items-center justify-center hidden">
                             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -562,15 +657,40 @@
 
     <script>
         // Toggle menú móvil
-        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
 
-        // Cerrar menú móvil al hacer clic en un enlace
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                document.getElementById('mobile-menu').classList.add('hidden');
+                // Cerrar menú móvil al hacer clic en un enlace
+                document.querySelectorAll('#mobile-menu a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                    });
+                });
+        }
+    </script>
+    <script>
+        // Proteger iconos durante transiciones de Inertia
+        if (window.Inertia) {
+            window.Inertia.on('start', () => {
+                // Cuando inicia una transición, asegurar que SVGs se mantengan pequeños
+                document.querySelectorAll('svg').forEach(svg => {
+                    svg.style.maxWidth = svg.getAttribute('data-max-width') || '16px';
+                    svg.style.maxHeight = svg.getAttribute('data-max-height') || '16px';
+                });
+            });
+        }
+        
+        // Proteger durante transiciones normales de página
+        document.addEventListener('beforeunload', () => {
+            document.querySelectorAll('svg').forEach(svg => {
+                svg.style.flexShrink = '0';
+                svg.style.maxWidth = svg.getAttribute('data-max-width') || '16px';
+                svg.style.maxHeight = svg.getAttribute('data-max-height') || '16px';
             });
         });
     </script>
