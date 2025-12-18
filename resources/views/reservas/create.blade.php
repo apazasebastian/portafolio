@@ -26,371 +26,408 @@
             </div>
         </div>
 
-        <!-- Info del Recinto -->
-        @php
-            // Decodificar JSON si es necesario
-            $horarios = is_array($recinto->horarios_disponibles) 
-                ? $recinto->horarios_disponibles 
-                : json_decode($recinto->horarios_disponibles, true);
-                
-            $diasCerrados = is_array($recinto->dias_cerrados) 
-                ? $recinto->dias_cerrados 
-                : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
-        @endphp
-        
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
-            <h2 class="text-2xl font-bold mb-3">{{ $recinto->nombre }}</h2>
-            <p class="mb-4 opacity-90">{{ $recinto->descripcion }}</p>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                    </svg>
-                    <span>Capacidad: <strong>{{ $recinto->capacidad_maxima }} personas</strong></span>
-                </div>
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                    </svg>
-                    <span>Horario: <strong>{{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</strong></span>
-                </div>
-            </div>
-            
-            @if($diasCerrados && in_array('monday', $diasCerrados))
-            <div class="mt-4 bg-red-500 bg-opacity-20 border border-white border-opacity-30 rounded-lg p-3">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <!-- ✅ MOSTRAR ERROR DE RESTRICCIÓN SI VIENE DEL SUBMIT -->
+        @if($errors->has('restriccion'))
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-6 shadow-lg">
+                <div class="flex items-start">
+                    <svg class="w-6 h-6 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                     </svg>
-                    <span><strong>Importante:</strong> Cerrado los lunes por mantenimiento</span>
-                </div>
-            </div>
-            @endif
-        </div>
-
-        <form method="POST" action="{{ route('reservas.store') }}" id="reservaForm">
-            @csrf
-            <input type="hidden" name="recinto_id" value="{{ $recinto->id }}">
-
-            <!-- PASO 1: Tipo de Actividad -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
-                        1
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Tipo de Actividad</h3>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="text-red-500">*</span> Deporte a Practicar
-                    </label>
-                    <select name="deporte" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Seleccione un deporte</option>
-                        <option value="Fútbol" {{ old('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
-                        <option value="Fútsal" {{ old('deporte') == 'Fútsal' ? 'selected' : '' }}>Fútsal</option>
-                        <option value="Básquetbol" {{ old('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
-                        <option value="Vóleibol" {{ old('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
-                        <option value="Handball" {{ old('deporte') == 'Handball' ? 'selected' : '' }}>Handball</option>
-                        <option value="Natación" {{ old('deporte') == 'Natación' ? 'selected' : '' }}>Natación</option>
-                        <option value="Actividad Recreativa" {{ old('deporte') == 'Actividad Recreativa' ? 'selected' : '' }}>Actividad Recreativa</option>
-                        <option value="Otro" {{ old('deporte') == 'Otro' ? 'selected' : '' }}>Otro</option>
-                    </select>
-                    @error('deporte')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- PASO 2: Datos de la Organización -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
-                        2
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Datos de la Organización</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Nombre del Club/Organización
-                        </label>
-                        <input type="text" name="nombre_organizacion" 
-                               value="{{ old('nombre_organizacion') }}" 
-                               required
-                               placeholder="Ej: Club Deportivo Los Campeones"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('nombre_organizacion')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Nombre del Representante
-                        </label>
-                        <input type="text" name="representante_nombre" 
-                               value="{{ old('representante_nombre') }}" 
-                               required
-                               placeholder="Ej: Juan Pérez González"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('representante_nombre')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> RUT del Representante
-                        </label>
-                        <input type="text" 
-                               id="rut" 
-                               name="rut" 
-                               value="{{ old('rut') }}" 
-                               required
-                               placeholder="12345678-9"
-                               maxlength="12"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">El guión se agregará automáticamente</p>
-                        @error('rut')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Teléfono de Contacto
-                        </label>
-                        <input type="tel" name="telefono" 
-                               value="{{ old('telefono') }}" 
-                               placeholder="+56 9 8765 4321"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('telefono')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Correo Electrónico
-                        </label>
-                        <input type="email" name="email" 
-                               value="{{ old('email') }}" 
-                               required
-                               placeholder="ejemplo@correo.com"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('email')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Confirmar Correo
-                        </label>
-                        <input type="email" name="email_confirmacion" 
-                               value="{{ old('email_confirmacion') }}" 
-                               required
-                               placeholder="ejemplo@correo.com"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('email_confirmacion')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Dirección de la Organización
-                        </label>
-                        <input type="text" name="direccion" 
-                               value="{{ old('direccion') }}" 
-                               placeholder="Calle, número"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Región
-                        </label>
-                        <select id="region" name="region"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Seleccione región</option>
-                        </select>
-                        @error('region')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Comuna
-                        </label>
-                        <select id="comuna" name="comuna" disabled
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100">
-                            <option value="">Seleccione comuna</option>
-                        </select>
-                        @error('comuna')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-red-800 mb-2">Acceso Restringido</h3>
+                        <p class="text-red-700 mb-2">
+                            {{ $errors->first('restriccion') }}
+                        </p>
+                        <p class="text-red-600 text-sm mt-3">
+                            Si considera que esto es un error, contacte con la administración en: <strong>deportes@municipalidaddearica.cl</strong>
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- PASO 3: Detalles de la Reserva -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
-                        3
-                    </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Detalles de la Reserva</h3>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <!-- ⚠️ CAMPO DE FECHA ACTUALIZADO CON LÍMITE DE 60 DÍAS ⚠️ -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Fecha
-                        </label>
-                        <input type="date" name="fecha_reserva" 
-                               value="{{ old('fecha_reserva') }}" 
-                               min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
-                               max="{{ $fechaMaxima }}"
-                               required
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        
-                        <!-- Mensaje informativo -->
-                        <div class="flex items-start mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                            <svg class="w-4 h-4 mr-2 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <div class="text-xs text-blue-700">
-                                <p class="font-medium">Rango disponible:</p>
-                                <p class="mt-0.5">Desde mañana hasta <strong>{{ \Carbon\Carbon::parse($fechaMaxima)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}</strong> (60 días)</p>
-                            </div>
-                        </div>
-                        
-                        @error('fecha_reserva')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Hora de Inicio
-                        </label>
-                        <select name="hora_inicio" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Seleccionar</option>
-                            @for($h = 8; $h < 23; $h++)
-                                <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
-                            @endfor
-                        </select>
-                        @error('hora_inicio')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span class="text-red-500">*</span> Hora de Término
-                        </label>
-                        <select name="hora_fin" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Seleccionar</option>
-                            @for($h = 9; $h <= 23; $h++)
-                                <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
-                            @endfor
-                        </select>
-                        @error('hora_fin')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <span class="text-red-500">*</span> Cantidad de Personas
-                    </label>
-                    <div class="relative">
-                        <input type="number" name="cantidad_personas" 
-                               value="{{ old('cantidad_personas') }}" 
-                               min="1" 
-                               max="{{ $recinto->capacidad_maxima }}" 
-                               required
-                               placeholder="Número de asistentes"
-                               class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <span class="absolute right-4 top-3 text-gray-500 text-sm">
-                            Máx: {{ $recinto->capacidad_maxima }}
-                        </span>
-                    </div>
-                    @error('cantidad_personas')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Observaciones Adicionales
-                    </label>
-                    <textarea name="observaciones" rows="4" 
-                              placeholder="Describa el tipo de actividad, equipamiento necesario, etc."
-                              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('observaciones') }}</textarea>
-                </div>
+            <!-- Mensaje informativo adicional -->
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Formulario Bloqueado</h2>
+                <p class="text-gray-600 mb-4">
+                    El formulario de reserva no está disponible debido a las cancelaciones realizadas.
+                </p>
+                <a href="{{ route('calendario') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                    Volver al Calendario
+                </a>
             </div>
 
-            <!-- PASO 4: Confirmación -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
-                        4
+        @else
+            <!-- ✅ FORMULARIO NORMAL - SIN RESTRICCIÓN AL ENTRAR -->
+            
+            <!-- Info del Recinto -->
+            @php
+                // Decodificar JSON si es necesario
+                $horarios = is_array($recinto->horarios_disponibles) 
+                    ? $recinto->horarios_disponibles 
+                    : json_decode($recinto->horarios_disponibles, true);
+                    
+                $diasCerrados = is_array($recinto->dias_cerrados) 
+                    ? $recinto->dias_cerrados 
+                    : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+            @endphp
+            
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+                <h2 class="text-2xl font-bold mb-3">{{ $recinto->nombre }}</h2>
+                <p class="mb-4 opacity-90">{{ $recinto->descripcion }}</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                        <span>Capacidad: <strong>{{ $recinto->capacidad_maxima }} personas</strong></span>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Confirmación</h3>
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Horario: <strong>{{ $horarios['inicio'] ?? '08:00' }} - {{ $horarios['fin'] ?? '23:00' }}</strong></span>
+                    </div>
                 </div>
-
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                    <div class="flex">
-                        <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                
+                @if($diasCerrados && in_array('monday', $diasCerrados))
+                <div class="mt-4 bg-red-500 bg-opacity-20 border border-white border-opacity-30 rounded-lg p-3">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                         </svg>
-                        <div class="text-sm text-yellow-700">
-                            <p class="font-medium">Importante:</p>
-                            <p>Su reserva estará sujeta a aprobación. Recibirá una notificación por correo electrónico.</p>
+                        <span><strong>Importante:</strong> Cerrado los lunes por mantenimiento</span>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <form method="POST" action="{{ route('reservas.store') }}" id="reservaForm">
+                @csrf
+                <input type="hidden" name="recinto_id" value="{{ $recinto->id }}">
+
+                <!-- PASO 1: Tipo de Actividad -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
+                            1
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Tipo de Actividad</h3>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> Deporte a Practicar
+                        </label>
+                        <select name="deporte" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('deporte') border-red-500 @enderror">
+                            <option value="">Seleccione un deporte</option>
+                            <option value="Fútbol" {{ old('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
+                            <option value="Fútsal" {{ old('deporte') == 'Fútsal' ? 'selected' : '' }}>Fútsal</option>
+                            <option value="Básquetbol" {{ old('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
+                            <option value="Vóleibol" {{ old('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
+                            <option value="Handball" {{ old('deporte') == 'Handball' ? 'selected' : '' }}>Handball</option>
+                            <option value="Natación" {{ old('deporte') == 'Natación' ? 'selected' : '' }}>Natación</option>
+                            <option value="Actividad Recreativa" {{ old('deporte') == 'Actividad Recreativa' ? 'selected' : '' }}>Actividad Recreativa</option>
+                            <option value="Otro" {{ old('deporte') == 'Otro' ? 'selected' : '' }}>Otro</option>
+                        </select>
+                        @error('deporte')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- PASO 2: Datos de la Organización -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
+                            2
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Datos de la Organización</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Nombre del Club/Organización
+                            </label>
+                            <input type="text" name="nombre_organizacion" 
+                                   value="{{ old('nombre_organizacion') }}" 
+                                   required
+                                   placeholder="Ej: Club Deportivo Los Campeones"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('nombre_organizacion') border-red-500 @enderror">
+                            @error('nombre_organizacion')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Nombre del Representante
+                            </label>
+                            <input type="text" name="representante_nombre" 
+                                   value="{{ old('representante_nombre') }}" 
+                                   required
+                                   placeholder="Ej: Juan Pérez González"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('representante_nombre') border-red-500 @enderror">
+                            @error('representante_nombre')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> RUT del Representante
+                            </label>
+                            <input type="text" 
+                                   id="rut" 
+                                   name="rut" 
+                                   value="{{ old('rut') }}" 
+                                   required
+                                   placeholder="12345678-9"
+                                   maxlength="12"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('rut') border-red-500 @enderror">
+                            <p class="text-xs text-gray-500 mt-1">El guión se agregará automáticamente</p>
+                            @error('rut')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Teléfono de Contacto
+                            </label>
+                            <input type="tel" name="telefono" 
+                                   value="{{ old('telefono') }}" 
+                                   placeholder="+56 9 8765 4321"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('telefono') border-red-500 @enderror">
+                            @error('telefono')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Correo Electrónico
+                            </label>
+                            <input type="email" name="email" 
+                                   value="{{ old('email') }}" 
+                                   required
+                                   placeholder="ejemplo@correo.com"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror">
+                            @error('email')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Confirmar Correo
+                            </label>
+                            <input type="email" name="email_confirmacion" 
+                                   value="{{ old('email_confirmacion') }}" 
+                                   required
+                                   placeholder="ejemplo@correo.com"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email_confirmacion') border-red-500 @enderror">
+                            @error('email_confirmacion')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Dirección de la Organización
+                            </label>
+                            <input type="text" name="direccion" 
+                                   value="{{ old('direccion') }}" 
+                                   placeholder="Calle, número"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('direccion') border-red-500 @enderror">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Región
+                            </label>
+                            <select id="region" name="region"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('region') border-red-500 @enderror">
+                                <option value="">Seleccione región</option>
+                            </select>
+                            @error('region')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Comuna
+                            </label>
+                            <select id="comuna" name="comuna" disabled
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 @error('comuna') border-red-500 @enderror">
+                                <option value="">Seleccione comuna</option>
+                            </select>
+                            @error('comuna')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
                 </div>
 
-                <label class="flex items-start cursor-pointer">
-                    <input type="checkbox" name="acepta_reglamento" value="1" required
-                           class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                    <span class="ml-3 text-sm text-gray-700">
-                        <span class="text-red-500">*</span> Acepto el 
-                        <button type="button" onclick="abrirReglamento()" class="text-blue-600 hover:underline font-medium">
-                            reglamento de uso
-                        </button> 
-                        de recintos deportivos municipales
-                    </span>
-                </label>
-                @error('acepta_reglamento')
-                    <p class="text-red-600 text-sm mt-1 ml-7">{{ $message }}</p>
-                @enderror
-            </div>
+                <!-- PASO 3: Detalles de la Reserva -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
+                            3
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Detalles de la Reserva</h3>
+                    </div>
 
-            <!-- Botones -->
-            <div class="flex justify-between">
-                <a href="{{ route('calendario') }}" 
-                   class="px-8 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
-                    Cancelar
-                </a>
-                
-                <button type="submit" 
-                        class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl">
-                    Enviar Solicitud
-                </button>
-            </div>
-        </form>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Fecha
+                            </label>
+                            <input type="date" name="fecha_reserva" 
+                                   value="{{ old('fecha_reserva') }}" 
+                                   min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
+                                   max="{{ $fechaMaxima }}"
+                                   required
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('fecha_reserva') border-red-500 @enderror">
+                            
+                            <!-- Mensaje informativo -->
+                            <div class="flex items-start mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                                <svg class="w-4 h-4 mr-2 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <div class="text-xs text-blue-700">
+                                    <p class="font-medium">Rango disponible:</p>
+                                    <p class="mt-0.5">Desde mañana hasta <strong>{{ \Carbon\Carbon::parse($fechaMaxima)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}</strong> (60 días)</p>
+                                </div>
+                            </div>
+                            
+                            @error('fecha_reserva')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Hora de Inicio
+                            </label>
+                            <select name="hora_inicio" required
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('hora_inicio') border-red-500 @enderror">
+                                <option value="">Seleccionar</option>
+                                @for($h = 8; $h < 23; $h++)
+                                    <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
+                                @endfor
+                            </select>
+                            @error('hora_inicio')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> Hora de Término
+                            </label>
+                            <select name="hora_fin" required
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('hora_fin') border-red-500 @enderror">
+                                <option value="">Seleccionar</option>
+                                @for($h = 9; $h <= 23; $h++)
+                                    <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
+                                @endfor
+                            </select>
+                            @error('hora_fin')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> Cantidad de Personas
+                        </label>
+                        <div class="relative">
+                            <input type="number" name="cantidad_personas" 
+                                   value="{{ old('cantidad_personas') }}" 
+                                   min="1" 
+                                   max="{{ $recinto->capacidad_maxima }}" 
+                                   required
+                                   placeholder="Número de asistentes"
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('cantidad_personas') border-red-500 @enderror">
+                            <span class="absolute right-4 top-3 text-gray-500 text-sm">
+                                Máx: {{ $recinto->capacidad_maxima }}
+                            </span>
+                        </div>
+                        @error('cantidad_personas')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Observaciones Adicionales
+                        </label>
+                        <textarea name="observaciones" rows="4" 
+                                  placeholder="Describa el tipo de actividad, equipamiento necesario, etc."
+                                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('observaciones') border-red-500 @enderror">{{ old('observaciones') }}</textarea>
+                    </div>
+                </div>
+
+                <!-- PASO 4: Confirmación -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center text-blue-600 font-bold mr-3">
+                            4
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Confirmación</h3>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="text-sm text-yellow-700">
+                                <p class="font-medium">Importante:</p>
+                                <p>Su reserva estará sujeta a aprobación. Recibirá una notificación por correo electrónico.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="flex items-start cursor-pointer">
+                        <input type="checkbox" name="acepta_reglamento" value="1" required
+                               class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 @error('acepta_reglamento') border-red-500 @enderror">
+                        <span class="ml-3 text-sm text-gray-700">
+                            <span class="text-red-500">*</span> Acepto el 
+                            <button type="button" onclick="abrirReglamento()" class="text-blue-600 hover:underline font-medium">
+                                reglamento de uso
+                            </button> 
+                            de recintos deportivos municipales
+                        </span>
+                    </label>
+                    @error('acepta_reglamento')
+                        <p class="text-red-600 text-sm mt-1 ml-7">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-between">
+                    <a href="{{ route('calendario') }}" 
+                       class="px-8 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+                        Cancelar
+                    </a>
+                    
+                    <button type="submit" 
+                            class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl">
+                        Enviar Solicitud
+                    </button>
+                </div>
+            </form>
+
+        @endif
 
     </div>
 </div>

@@ -76,6 +76,63 @@
             </table>
         </div>
 
+        <!-- ✅ NUEVA SECCIÓN: Información del Encargado del Recinto -->
+        <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-top: 30px;">
+             Encargado del Recinto
+        </h2>
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; color: white;">
+                        <strong>Responsable:</strong>
+                    </td>
+                    <td style="padding: 8px 0; color: white;">
+                        @php
+                            $encargados = [
+                                1 => ['nombre' => 'Carlos Pérez', 'email' => 'carlosapazac33@gmail.com', 'telefono' => '+56 9 2245 8901'],
+                                2 => ['nombre' => 'María García', 'email' => 'maria.garcia@munirica.cl', 'telefono' => '+56 9 3156 7234'],
+                                3 => ['nombre' => 'Roberto Flores', 'email' => 'roberto.flores@munirica.cl', 'telefono' => '+56 9 4567 1289'],
+                                4 => ['nombre' => 'Andrea Castillo', 'email' => 'andrea.castillo@munirica.cl', 'telefono' => '+56 9 8765 4321'],
+                            ];
+                            
+                            $encargado = $encargados[$reserva->recinto_id] ?? null;
+                        @endphp
+                        
+                        @if($encargado)
+                            {{ $encargado['nombre'] }}
+                        @else
+                            Encargado del Recinto
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: white;">
+                        <strong>Correo:</strong>
+                    </td>
+                    <td style="padding: 8px 0; color: white;">
+                        @if($encargado)
+                            <a href="mailto:{{ $encargado['email'] }}" style="color: white; text-decoration: underline;">{{ $encargado['email'] }}</a>
+                        @else
+                            deportes@municipalidaddearica.cl
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: white;">
+                        <strong>Teléfono:</strong>
+                    </td>
+                    <td style="padding: 8px 0; color: white;">
+                        @if($encargado)
+                            {{ $encargado['telefono'] }}
+                        @else
+                            +56 58 220 5522
+                        @endif
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <!-- Código de Cancelación -->
         <h2 style="color: #333; border-bottom: 2px solid #f59e0b; padding-bottom: 10px; margin-top: 30px;">
              Código de Cancelación

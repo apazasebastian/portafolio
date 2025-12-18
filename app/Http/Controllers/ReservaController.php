@@ -17,7 +17,44 @@ class ReservaController extends Controller
         // Calcular fecha máxima (60 días desde hoy)
         $fechaMaxima = Carbon::today()->addDays(60)->format('Y-m-d');
         
-        return view('reservas.create', compact('recinto', 'fechaMaxima'));
+        // ✅ NO VERIFICAR AQUÍ - Solo pasar variable
+        $restriccion = ['restringido' => false];
+        
+        return view('reservas.create', compact('recinto', 'fechaMaxima', 'restriccion'));
+    }
+    
+    /**
+     * ✅ NUEVA FUNCIÓN: Verificar si hay restricción por cancelaciones
+     * Ahora verifica por NOMBRE DE ORGANIZACIÓN (en cualquier recinto)
+     */
+    private function verificarRestriccionCancelaciones($nombreOrganizacion)
+    {
+        // Obtener todas las reservas de esa organización que fueron aprobadas y luego canceladas
+        $mesActual = now()->month;
+        $anoActual = now()->year;
+        
+        // ✅ CAMBIO: Buscar por nombre_organizacion en lugar de recinto_id
+        $cancelacionesEsteMes = Reserva::where('nombre_organizacion', $nombreOrganizacion)
+            ->where('estado', 'aprobada')
+            ->whereNotNull('fecha_cancelacion')
+            ->whereMonth('fecha_cancelacion', $mesActual)
+            ->whereYear('fecha_cancelacion', $anoActual)
+            ->count();
+        
+        if ($cancelacionesEsteMes >= 3) {
+            $proximoMes = Carbon::now()->addMonth();
+            return [
+                'restringido' => true,
+                'cancelaciones' => $cancelacionesEsteMes,
+                'proximoMes' => $proximoMes->format('F'),
+                'fechaDesbloqueo' => $proximoMes->format('d/m/Y')
+            ];
+        }
+        
+        return [
+            'restringido' => false,
+            'cancelaciones' => $cancelacionesEsteMes
+        ];
     }
     
     public function store(Request $request)
@@ -25,6 +62,7 @@ class ReservaController extends Controller
         // Calcular fecha máxima para validación
         $fechaMaxima = Carbon::today()->addDays(60);
         
+        // Validar primero para tener el nombre de la organización
         $validated = $request->validate([
             'recinto_id' => 'required|exists:recintos,id',
             'deporte' => 'required|string|max:50',
@@ -33,7 +71,6 @@ class ReservaController extends Controller
             'representante_nombre' => 'required|string|max:255',
             'email' => 'required|email',
             'email_confirmacion' => 'required|email|same:email',
-            //  VALIDACIÓN DE TELÉFONO CHILENO ACTUALIZADA 
             'telefono' => ['nullable', 'string', 'max:20', new ValidTelefonoChileno],
             'direccion' => 'nullable|string|max:500',
             'region' => 'nullable|string|max:100',
@@ -88,7 +125,6 @@ class ReservaController extends Controller
             // Teléfono
             'telefono.string' => 'El teléfono debe ser texto.',
             'telefono.max' => 'El teléfono no puede tener más de 20 caracteres.',
-            // El mensaje de ValidTelefonoChileno se define en la clase Rule
             
             // Dirección
             'direccion.string' => 'La dirección debe ser texto.',
@@ -131,6 +167,15 @@ class ReservaController extends Controller
             'acepta_reglamento.required' => 'Debe aceptar el reglamento para continuar.',
             'acepta_reglamento.accepted' => 'Debe aceptar el reglamento para continuar.',
         ]);
+        
+        // ✅ VERIFICAR RESTRICCIÓN USANDO EL NOMBRE DE LA ORGANIZACIÓN
+        $restriccion = $this->verificarRestriccionCancelaciones($validated['nombre_organizacion']);
+        
+        if ($restriccion['restringido']) {
+            return back()
+                ->withInput()
+                ->withErrors(['restriccion' => 'Su organización ha alcanzado el límite de 3 cancelaciones permitidas en este mes. Podrá hacer nuevas reservas a partir del ' . $restriccion['fechaDesbloqueo'] . '.']);
+        }
         
         // Verificar disponibilidad
         $recinto = Recinto::find($validated['recinto_id']);

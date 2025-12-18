@@ -28,16 +28,17 @@ class DashboardController extends Controller
         // Query base para reservas
         $query = Reserva::with(['recinto']);
 
-        // Filtro por pestaña (todas, pendientes, aprobadas, rechazadas, canceladas)
-        $filtro = $request->get('filtro', 'todas');
+        // ✅ CAMBIO: Usar 'estado' en lugar de 'filtro'
+        // Filtro por estado (desde el dropdown)
+        $estado = $request->get('estado', '');
         
-        if ($filtro === 'pendientes') {
+        if ($estado === 'pendiente') {
             $query->where('estado', 'pendiente');
-        } elseif ($filtro === 'aprobadas') {
+        } elseif ($estado === 'aprobada') {
             $query->where('estado', 'aprobada');
-        } elseif ($filtro === 'rechazadas') {
+        } elseif ($estado === 'rechazada') {
             $query->where('estado', 'rechazada');
-        } elseif ($filtro === 'canceladas') {
+        } elseif ($estado === 'cancelada') {
             $query->whereNotNull('fecha_cancelacion');
         }
 
@@ -52,6 +53,18 @@ class DashboardController extends Controller
 
         if ($request->filled('fecha')) {
             $query->whereDate('fecha_reserva', $request->fecha);
+        }
+
+        // ✅ Búsqueda por RUT
+        if ($request->filled('buscar_rut')) {
+            // Limpiar el RUT de puntos y guiones para búsqueda más flexible
+            $rutBuscar = str_replace(['.', '-', ' '], '', $request->buscar_rut);
+            $query->whereRaw("REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') LIKE ?", ['%' . $rutBuscar . '%']);
+        }
+        
+        // ✅ Búsqueda por Organización
+        if ($request->filled('buscar_organizacion')) {
+            $query->where('nombre_organizacion', 'LIKE', '%' . $request->buscar_organizacion . '%');
         }
 
         // Ordenar y paginar
@@ -103,16 +116,16 @@ class DashboardController extends Controller
             // Construir query con los mismos filtros del dashboard
             $query = Reserva::with(['recinto']);
 
-            // Aplicar filtros
-            $filtro = $request->get('filtro', 'todas');
+            // ✅ CAMBIO: Usar 'estado' en lugar de 'filtro'
+            $estado = $request->get('estado', '');
             
-            if ($filtro === 'pendientes') {
+            if ($estado === 'pendiente') {
                 $query->where('estado', 'pendiente');
-            } elseif ($filtro === 'aprobadas') {
+            } elseif ($estado === 'aprobada') {
                 $query->where('estado', 'aprobada');
-            } elseif ($filtro === 'rechazadas') {
+            } elseif ($estado === 'rechazada') {
                 $query->where('estado', 'rechazada');
-            } elseif ($filtro === 'canceladas') {
+            } elseif ($estado === 'cancelada') {
                 $query->whereNotNull('fecha_cancelacion');
             }
 
@@ -126,6 +139,17 @@ class DashboardController extends Controller
 
             if ($request->filled('fecha')) {
                 $query->whereDate('fecha_reserva', $request->fecha);
+            }
+
+            // ✅ Búsqueda por RUT en exportación
+            if ($request->filled('buscar_rut')) {
+                $rutBuscar = str_replace(['.', '-', ' '], '', $request->buscar_rut);
+                $query->whereRaw("REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') LIKE ?", ['%' . $rutBuscar . '%']);
+            }
+            
+            // ✅ Búsqueda por Organización en exportación
+            if ($request->filled('buscar_organizacion')) {
+                $query->where('nombre_organizacion', 'LIKE', '%' . $request->buscar_organizacion . '%');
             }
 
             $reservas = $query->orderBy('fecha_reserva', 'desc')->get();

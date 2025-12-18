@@ -156,7 +156,7 @@
                         <p class="text-xs text-gray-500 mt-2">Días en que el recinto estará cerrado todo el día</p>
                     </div>
 
-                    <!-- ⚠️ NUEVO: Bloqueos de Horarios por Fecha Específica ⚠️ -->
+                    <!--  NUEVO: Bloqueos de Horarios por Fecha Específica  -->
                     <div class="mt-6">
                         <div class="flex items-center justify-between mb-3">
                             <label class="block text-sm font-medium text-gray-700">
@@ -179,7 +179,7 @@
                             @foreach($rangos as $index => $rango)
                                 <div class="bloqueo-item border border-gray-200 rounded-lg p-4 bg-gray-50" data-index="{{ $index }}">
                                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                        <!-- ⚠️ CAMBIO: Fecha específica en lugar de día de semana ⚠️ -->
+                                        <!--  CAMBIO: Fecha específica en lugar de día de semana  -->
                                         <div>
                                             <label class="block text-xs font-medium text-gray-600 mb-1">📅 Fecha</label>
                                             <input type="date" 
@@ -355,7 +355,7 @@
     </form>
 </div>
 
-<!-- ⚠️ JAVASCRIPT ACTUALIZADO PARA FECHAS ⚠️ -->
+<!--  JAVASCRIPT ACTUALIZADO PARA FECHAS  -->
 <script>
 let bloqueoIndex = {{ count($rangos) }};
 
@@ -367,7 +367,7 @@ function agregarBloqueo() {
         <div class="bloqueo-item border border-gray-200 rounded-lg p-4 bg-gray-50" data-index="${bloqueoIndex}">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">📅 Fecha</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1"> Fecha</label>
                     <input type="date" name="bloqueos[${bloqueoIndex}][fecha]" min="${fechaMinima}" class="w-full text-sm border-gray-300 rounded-lg" required>
                 </div>
                 <div>

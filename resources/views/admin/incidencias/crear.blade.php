@@ -94,6 +94,71 @@
                     @enderror
                 </div>
 
+                <!-- ✅ NUEVA SECCIÓN: Estado del Recinto -->
+                <div class="mb-6">
+                    <label for="estado_recinto" class="block text-sm font-medium text-gray-700 mb-2">
+                        Estado del Recinto <span class="text-red-500">*</span>
+                    </label>
+                    <select name="estado_recinto" id="estado_recinto" required
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('estado_recinto') border-red-500 @enderror">
+                        <option value="">Seleccione un estado</option>
+                        <option value="buen_estado" {{ old('estado_recinto') == 'buen_estado' ? 'selected' : '' }}>
+                            Buen Estado
+                        </option>
+                        <option value="mal_estado" {{ old('estado_recinto') == 'mal_estado' ? 'selected' : '' }}>
+                            Mal Estado
+                        </option>
+                    </select>
+                    @error('estado_recinto')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- ✅ NUEVA SECCIÓN: Cantidad de Personas -->
+                <div class="mb-6">
+                    <label for="cantidad_personas" class="block text-sm font-medium text-gray-700 mb-2">
+                        Cantidad de Personas que Asistieron <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" name="cantidad_personas" id="cantidad_personas" 
+                           value="{{ old('cantidad_personas') }}" min="1" max="500" required
+                           placeholder="Ingrese la cantidad de personas"
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('cantidad_personas') border-red-500 @enderror">
+                    @error('cantidad_personas')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- ✅ NUEVA SECCIÓN: Horas Reales -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Hora de Inicio Real -->
+                    <div>
+                        <label for="hora_inicio_real" class="block text-sm font-medium text-gray-700 mb-2">
+                            Hora Real de Inicio <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" name="hora_inicio_real" id="hora_inicio_real" 
+                               value="{{ old('hora_inicio_real') }}" required
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('hora_inicio_real') border-red-500 @enderror">
+                        @error('hora_inicio_real')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Hora prevista: {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }}</p>
+                    </div>
+
+                    <!-- Hora de Fin Real -->
+                    <div>
+                        <label for="hora_fin_real" class="block text-sm font-medium text-gray-700 mb-2">
+                            Hora Real de Finalización <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" name="hora_fin_real" id="hora_fin_real" 
+                               value="{{ old('hora_fin_real') }}" required
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 @error('hora_fin_real') border-red-500 @enderror">
+                        @error('hora_fin_real')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Hora prevista: {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}</p>
+                    </div>
+                </div>
+
                 <!-- Descripción -->
                 <div class="mb-6">
                     <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
@@ -118,6 +183,7 @@
                             <p class="font-medium mb-1">Información importante</p>
                             <ul class="list-disc list-inside space-y-1 text-xs">
                                 <li>La incidencia será registrada como "Reportada" inicialmente</li>
+                                <li>Se registrará el estado del recinto, cantidad de personas y horarios reales</li>
                                 <li>Puede cambiar el estado posteriormente desde el panel de incidencias</li>
                                 <li>Se recomienda incluir toda la información relevante desde el inicio</li>
                             </ul>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Incidencia;
 use App\Models\Reserva;
-use App\Models\AuditLog; // ← NUEVO
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
 class IncidenciasController extends Controller
@@ -47,21 +47,48 @@ class IncidenciasController extends Controller
                 ->with('error', 'Esta reserva no puede tener incidencias reportadas.');
         }
         
+        // ✅ VALIDACIÓN MEJORADA CON NUEVOS CAMPOS
         $validated = $request->validate([
             'tipo' => 'required|in:problema_posuso,dano,otro',
             'descripcion' => 'required|string|min:10|max:1000',
+            'estado_recinto' => 'required|in:buen_estado,mal_estado',
+            'cantidad_personas' => 'required|integer|min:1|max:500',
+            'hora_inicio_real' => 'required|date_format:H:i',
+            'hora_fin_real' => 'required|date_format:H:i|after:hora_inicio_real',
         ], [
             'tipo.required' => 'Debe seleccionar un tipo de incidencia',
             'tipo.in' => 'El tipo de incidencia seleccionado no es válido',
             'descripcion.required' => 'La descripción de la incidencia es obligatoria',
             'descripcion.min' => 'La descripción debe tener al menos 10 caracteres',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres',
+            'estado_recinto.required' => 'Debe seleccionar el estado del recinto',
+            'estado_recinto.in' => 'El estado del recinto no es válido',
+            'cantidad_personas.required' => 'Debe ingresar la cantidad de personas',
+            'cantidad_personas.integer' => 'La cantidad de personas debe ser un número',
+            'cantidad_personas.min' => 'Debe haber al menos 1 persona',
+            'cantidad_personas.max' => 'No puede haber más de 500 personas',
+            'hora_inicio_real.required' => 'Debe ingresar la hora de inicio',
+            'hora_inicio_real.date_format' => 'La hora de inicio debe tener el formato HH:MM',
+            'hora_fin_real.required' => 'Debe ingresar la hora de finalización',
+            'hora_fin_real.date_format' => 'La hora de finalización debe tener el formato HH:MM',
+            'hora_fin_real.after' => 'La hora de finalización debe ser posterior a la hora de inicio',
         ]);
+        
+        // ✅ CONSTRUIR DESCRIPCIÓN CON INFORMACIÓN ADICIONAL
+        $descripcionCompleta = "REPORTE DE INCIDENCIA\n";
+        $descripcionCompleta .= "======================\n\n";
+        $descripcionCompleta .= "Estado del Recinto: " . ($validated['estado_recinto'] === 'buen_estado' ? 'Buen Estado' : 'Mal Estado') . "\n";
+        $descripcionCompleta .= "Cantidad de Personas: " . $validated['cantidad_personas'] . "\n";
+        $descripcionCompleta .= "Hora Real de Inicio: " . $validated['hora_inicio_real'] . "\n";
+        $descripcionCompleta .= "Hora Real de Finalización: " . $validated['hora_fin_real'] . "\n";
+        $descripcionCompleta .= "\n---\n\n";
+        $descripcionCompleta .= "Descripción de la Incidencia:\n";
+        $descripcionCompleta .= $validated['descripcion'];
         
         $incidencia = Incidencia::create([
             'reserva_id' => $reserva->id,
             'tipo' => $validated['tipo'],
-            'descripcion' => $validated['descripcion'],
+            'descripcion' => $descripcionCompleta,
             'estado' => 'reportada',
         ]);
 
@@ -75,6 +102,10 @@ class IncidenciasController extends Controller
                 'descripcion' => $validated['descripcion'],
                 'estado' => 'reportada',
                 'reserva_id' => $reserva->id,
+                'estado_recinto' => $validated['estado_recinto'],
+                'cantidad_personas' => $validated['cantidad_personas'],
+                'hora_inicio_real' => $validated['hora_inicio_real'],
+                'hora_fin_real' => $validated['hora_fin_real'],
             ]
         );
         
@@ -136,7 +167,7 @@ class IncidenciasController extends Controller
         AuditLog::log(
             action: 'eliminar_incidencia',
             description: "Eliminó la incidencia #{$incidenciaId} (Tipo: {$this->getNombreTipo($tipo)}, Estado: {$this->getNombreEstado($estado)})",
-            auditable: null, // Ya no existe el objeto
+            auditable: null,
             oldValues: [
                 'id' => $incidenciaId,
                 'tipo' => $tipo,

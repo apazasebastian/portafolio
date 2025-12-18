@@ -8,18 +8,12 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.vue',
-        './resources/js/**/*.js',
     ],
 
     theme: {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-            colors: {
-                primary: '#1e3a8a',      // Azul oscuro institucional
-                secondary: '#3b82f6',   // Azul medio
-                accent: '#f59e0b',      // Naranja/amarillo para acentos
             },
         },
     },

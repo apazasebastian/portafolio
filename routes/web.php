@@ -33,9 +33,11 @@ Route::get('/calendario', [CalendarioController::class, 'index'])->name('calenda
 Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('api.disponibilidad');
 
+
+
 /*
 |--------------------------------------------------------------------------
-| Recintos (Protegido - SOLO JEFE DE RECINTOS) 🔐
+| Recintos (Protegido - SOLO JEFE DE RECINTOS) IMPORTANTE! 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', EnsureUserIsJefeRecintos::class])

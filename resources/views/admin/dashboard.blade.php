@@ -313,83 +313,252 @@
         </div>
 
         
-        <!-- Sistema de Pestañas/Filtros Rápidos -->
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'todas'])) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro', 'todas') == 'todas' ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
-                    Todas <span class="text-xs ml-1">({{ $todasReservas }})</span>
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'pendientes'])) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'pendientes' ? 'bg-yellow-500 text-white border-yellow-600' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
-                    Pendientes <span class="text-xs ml-1">({{ $reservasPendientes }})</span>
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'aprobadas'])) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'aprobadas' ? 'bg-green-600 text-white border-green-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
-                    Aprobadas <span class="text-xs ml-1">({{ $contadorAprobadas }})</span>
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'rechazadas'])) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'rechazadas' ? 'bg-red-600 text-white border-red-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
-                    Rechazadas <span class="text-xs ml-1">({{ $contadorRechazadas }})</span>
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->except('filtro'), ['filtro' => 'canceladas'])) }}" 
-                   class="px-4 py-2 rounded-lg font-medium transition-colors border {{ request('filtro') == 'canceladas' ? 'bg-gray-600 text-white border-gray-700' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300' }}">
-                    Canceladas <span class="text-xs ml-1">({{ $contadorCanceladas }})</span>
-                </a>
+
+
+        <!-- Filtros Avanzados Mejorados -->
+<div class="px-6 py-4 bg-white border-b border-gray-200">
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="space-y-4">
+        <input type="hidden" name="filtro" value="{{ request('filtro', 'todas') }}">
+        
+        <!-- Primera fila: Estado, Recinto, Deporte, Fecha -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Estado -->
+            <div>
+                <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">
+                    Estado
+                </label>
+                <select name="estado" id="estado" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente" {{ request('estado') === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                    <option value="aprobada" {{ request('estado') === 'aprobada' ? 'selected' : '' }}>Aprobada</option>
+                    <option value="rechazada" {{ request('estado') === 'rechazada' ? 'selected' : '' }}>Rechazada</option>
+                    <option value="cancelada" {{ request('estado') === 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                </select>
+            </div>
+
+            <!-- Recinto -->
+            <div>
+                <label for="recinto_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    Recinto
+                </label>
+                <select name="recinto_id" id="recinto_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos los recintos</option>
+                    @foreach($recintos as $recinto)
+                        <option value="{{ $recinto->id }}" {{ request('recinto_id') == $recinto->id ? 'selected' : '' }}>
+                            {{ $recinto->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Deporte -->
+            <div>
+                <label for="deporte" class="block text-sm font-medium text-gray-700 mb-1">
+                    Deporte
+                </label>
+                <select name="deporte" id="deporte" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos los deportes</option>
+                    <option value="Fútbol" {{ request('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
+                    <option value="Básquetbol" {{ request('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
+                    <option value="Vóleibol" {{ request('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
+                    <option value="Tenis" {{ request('deporte') == 'Tenis' ? 'selected' : '' }}>Tenis</option>
+                    <option value="Natación" {{ request('deporte') == 'Natación' ? 'selected' : '' }}>Natación</option>
+                </select>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+                <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha
+                </label>
+                <input type="date" name="fecha" id="fecha" value="{{ request('fecha') }}" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
         </div>
 
-        <!-- Filtros Avanzados -->
-        <div class="px-6 py-4 bg-white border-b border-gray-200">
-            <form method="GET" action="{{ route('admin.dashboard') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="hidden" name="filtro" value="{{ request('filtro', 'todas') }}">
-                
-                <div>
-                    <label for="recinto_id" class="block text-sm font-medium text-gray-700 mb-1">
-                        Recinto
-                    </label>
-                    <select name="recinto_id" id="recinto_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">Todos los recintos</option>
-                        @foreach($recintos as $recinto)
-                            <option value="{{ $recinto->id }}" {{ request('recinto_id') == $recinto->id ? 'selected' : '' }}>
-                                {{ $recinto->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+        <!-- Segunda fila: Búsqueda por RUT y Organización -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+            <!-- Búsqueda por RUT CON FORMATEO AUTOMÁTICO Y SOPORTE PARA K -->
+            <div>
+                <label for="buscar_rut" class="block text-sm font-medium text-gray-700 mb-1">
+                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Buscar por RUT
+                </label>
+                <input type="text" name="buscar_rut" id="buscar_rut" 
+                       placeholder="ej: 21.284.335-0" 
+                       value="{{ request('buscar_rut') }}"
+                       maxlength="12"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       title="Solo números y letra K">
+                <p class="text-xs text-gray-500 mt-1">Máximo 9 dígitos (se formatea automáticamente)</p>
+            </div>
 
-                <div>
-                    <label for="deporte" class="block text-sm font-medium text-gray-700 mb-1">
-                        Deporte
-                    </label>
-                    <select name="deporte" id="deporte" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">Todos los deportes</option>
-                        <option value="Fútbol" {{ request('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
-                        <option value="Básquetbol" {{ request('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
-                        <option value="Vóleibol" {{ request('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
-                        <option value="Tenis" {{ request('deporte') == 'Tenis' ? 'selected' : '' }}>Tenis</option>
-                        <option value="Otro" {{ request('deporte') == 'Otro' ? 'selected' : '' }}>Otro</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">
-                        Fecha
-                    </label>
-                    <input type="date" name="fecha" id="fecha" value="{{ request('fecha') }}" 
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <div class="flex items-end gap-2">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition font-medium">
-                        Filtrar
-                    </button>
-                    <a href="{{ route('admin.dashboard') }}" class="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition text-center font-medium">
-                        Limpiar
-                    </a>
-                </div>
-            </form>
+            <!-- Búsqueda por Organización -->
+            <div>
+                <label for="buscar_organizacion" class="block text-sm font-medium text-gray-700 mb-1">
+                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Buscar por Organización
+                </label>
+                <input type="text" name="buscar_organizacion" id="buscar_organizacion" 
+                       placeholder="Ingrese parte del nombre" 
+                       value="{{ request('buscar_organizacion') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
         </div>
+
+        <!-- Tercera fila: Botones de acción -->
+        <div class="flex gap-2 pt-4 border-t border-gray-200">
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                Filtrar
+            </button>
+            <a href="{{ route('admin.dashboard') }}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
+                Limpiar
+            </a>
+        </div>
+
+        <!-- Indicadores de filtros activos -->
+        @if(request()->filled('estado') || request()->filled('recinto_id') || request()->filled('deporte') || request()->filled('fecha') || 
+            request()->filled('buscar_rut') || request()->filled('buscar_organizacion'))
+            <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-200">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2H3V3zm0 3h14v11a1 1 0 01-1 1H4a1 1 0 01-1-1V6z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700">Filtros activos:</span>
+                </div>
+                
+                @if(request('estado'))
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200">
+                         Estado: {{ ucfirst(request('estado')) }}
+                    </span>
+                @endif
+                
+                @if(request('recinto_id'))
+                    @php
+                        $recinto = $recintos->find(request('recinto_id'));
+                    @endphp
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200">
+                         {{ $recinto->nombre ?? 'Recinto' }}
+                    </span>
+                @endif
+                
+                @if(request('deporte'))
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full border border-purple-200">
+                         {{ request('deporte') }}
+                    </span>
+                @endif
+                
+                @if(request('fecha'))
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full border border-orange-200">
+                         {{ \Carbon\Carbon::parse(request('fecha'))->format('d/m/Y') }}
+                    </span>
+                @endif
+                
+                @if(request('buscar_rut'))
+                    <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full border border-red-200">
+                         RUT: {{ request('buscar_rut') }}
+                    </span>
+                @endif
+                
+                @if(request('buscar_organizacion'))
+                    <span class="px-3 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full border border-pink-200">
+                         {{ request('buscar_organizacion') }}
+                    </span>
+                @endif
+            </div>
+        @endif
+    </form>
+</div>
+
+<!-- Script para formatear RUT automáticamente con soporte para K -->
+<script>
+document.getElementById('buscar_rut').addEventListener('input', function(e) {
+    let value = e.target.value;
+    
+    // Convertir K minúscula a mayúscula, y remover todo lo que no sea números o K
+    value = value.toUpperCase().replace(/[^0-9K]/g, '');
+    
+    // La K solo puede estar al final (dígito verificador)
+    // Limitar a máximo 9 caracteres (8 números + 1 K)
+    if (value.length > 9) {
+        value = value.slice(0, 9);
+    }
+    
+    // Verificar que K solo esté al final
+    let lastChar = value.charAt(value.length - 1);
+    if (lastChar === 'K' && value.length > 1) {
+        // Validar que antes de K solo haya números
+        let beforeK = value.slice(0, -1);
+        if (beforeK.match(/^[0-9]{1,8}$/)) {
+            // Es válido
+        } else {
+            // Remover K si hay caracteres inválidos antes
+            value = beforeK;
+        }
+    } else if (value.includes('K') && lastChar !== 'K') {
+        // Si K está en medio, removerla
+        value = value.replace(/K/g, '');
+    }
+    
+    // Formatear: XX.XXX.XXX-X (o XX.XXX.XXX-K)
+    let formatted = '';
+    if (value.length > 0) {
+        if (value.length <= 2) {
+            formatted = value;
+        } else if (value.length <= 5) {
+            formatted = value.slice(0, 2) + '.' + value.slice(2);
+        } else if (value.length <= 8) {
+            formatted = value.slice(0, 2) + '.' + value.slice(2, 5) + '.' + value.slice(5);
+        } else {
+            formatted = value.slice(0, 2) + '.' + value.slice(2, 5) + '.' + value.slice(5, 8) + '-' + value.slice(8);
+        }
+    }
+    
+    e.target.value = formatted;
+});
+
+// Prevenir pegar texto que no sea números o K
+document.getElementById('buscar_rut').addEventListener('paste', function(e) {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    
+    // Convertir a mayúsculas y remover caracteres inválidos
+    let numbers = text.toUpperCase().replace(/[^0-9K]/g, '').slice(0, 9);
+    
+    // Validar que K solo esté al final
+    if (numbers.includes('K')) {
+        if (numbers.charAt(numbers.length - 1) === 'K') {
+            // K está al final, validar
+            let beforeK = numbers.slice(0, -1);
+            if (!beforeK.match(/^[0-9]{1,8}$/)) {
+                numbers = numbers.replace(/K/g, '');
+            }
+        } else {
+            // K está en medio, remover
+            numbers = numbers.replace(/K/g, '');
+        }
+    }
+    
+    let formatted = '';
+    if (numbers.length > 0) {
+        if (numbers.length <= 2) {
+            formatted = numbers;
+        } else if (numbers.length <= 5) {
+            formatted = numbers.slice(0, 2) + '.' + numbers.slice(2);
+        } else if (numbers.length <= 8) {
+            formatted = numbers.slice(0, 2) + '.' + numbers.slice(2, 5) + '.' + numbers.slice(5);
+        } else {
+            formatted = numbers.slice(0, 2) + '.' + numbers.slice(2, 5) + '.' + numbers.slice(5, 8) + '-' + numbers.slice(8);
+        }
+    }
+    
+    this.value = formatted;
+});
+</script>
 
         <!-- Tabla de Reservas -->
         <div class="overflow-x-auto">
