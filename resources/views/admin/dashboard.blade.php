@@ -866,4 +866,200 @@ createApp({
     }
 }).mount('#calendar-app');
 </script>
+<!-- SCRIPT PARA FILTROS EN TIEMPO REAL SIN RECARGAR PÁGINA -->
+<script>
+// ============================================
+// FILTROS AJAX PARA DASHBOARD
+// ============================================
+
+let timeoutBusqueda = null;
+
+// Función para cargar reservas con AJAX
+function cargarReservasDashboard(pagina = 1) {
+    const estado = document.getElementById('estado').value;
+    const recintoId = document.getElementById('recinto_id').value;
+    const deporte = document.getElementById('deporte').value;
+    const fecha = document.getElementById('fecha').value;
+    const buscarRut = document.getElementById('buscar_rut').value;
+    const buscarOrg = document.getElementById('buscar_organizacion').value;
+
+    // Mostrar indicador de carga
+    const tablaContainer = document.querySelector('.overflow-x-auto');
+    if (!document.getElementById('loading-dashboard')) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'loading-dashboard';
+        loadingDiv.className = 'fixed top-4 right-4 z-50 bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-xl p-4';
+        loadingDiv.innerHTML = `
+            <div class="flex items-center">
+                <svg class="animate-spin h-5 w-5 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-blue-700 font-medium">Buscando reservas...</span>
+            </div>
+        `;
+        document.body.appendChild(loadingDiv);
+    }
+    
+    tablaContainer.style.opacity = '0.5';
+
+    // Construir URL con parámetros
+    const params = new URLSearchParams({
+        estado: estado,
+        recinto_id: recintoId,
+        deporte: deporte,
+        fecha: fecha,
+        buscar_rut: buscarRut,
+        buscar_organizacion: buscarOrg,
+        page: pagina,
+        ajax: '1'
+    });
+
+    // Hacer petición AJAX
+    fetch(`{{ route('admin.dashboard') }}?${params.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Ocultar indicador de carga
+        const loadingEl = document.getElementById('loading-dashboard');
+        if (loadingEl) loadingEl.remove();
+        tablaContainer.style.opacity = '1';
+
+        // Actualizar tabla
+        const tbody = document.querySelector('tbody.bg-white.divide-y');
+        if (tbody) {
+            tbody.innerHTML = data.html;
+        }
+        
+        // Actualizar paginación y contador
+        const paginacionContainer = document.querySelector('.px-6.py-4.border-t.border-gray-200.bg-gray-50');
+        if (paginacionContainer) {
+            paginacionContainer.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        Mostrando <span class="font-semibold text-gray-900">${data.desde}</span> 
+                        a <span class="font-semibold text-gray-900">${data.hasta}</span> 
+                        de <span class="font-semibold text-gray-900">${data.total}</span> reservas
+                    </div>
+                    <div>${data.paginacion}</div>
+                </div>
+            `;
+        }
+
+        // Actualizar URL sin recargar
+        const newUrl = `{{ route('admin.dashboard') }}?${params.toString()}`;
+        window.history.pushState({path: newUrl}, '', newUrl);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const loadingEl = document.getElementById('loading-dashboard');
+        if (loadingEl) loadingEl.remove();
+        tablaContainer.style.opacity = '1';
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un problema al cargar las reservas. Por favor, recarga la página.',
+            confirmButtonColor: '#3b82f6'
+        });
+    });
+}
+
+// Esperar a que el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Filtros inmediatos (select y date)
+    const selectEstado = document.getElementById('estado');
+    const selectRecinto = document.getElementById('recinto_id');
+    const selectDeporte = document.getElementById('deporte');
+    const inputFecha = document.getElementById('fecha');
+    
+    if (selectEstado) {
+        selectEstado.addEventListener('change', () => cargarReservasDashboard());
+    }
+    if (selectRecinto) {
+        selectRecinto.addEventListener('change', () => cargarReservasDashboard());
+    }
+    if (selectDeporte) {
+        selectDeporte.addEventListener('change', () => cargarReservasDashboard());
+    }
+    if (inputFecha) {
+        inputFecha.addEventListener('change', () => cargarReservasDashboard());
+    }
+
+    // Búsqueda por RUT con delay
+    const inputRut = document.getElementById('buscar_rut');
+    if (inputRut) {
+        inputRut.addEventListener('input', function() {
+            clearTimeout(timeoutBusqueda);
+            timeoutBusqueda = setTimeout(() => {
+                cargarReservasDashboard();
+            }, 800); // Espera 800ms después de que el usuario deje de escribir
+        });
+    }
+
+    // Búsqueda por Organización con delay
+    const inputOrg = document.getElementById('buscar_organizacion');
+    if (inputOrg) {
+        inputOrg.addEventListener('input', function() {
+            clearTimeout(timeoutBusqueda);
+            timeoutBusqueda = setTimeout(() => {
+                cargarReservasDashboard();
+            }, 600); // Espera 600ms
+        });
+    }
+
+    // Interceptar el submit del formulario para evitar recarga
+    const form = document.querySelector('form[action="{{ route("admin.dashboard") }}"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            cargarReservasDashboard();
+        });
+    }
+
+    // Manejar clics en paginación
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.pagination a') || e.target.closest('.pagination a')) {
+            e.preventDefault();
+            const link = e.target.matches('.pagination a') ? e.target : e.target.closest('.pagination a');
+            const url = new URL(link.href);
+            const page = url.searchParams.get('page');
+            cargarReservasDashboard(page);
+            
+            // Scroll suave al inicio de la tabla
+            const tablaContainer = document.querySelector('.overflow-x-auto');
+            if (tablaContainer) {
+                tablaContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }
+    });
+
+    // Botón Limpiar
+    const btnLimpiarForm = document.querySelector('a[href="{{ route("admin.dashboard") }}"]');
+    if (btnLimpiarForm) {
+        btnLimpiarForm.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Limpiar todos los campos
+            if (selectEstado) selectEstado.value = '';
+            if (selectRecinto) selectRecinto.value = '';
+            if (selectDeporte) selectDeporte.value = '';
+            if (inputFecha) inputFecha.value = '';
+            if (inputRut) inputRut.value = '';
+            if (inputOrg) inputOrg.value = '';
+            
+            // Recargar sin filtros
+            cargarReservasDashboard();
+        });
+    }
+});
+</script>
 @endsection

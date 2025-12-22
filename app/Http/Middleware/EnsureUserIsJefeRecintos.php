@@ -23,7 +23,7 @@ class EnsureUserIsJefeRecintos
         // Verificar que el rol sea jefe_recintos
         if (auth()->user()->role !== 'jefe_recintos') {
             // Redirigir con mensaje de error
-            return redirect()->back()->with('error', 'No tienes permisos para realizar esta acción. Solo el Jefe de Recintos puede aprobar o rechazar reservas.');
+            return redirect()->back()->with('error', 'No tienes permisos para realizar esta acción. Solo el Jefe de Recintos.');
         }
 
         return $next($request);

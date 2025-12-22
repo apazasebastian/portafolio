@@ -279,15 +279,16 @@
                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Panel Admin
                         </a>
-                        <a href="{{ route('admin.recintos.index') }}" 
-                           class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Recintos
-                        </a>
-                        <a href="{{ route('admin.eventos.index') }}" 
-                           class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Eventos
-                        </a>
-
+                        @if(auth()->user()->role !== 'encargado_recinto')
+                            <a href="{{ route('admin.recintos.index') }}" 
+                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                Recintos
+                            </a>
+                            <a href="{{ route('admin.eventos.index') }}" 
+                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                Eventos
+                            </a>
+                        @endif
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
                             @csrf
@@ -343,14 +344,16 @@
                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Panel Admin
                         </a>
-                        <a href="{{ route('admin.recintos.index') }}" 
-                           class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Recintos
-                        </a>
-                        <a href="{{ route('admin.eventos.index') }}" 
-                           class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Eventos
-                        </a>
+                        @if(auth()->user()->role !== 'encargado_recinto')
+                            <a href="{{ route('admin.recintos.index') }}" 
+                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                Recintos
+                            </a>
+                            <a href="{{ route('admin.eventos.index') }}" 
+                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                                Eventos
+                            </a>
+                        @endif
                         <a href="{{ route('admin.reservas.index') }}" 
                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.reservas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Reservas

@@ -122,16 +122,21 @@
                 </dl>
             </div>
 
-            @if($reserva->estado === 'pendiente')
+            <!-- ✅ BOTONES SOLO PARA JEFE_RECINTOS (NO para encargado_recinto) -->
+            @if($reserva->estado === 'pendiente' && auth()->user()->role !== 'encargado_recinto')
             <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 
-                <button type="button" onclick="document.getElementById('form-rechazo').classList.toggle('hidden')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
+                <button type="button" 
+                        onclick="document.getElementById('form-rechazo').classList.toggle('hidden')" 
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
                     Rechazar
                 </button>
 
                 <form action="{{ route('admin.reservas.aprobar', $reserva) }}" method="POST">
                     @csrf
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition" onclick="return confirm('¿Estás seguro de aprobar esta reserva?')">
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition" 
+                            onclick="return confirm('¿Estás seguro de aprobar esta reserva?')">
                         Aprobar Reserva
                     </button>
                 </form>
@@ -140,10 +145,23 @@
             <div id="form-rechazo" class="hidden bg-gray-100 px-6 py-4 border-t border-gray-200">
                 <form action="{{ route('admin.reservas.rechazar', $reserva) }}" method="POST">
                     @csrf
-                    <label for="motivo_rechazo" class="block text-sm font-medium text-gray-700 mb-2">Motivo del rechazo:</label>
-                    <textarea name="motivo_rechazo" id="motivo_rechazo" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" required placeholder="Explique por qué se rechaza la solicitud..."></textarea>
-                    <div class="mt-3 flex justify-end">
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
+                    <label for="motivo_rechazo" class="block text-sm font-medium text-gray-700 mb-2">
+                        Motivo del rechazo:
+                    </label>
+                    <textarea name="motivo_rechazo" 
+                              id="motivo_rechazo" 
+                              rows="3" 
+                              class="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500" 
+                              required 
+                              placeholder="Explique por qué se rechaza la solicitud..."></textarea>
+                    <div class="mt-3 flex justify-end space-x-2">
+                        <button type="button" 
+                                onclick="document.getElementById('form-rechazo').classList.add('hidden')"
+                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
                             Confirmar Rechazo
                         </button>
                     </div>
