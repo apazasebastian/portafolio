@@ -14,7 +14,7 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * ESTO NO AUN FALTA, NO ESTA ENLAZADO A NADA, SIRVE PARA LA SEGUNDA ETAPA, CREAR EDITAR Y ELIMINAR CUENTA
+     * ESTO ES SOLO DE PRUEBA, NO CONECTADO A NADA, SIRVE PARA LA SEGUNDA ETAPA, CREAR EDITAR Y ELIMINAR CUENTA A TRAVES DE LA WEB
      */
     public function edit(Request $request): Response
     {
