@@ -94,7 +94,7 @@
                     @enderror
                 </div>
 
-                <!-- ✅ NUEVO: Asistieron -->
+                <!--  NUEVO: Asistieron -->
                 <div class="mb-6">
                     <label for="asistieron" class="block text-sm font-medium text-gray-700 mb-2">
                         ¿Asistieron? <span class="text-red-500">*</span>
@@ -114,7 +114,7 @@
                     @enderror
                 </div>
 
-                <!-- ✅ CAMPOS CONDICIONALES: Mostrar si asistieron = SÍ -->
+                <!--  CAMPOS CONDICIONALES: Mostrar si asistieron = SÍ -->
                 <div id="camposAsistieron" class="space-y-6 hidden mb-6">
                     <!-- Estado del Recinto -->
                     <div>
@@ -364,7 +364,7 @@
 </div>
 
 <script>
-    // ✅ JAVASCRIPT: Mostrar/ocultar campos según "Asistieron"
+    //  JAVASCRIPT: Mostrar/ocultar campos según "Asistieron"
     document.getElementById('asistieron').addEventListener('change', function() {
         const camposAsistieron = document.getElementById('camposAsistieron');
         const fieldsSi = ['estado_recinto', 'cantidad_personas', 'hora_inicio_real', 'hora_fin_real'];

@@ -107,7 +107,7 @@ class AuditoriaController extends Controller
                 'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
             ];
 
-            // ⚠️ REGISTRAR EXPORTACIÓN EN AUDITORÍA ⚠️
+            //  REGISTRAR EXPORTACIÓN EN AUDITORÍA 
             $filtrosAplicados = [];
             if ($request->filled('user_id')) {
                 $usuario = User::find($request->user_id);

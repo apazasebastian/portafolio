@@ -69,7 +69,7 @@ class RecintoController extends Controller
             'fin' => $validated['horario_fin']
         ];
 
-        // ⚠️ PREPARAR ESTRUCTURA CON FECHAS ESPECÍFICAS ⚠️
+        //  PREPARAR ESTRUCTURA CON FECHAS ESPECÍFICAS 
         $diasCerrados = [
             'dias_completos' => $validated['dias_cerrados_completos'] ?? [],
             'rangos_bloqueados' => []
@@ -80,7 +80,7 @@ class RecintoController extends Controller
             foreach ($request->bloqueos as $bloqueo) {
                 if (isset($bloqueo['fecha']) && isset($bloqueo['hora_inicio']) && isset($bloqueo['hora_fin'])) {
                     $diasCerrados['rangos_bloqueados'][] = [
-                        'fecha' => $bloqueo['fecha'], // ⚠️ FECHA ESPECÍFICA ⚠️
+                        'fecha' => $bloqueo['fecha'], //  FECHA ESPECÍFICA 
                         'hora_inicio' => $bloqueo['hora_inicio'],
                         'hora_fin' => $bloqueo['hora_fin'],
                         'motivo' => $bloqueo['motivo'] ?? ''
@@ -142,7 +142,7 @@ class RecintoController extends Controller
     }
 
     /**
-     * ⚠️ ACTUALIZADO: Actualizar recinto con fechas específicas ⚠️
+     *  ACTUALIZADO: Actualizar recinto con fechas específicas 
      */
     public function update(Request $request, Recinto $recinto)
     {
