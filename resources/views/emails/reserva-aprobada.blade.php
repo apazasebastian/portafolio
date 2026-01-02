@@ -76,7 +76,7 @@
             </table>
         </div>
 
-        <!--  NUEVA SECCIÓN: Información del Encargado del Recinto -->
+        <!-- ✅ NUEVA SECCIÓN: Información del Encargado del Recinto -->
         <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-top: 30px;">
              Encargado del Recinto
         </h2>
@@ -91,9 +91,9 @@
                         @php
                             $encargados = [
                                 1 => ['nombre' => 'Carlos Pérez', 'email' => 'carlosapazac33@gmail.com', 'telefono' => '+56 9 2245 8901'],
-                                2 => ['nombre' => 'María García', 'email' => 'gomezchurabrayan@gmail.com', 'telefono' => '+56 9 3156 7234'],
+                                2 => ['nombre' => 'María García', 'email' => 'maria.garcia@munirica.cl', 'telefono' => '+56 9 3156 7234'],
                                 3 => ['nombre' => 'Roberto Flores', 'email' => 'roberto.flores@munirica.cl', 'telefono' => '+56 9 4567 1289'],
-                                4 => ['nombre' => 'Andrea Castillo', 'email' => 'apazasebastian@gmail.com', 'telefono' => '+56 9 8765 4321'],
+                                4 => ['nombre' => 'Andrea Castillo', 'email' => 'andrea.castillo@munirica.cl', 'telefono' => '+56 9 8765 4321'],
                             ];
                             
                             $encargado = $encargados[$reserva->recinto_id] ?? null;

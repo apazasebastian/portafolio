@@ -89,7 +89,7 @@ class IncidenciasController extends Controller
             $validated = array_merge($baseValidated, $additionalValidated);
         }
         
-        //  CONSTRUIR DESCRIPCIÓN COMPLETA
+        // ✅ CONSTRUIR DESCRIPCIÓN COMPLETA
         $descripcionCompleta = "REPORTE DE INCIDENCIA\n";
         $descripcionCompleta .= "======================\n\n";
         

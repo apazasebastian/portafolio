@@ -17,15 +17,15 @@ class ReservaController extends Controller
         // Calcular fecha máxima (60 días desde hoy)
         $fechaMaxima = Carbon::today()->addDays(60)->format('Y-m-d');
         
-        //  NO VERIFICAR AQUÍ - Solo pasar variable
+        // ✅ NO VERIFICAR AQUÍ - Solo pasar variable
         $restriccion = ['restringido' => false];
         
         return view('reservas.create', compact('recinto', 'fechaMaxima', 'restriccion'));
     }
     
     /**
-     *  NUEVA FUNCIÓN: Verificar si hay restricción por cancelaciones
-     * Calcula la fecha de desbloqueo desde la PRIMERA cancelación del mes
+     * ✅ NUEVA FUNCIÓN: Verificar si hay restricción por cancelaciones
+     * Ahora verifica por NOMBRE DE ORGANIZACIÓN (en cualquier recinto)
      */
     private function verificarRestriccionCancelaciones($nombreOrganizacion)
     {
@@ -33,7 +33,7 @@ class ReservaController extends Controller
         $mesActual = now()->month;
         $anoActual = now()->year;
         
-        // Buscar por nombre_organizacion en lugar de recinto_id
+        // ✅ CAMBIO: Buscar por nombre_organizacion en lugar de recinto_id
         $cancelacionesEsteMes = Reserva::where('nombre_organizacion', $nombreOrganizacion)
             ->where('estado', 'aprobada')
             ->whereNotNull('fecha_cancelacion')
@@ -42,25 +42,12 @@ class ReservaController extends Controller
             ->count();
         
         if ($cancelacionesEsteMes >= 3) {
-            // OBTENER LA FECHA DE LA PRIMERA CANCELACIÓN
-            $primeraCancel = Reserva::where('nombre_organizacion', $nombreOrganizacion)
-                ->where('estado', 'aprobada')
-                ->whereNotNull('fecha_cancelacion')
-                ->whereMonth('fecha_cancelacion', $mesActual)
-                ->whereYear('fecha_cancelacion', $anoActual)
-                ->orderBy('fecha_cancelacion', 'asc')
-                ->first();
-            
-            // ✅ CALCULAR DESDE LA PRIMERA CANCELACIÓN + 1 MES
-            $fechaDesbloqueo = $primeraCancel ? 
-                Carbon::parse($primeraCancel->fecha_cancelacion)->addMonth() : 
-                now()->addMonth();
-            
+            $proximoMes = Carbon::now()->addMonth();
             return [
                 'restringido' => true,
                 'cancelaciones' => $cancelacionesEsteMes,
-                'proximoMes' => $fechaDesbloqueo->format('F'),
-                'fechaDesbloqueo' => $fechaDesbloqueo->format('d/m/Y')
+                'proximoMes' => $proximoMes->format('F'),
+                'fechaDesbloqueo' => $proximoMes->format('d/m/Y')
             ];
         }
         
@@ -181,7 +168,7 @@ class ReservaController extends Controller
             'acepta_reglamento.accepted' => 'Debe aceptar el reglamento para continuar.',
         ]);
         
-        // VERIFICAR RESTRICCIÓN USANDO EL NOMBRE DE LA ORGANIZACIÓN
+        // ✅ VERIFICAR RESTRICCIÓN USANDO EL NOMBRE DE LA ORGANIZACIÓN
         $restriccion = $this->verificarRestriccionCancelaciones($validated['nombre_organizacion']);
         
         if ($restriccion['restringido']) {

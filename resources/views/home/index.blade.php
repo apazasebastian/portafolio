@@ -190,7 +190,7 @@
             </div>
         </div>
 
-        <!--  CALENDARIO SEMANAL MEJORADO (Derecha)  -->
+        <!-- ⚠️ CALENDARIO SEMANAL MEJORADO (Derecha) ⚠️ -->
         <div>
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-t-lg">
                 <h2 class="text-xl font-bold flex items-center">

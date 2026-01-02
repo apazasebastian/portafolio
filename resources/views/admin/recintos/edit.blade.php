@@ -181,7 +181,7 @@
                                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                         <!--  CAMBIO: Fecha específica en lugar de día de semana  -->
                                         <div>
-                                            <label class="block text-xs font-medium text-gray-600 mb-1"> Fecha</label>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">📅 Fecha</label>
                                             <input type="date" 
                                                    name="bloqueos[{{ $index }}][fecha]" 
                                                    value="{{ $rango['fecha'] ?? '' }}"

@@ -122,7 +122,7 @@
                 </dl>
             </div>
 
-            <!--  BOTONES SOLO PARA JEFE_RECINTOS (NO para encargado_recinto) -->
+            <!-- ✅ BOTONES SOLO PARA JEFE_RECINTOS (NO para encargado_recinto) -->
             @if($reserva->estado === 'pendiente' && auth()->user()->role !== 'encargado_recinto')
             <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 

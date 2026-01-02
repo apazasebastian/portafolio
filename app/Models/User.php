@@ -9,50 +9,39 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    // Usa el trait HasFactory para crear usuarios de prueba con factories
-    // Usa el trait Notifiable para enviar notificaciones (emails, SMS, etc.)
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * Los atributos que se pueden asignar masivamente.
-     * Esto significa que puedo hacer: User::create(['name' => '...', 'email' => '...'])
-     * Sin estos, Laravel rechazaría la asignación por seguridad
+     * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',        // Nombre del usuario
-        'email',       // Email del usuario
-        'password',    // Contraseña del usuario
-        'role',        // Rol del usuario (jefe_recintos, encargado_recinto, etc)
+        'name',
+        'email',
+        'password',
     ];
 
     /**
-     * Los atributos que deben ocultarse en la serialización.
-     * Cuando conviertes el usuario a JSON, estos campos NO aparecen
-     * (por seguridad, para no exponer la contraseña en respuestas HTTP)
+     * The attributes that should be hidden for serialization.
      *
      * @var list<string>
      */
     protected $hidden = [
-        'password',          // Ocultar la contraseña
-        'remember_token',    // Token de "recuérdame" en cookies
+        'password',
+        'remember_token',
     ];
 
     /**
-     * Obtener los atributos que deben ser convertidos.
-     * Define cómo Laravel debe procesar ciertos campos
+     * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
-            // Convertir 'email_verified_at' a objeto Carbon (fecha y hora)
             'email_verified_at' => 'datetime',
-            
-            // Convertir 'password' automáticamente a hash bcrypt
-            // Cuando asignas una contraseña, Laravel la encripta automáticamente
             'password' => 'hashed',
         ];
     }
