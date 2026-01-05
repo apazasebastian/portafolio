@@ -19,7 +19,7 @@ Este sistema permite a organizaciones deportivas y ciudadanos solicitar reservas
 -  **Auditoría Completa**: Trazabilidad total de todas las acciones administrativas
 -  **Gestión de Eventos**: Publicación de noticias y eventos deportivos
 
-## 🛠️ Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 ### Backend
 - **Framework**: Laravel 11.x
