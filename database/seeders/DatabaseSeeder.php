@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
         // Aquí llamas a tus seeders
         $this->call([
             UserSeeder::class,
+            RecintoSeeder::class,  // ← Agregar esta línea
             EventoSeeder::class,
         ]);
     }
