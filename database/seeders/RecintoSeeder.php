@@ -49,7 +49,13 @@ class RecintoSeeder extends Seeder
         ];
 
         foreach ($recintos as $recinto) {
-            Recinto::create($recinto);
+            // Cambiamos create() por firstOrCreate()
+            // El primer parámetro es lo que busca (el nombre único)
+            // El segundo parámetro son los demás datos si necesita crear
+            Recinto::firstOrCreate(
+                ['nombre' => $recinto['nombre']], // Busca por nombre
+                $recinto // Si no existe, crea con todos estos datos
+            );
         }
 
         $this->command->info('Recintos creados exitosamente');

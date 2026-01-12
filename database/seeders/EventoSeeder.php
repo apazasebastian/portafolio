@@ -54,7 +54,12 @@ class EventoSeeder extends Seeder
         ];
 
         foreach ($eventos as $evento) {
-            Evento::create($evento);
+            // Cambiamos create() por firstOrCreate()
+            // Busca por título (único para cada evento)
+            Evento::firstOrCreate(
+                ['titulo' => $evento['titulo']], // Busca por título
+                $evento // Si no existe, crea con todos estos datos
+            );
         }
 
         $this->command->info('Eventos creados exitosamente');
