@@ -51,9 +51,6 @@ EXPOSE 80
 CMD php artisan storage:link && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
     touch storage/logs/laravel.log && \
     chmod 666 storage/logs/laravel.log && \
     tail -f storage/logs/laravel.log & \
