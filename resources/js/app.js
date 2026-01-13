@@ -26,4 +26,15 @@ createInertiaApp({
     },
 });
 
-import './formulario-reserva.js';
+import { initRegionesyComunas, initFormatoRUT } from './regiones-comunas.js';
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initRegionesyComunas();
+        initFormatoRUT();
+    });
+} else {
+    initRegionesyComunas();
+    initFormatoRUT();
+}
