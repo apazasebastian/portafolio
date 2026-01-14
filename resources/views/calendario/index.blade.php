@@ -371,8 +371,9 @@ function verDisponibilidadRecinto(recintoId, recintoNombre) {
     document.getElementById('modalContent').classList.add('hidden');
     document.getElementById('modalError').classList.add('hidden');
 
-    // Hacer petición AJAX
-    fetch(`/api/disponibilidad?recinto_id=${recintoId}&fecha=${fechaSeleccionadaGlobal}`, {
+    // Hacer petición AJAX - usar protocolo correcto (https en producción)
+    const apiUrl = `${window.location.protocol}//${window.location.host}/api/disponibilidad?recinto_id=${recintoId}&fecha=${fechaSeleccionadaGlobal}`;
+    fetch(apiUrl, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
