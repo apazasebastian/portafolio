@@ -25,7 +25,7 @@
             ? $recinto->dias_cerrados 
             : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
         
-        // ⚠️ PROCESAR NUEVA ESTRUCTURA CON FECHAS ESPECÍFICAS ⚠️
+        //  PROCESAR NUEVA ESTRUCTURA CON FECHAS ESPECÍFICAS 
         $diasCompletosArray = [];
         $rangosBloqueados = [];
         
@@ -74,7 +74,7 @@
                             </li>
                         @endforeach
                         
-                        {{-- ⚠️ BLOQUEOS CON FECHAS ESPECÍFICAS ⚠️ --}}
+                        {{--  BLOQUEOS CON FECHAS ESPECÍFICAS  --}}
                         @foreach($rangosBloqueados as $bloqueo)
                             <li class="flex items-start">
                                 <span class="text-orange-500 mr-1">•</span>
@@ -372,7 +372,7 @@ function verDisponibilidadRecinto(recintoId, recintoNombre) {
     document.getElementById('modalError').classList.add('hidden');
 
     // Hacer petición AJAX
-    fetch(`/api/disponibilidad?recinto_id=${recintoId}&fecha=${fechaSeleccionadaGlobal}`, {
+    fetch(`{{ config('app.url') }}/api/disponibilidad?recinto_id=${recintoId}&fecha=${fechaSeleccionadaGlobal}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
@@ -386,7 +386,7 @@ function verDisponibilidadRecinto(recintoId, recintoNombre) {
     })
     .then(data => {
         console.log('Respuesta API:', data);
-        // ⚠️ CORREGIDO: Pasar los 3 parámetros correctamente ⚠️
+        //  CORREGIDO: Pasar los 3 parámetros correctamente 
         mostrarDisponibilidad(data, recintoId, fechaSeleccionadaGlobal);
     })
     .catch(error => {
@@ -412,7 +412,7 @@ function mostrarDisponibilidad(data, recintoId, fecha) {
     const estadoDiv = document.getElementById('estadoGeneral');
     estadoDiv.innerHTML = ''; // Limpiar contenido previo
     
-    // ⚠️ Mostrar bloqueos de horarios si existen ⚠️
+    //  Mostrar bloqueos de horarios si existen 
     if (data.bloqueos_dia && data.bloqueos_dia.length > 0) {
         let bloqueosList = data.bloqueos_dia.map(b => 
             `<li class="text-orange-700">• ${b.hora_inicio} - ${b.hora_fin} ${b.motivo ? '(' + b.motivo + ')' : ''}</li>`
@@ -482,7 +482,7 @@ function mostrarDisponibilidad(data, recintoId, fecha) {
     franjasDiv.innerHTML = data.horarios.map(franja => {
         let bgColor, textColor, icon, estadoHtml;
         
-        // ⚠️ Bloqueado > Cerrado > Ocupado > Disponible ⚠️
+        //  Bloqueado > Cerrado > Ocupado > Disponible 
         if (franja.bloqueada) {
             bgColor = 'bg-orange-50 border-orange-200';
             textColor = 'text-orange-700';
@@ -535,7 +535,7 @@ function mostrarDisponibilidad(data, recintoId, fecha) {
         `;
     }).join('');
 
-    // ⚠️ CORREGIDO: Usar el parámetro fecha en lugar de fechaOriginal ⚠️
+    //  CORREGIDO: Usar el parámetro fecha en lugar de fechaOriginal 
     document.getElementById('btnReservar').href = `/reservas/crear/${recintoId}?fecha=${fecha}`;
 }
 
