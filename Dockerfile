@@ -49,6 +49,10 @@ EXPOSE 80
 
 # Comando de inicio
 CMD php artisan storage:link && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan view:clear && \
+    php artisan route:clear && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
     touch storage/logs/laravel.log && \
