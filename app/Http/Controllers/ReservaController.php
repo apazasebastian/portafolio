@@ -17,24 +17,24 @@ class ReservaController extends Controller
         // Calcular fecha máxima (60 días desde hoy)
         $fechaMaxima = Carbon::today()->addDays(60)->format('Y-m-d');
         
-        // ✅ NO VERIFICAR AQUÍ - Solo pasar variable
+        //  NO VERIFICAR AQUÍ - Solo pasar variable
         $restriccion = ['restringido' => false];
         
         return view('reservas.create', compact('recinto', 'fechaMaxima', 'restriccion'));
     }
     
     /**
-     * ✅ NUEVA FUNCIÓN: Verificar si hay restricción por cancelaciones
-     * Ahora verifica por NOMBRE DE ORGANIZACIÓN (en cualquier recinto)
+     *  NUEVA FUNCIÓN: Verificar si hay restricción por cancelaciones
+     * Ahora verifica por RUT DEL REPRESENTANTE (en cualquier recinto)
      */
-    private function verificarRestriccionCancelaciones($nombreOrganizacion)
+    private function verificarRestriccionCancelaciones($rutRepresentante)
     {
-        // Obtener todas las reservas de esa organización que fueron aprobadas y luego canceladas
+        // Obtener todas las reservas de ese representante que fueron aprobadas y luego canceladas
         $mesActual = now()->month;
         $anoActual = now()->year;
         
-        // ✅ CAMBIO: Buscar por nombre_organizacion en lugar de recinto_id
-        $cancelacionesEsteMes = Reserva::where('nombre_organizacion', $nombreOrganizacion)
+        //  CAMBIO: Buscar por RUT del representante en lugar de nombre_organizacion
+        $cancelacionesEsteMes = Reserva::where('rut', $rutRepresentante)
             ->where('estado', 'aprobada')
             ->whereNotNull('fecha_cancelacion')
             ->whereMonth('fecha_cancelacion', $mesActual)
@@ -168,13 +168,13 @@ class ReservaController extends Controller
             'acepta_reglamento.accepted' => 'Debe aceptar el reglamento para continuar.',
         ]);
         
-        // ✅ VERIFICAR RESTRICCIÓN USANDO EL NOMBRE DE LA ORGANIZACIÓN
-        $restriccion = $this->verificarRestriccionCancelaciones($validated['nombre_organizacion']);
+        //  VERIFICAR RESTRICCIÓN USANDO EL RUT DEL REPRESENTANTE
+        $restriccion = $this->verificarRestriccionCancelaciones($validated['rut']);
         
         if ($restriccion['restringido']) {
             return back()
                 ->withInput()
-                ->withErrors(['restriccion' => 'Su organización ha alcanzado el límite de 3 cancelaciones permitidas en este mes. Podrá hacer nuevas reservas a partir del ' . $restriccion['fechaDesbloqueo'] . '.']);
+                ->withErrors(['restriccion' => 'Ha alcanzado el límite de 3 cancelaciones permitidas en este mes para este RUT. Podrá hacer nuevas reservas a partir del ' . $restriccion['fechaDesbloqueo'] . '.']);
         }
         
         // Verificar disponibilidad

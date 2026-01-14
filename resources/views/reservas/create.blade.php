@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <!-- ✅ MOSTRAR ERROR DE RESTRICCIÓN SI VIENE DEL SUBMIT -->
+        <!--  MOSTRAR ERROR DE RESTRICCIÓN SI VIENE DEL SUBMIT -->
         @if($errors->has('restriccion'))
             <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-6 shadow-lg">
                 <div class="flex items-start">
@@ -60,7 +60,7 @@
             </div>
 
         @else
-            <!-- ✅ FORMULARIO NORMAL - SIN RESTRICCIÓN AL ENTRAR -->
+            <!--  FORMULARIO NORMAL - SIN RESTRICCIÓN AL ENTRAR -->
             
             <!-- Info del Recinto -->
             @php
