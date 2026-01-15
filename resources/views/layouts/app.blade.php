@@ -238,7 +238,7 @@
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('home') }}" class="flex items-center space-x-3">
                         <!-- Logo de la Municipalidad -->
-                        <img src="{{ asset('storage/logos/logo-header.png') }}" 
+                        <img src="{{ asset('images/logos/logo-header.png') }}" 
                              alt="Municipalidad de Arica" 
                              class="h-16 w-auto"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -431,7 +431,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Columna 1: Logo y Info Municipal -->
                 <div class="md:col-span-1">
-                    <img src="{{ asset('storage/logos/logo-footer.png') }}" 
+                    <img src="{{ asset('images/logos/logo-footer.png') }}" 
                          alt="Municipalidad de Arica" 
                          class="h-20 w-auto mb-4 brightness-0 invert"
                          onerror="this.style.display='none'">
