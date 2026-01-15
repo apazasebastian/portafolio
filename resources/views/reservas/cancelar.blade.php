@@ -8,11 +8,6 @@
         
         <!-- Header -->
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-4">
-                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Cancelar Reserva</h1>
             <p class="text-gray-600">Ingresa el código de cancelación que recibiste por correo electrónico</p>
         </div>

@@ -38,6 +38,11 @@ Route::get('/reglamentos', function () {
     return view('reglamentos.index');
 })->name('reglamentos');
 
+// Página Segunda Etapa
+Route::get('/segunda-etapa', function () {
+    return view('segunda-etapa.index');
+})->name('segunda-etapa');
+
 
 
 /*

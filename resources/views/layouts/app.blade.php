@@ -285,6 +285,13 @@
                         </svg>
                         Cancelar Reserva
                     </a>
+                    <a href="{{ route('segunda-etapa') }}" 
+                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r  to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
+                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        Segunda Etapa
+                    </a>
                     
                     
                     @auth
@@ -365,6 +372,13 @@
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                         </svg>
                         Cancelar Reserva
+                    </a>
+                    <a href="{{ route('segunda-etapa') }}" 
+                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700' }}">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                        Segunda Etapa
                     </a>
                     
                     @auth
