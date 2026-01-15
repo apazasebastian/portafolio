@@ -414,10 +414,10 @@
                     <li>Total de solicitudes procesadas: <strong>{{ $reservasAprobadas + $reservasRechazadas }}</strong></li>
                     <li>Solicitudes pendientes: <strong>{{ $reservasPendientes }}</strong> ({{ $totalReservas > 0 ? round(($reservasPendientes / $totalReservas) * 100, 1) : 0 }}%)</li>
                     @if($tasaRechazo > 30)
-                        <li class="text-red-700 font-semibold">⚠️ Alta tasa de rechazo - revisar criterios de aprobación</li>
+                        <li class="text-red-700 font-semibold"> Alta tasa de rechazo - revisar criterios de aprobación</li>
                     @endif
                     @if($reservasPendientes > ($totalReservas * 0.3))
-                        <li class="text-yellow-700 font-semibold">⚠️ Muchas solicitudes pendientes - agilizar proceso</li>
+                        <li class="text-yellow-700 font-semibold"> Muchas solicitudes pendientes - agilizar proceso</li>
                     @endif
                 </ul>
             </div>

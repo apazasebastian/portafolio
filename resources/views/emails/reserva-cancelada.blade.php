@@ -5,125 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserva Cancelada</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f5f5f5;">
     
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6; padding: 20px 0;">
-        <tr>
-            <td align="center">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    
-                    <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #4b5563 0%, #1f2937 100%); padding: 40px 20px;">
-                            <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.1); border-radius: 50%; line-height: 60px; font-size: 30px; color: white; margin-bottom: 15px;">
-                                ✕
-                            </div>
-                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">Reserva Cancelada</h1>
-                            <p style="color: #e5e7eb; margin: 5px 0 0; font-size: 16px;">Confirmación de anulación</p>
-                        </td>
-                    </tr>
+    <!-- Header con logo institucional -->
+    <div style="background-color: #ffffff; padding: 20px 30px; text-align: center; border-bottom: 4px solid #1a1a8e;">
+        <img src="{{ $message->embed(public_path('images/logo-municipalidad.png')) }}" alt="Municipalidad de Arica" style="max-height: 60px; width: auto;">
+    </div>
+    
+    <!-- Contenido principal -->
+    <div style="background-color: #ffffff; padding: 30px;">
+        
+        <!-- Banner de estado -->
+        <div style="background-color: #1a1a8e; color: white; padding: 20px; text-align: center; margin-bottom: 25px;">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0.5px;">
+                RESERVA CANCELADA
+            </h1>
+        </div>
+        
+        <p style="font-size: 15px; color: #444; margin-bottom: 20px;">
+            Estimado/a <strong>{{ $reserva->representante_nombre ?? $reserva->nombre_organizacion }}</strong>,
+        </p>
+        
+        <p style="font-size: 15px; color: #444; margin-bottom: 25px;">
+            Le informamos que su reserva ha sido <strong>cancelada</strong> exitosamente.
+        </p>
 
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">
-                                Estimado/a <strong>{{ $reserva->representante_nombre }}</strong>,
-                            </p>
-                            
-                            <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
-                                Te informamos que la reserva solicitada ha sido cancelada exitosamente. A continuación encontrarás los detalles:
-                            </p>
+        <!-- Detalles de la Reserva Cancelada -->
+        <div style="background-color: #f8f9fa; border-left: 4px solid #1a1a8e; padding: 20px; margin: 20px 0;">
+            <h2 style="color: #374151; margin: 0 0 15px 0; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                Detalles de la Reserva
+            </h2>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr>
+                    <td style="padding: 8px 0; color: #666; width: 40%;">Recinto:</td>
+                    <td style="padding: 8px 0; color: #333; font-weight: 500;">{{ $reserva->recinto->nombre }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666;">Fecha del evento:</td>
+                    <td style="padding: 8px 0; color: #333; font-weight: 500;">{{ $reserva->fecha_reserva->format('d/m/Y') }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666;">Horario:</td>
+                    <td style="padding: 8px 0; color: #333; font-weight: 500;">
+                        {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
+                        {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666;">Organización:</td>
+                    <td style="padding: 8px 0; color: #333; font-weight: 500;">{{ $reserva->nombre_organizacion }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #dc2626;">Cancelada el:</td>
+                    <td style="padding: 8px 0; color: #dc2626; font-weight: 500;">
+                        {{ $reserva->fecha_cancelacion ? $reserva->fecha_cancelacion->timezone('America/Santiago')->format('d/m/Y H:i') : now()->timezone('America/Santiago')->format('d/m/Y H:i') }}
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                            
-                                            <tr>
-                                                <td width="35%" style="padding: 8px 0; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                     Recinto:
-                                                </td>
-                                                <td width="65%" style="padding: 8px 0; color: #111827; font-weight: 500; font-size: 14px;">
-                                                    {{ $reserva->recinto->nombre }}
-                                                </td>
-                                            </tr>
-                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+        @if($reserva->motivo_cancelacion)
+        <!-- Motivo de Cancelación -->
+        <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0;">
+            <h2 style="color: #92400e; margin: 0 0 10px 0; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                Motivo de Cancelación
+            </h2>
+            <p style="color: #b45309; margin: 0; font-size: 14px;">
+                {{ $reserva->motivo_cancelacion }}
+            </p>
+        </div>
+        @endif
 
-                                            <tr>
-                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                     Fecha del Evento:
-                                                </td>
-                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
-                                                    {{ $reserva->fecha_reserva->format('d/m/Y') }}
-                                                </td>
-                                            </tr>
-                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+        <!-- Información -->
+        <div style="background-color: #eff6ff; border-left: 4px solid #1a1a8e; padding: 15px 20px; margin: 20px 0;">
+            <p style="color: #1a1a8e; margin: 0; font-size: 14px;">
+                El horario ha quedado liberado para otras reservas.
+            </p>
+        </div>
 
-                                            <tr>
-                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                     Horario:
-                                                </td>
-                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
-                                                    {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
-                                                    {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
-                                                </td>
-                                            </tr>
-                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+        <!-- Contacto -->
+        <div style="text-align: center; padding: 20px; background-color: #f0f4f8; margin-top: 25px;">
+            <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">¿Necesita realizar otra reserva?</p>
+            <p style="margin: 0; font-size: 14px; color: #333;">
+                <strong>Teléfono:</strong> +56 58 220 5522 | 
+                <strong>Email:</strong> deportes@municipalidaddearica.cl
+            </p>
+        </div>
+    </div>
 
-                                            <tr>
-                                                <td style="padding: 12px 0 8px; color: #6b7280; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                     Organización:
-                                                </td>
-                                                <td style="padding: 12px 0 8px; color: #111827; font-weight: 500; font-size: 14px;">
-                                                    {{ $reserva->nombre_organizacion }}
-                                                </td>
-                                            </tr>
-                                            <tr><td colspan="2" style="border-bottom: 1px solid #e5e7eb;"></td></tr>
+    <!-- Footer institucional -->
+    <div style="background-color: #1a1a8e; padding: 20px 30px; text-align: center;">
+        <p style="color: #ffffff; font-size: 12px; margin: 0 0 5px 0;">
+            Este es un correo automático, por favor no responder.
+        </p>
+        <p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 0;">
+            © {{ date('Y') }} Municipalidad de Arica - Oficina de Deportes
+        </p>
+    </div>
 
-                                            <tr>
-                                                <td style="padding: 12px 0 0; color: #ef4444; font-weight: bold; font-size: 14px; vertical-align: top;">
-                                                     Cancelada el:
-                                                </td>
-                                                <td style="padding: 12px 0 0; color: #ef4444; font-weight: 500; font-size: 14px;">
-                                                    {{ $reserva->fecha_cancelacion ? $reserva->fecha_cancelacion->timezone('America/Santiago')->format('d/m/Y H:i') : now()->timezone('America/Santiago')->format('d/m/Y H:i') }}
-                                                </td>
-                                            </tr>
-
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            @if($reserva->motivo_cancelacion)
-                            <div style="margin-top: 25px; background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
-                                <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: bold;"> Motivo de la Cancelación:</p>
-                                <p style="margin: 5px 0 0; font-size: 14px; color: #b45309;">{{ $reserva->motivo_cancelacion }}</p>
-                            </div>
-                            @endif
-
-                            <div style="margin-top: 20px; background-color: #eff6ff; border-radius: 6px; padding: 15px;">
-                                <p style="margin: 0; font-size: 13px; color: #1e40af; text-align: center;">
-                                     El horario ha quedado liberado para otras reservas.
-                                </p>
-                            </div>
-
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-                            <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                                &copy; {{ date('Y') }} Municipalidad de Arica<br>
-                                Departamento de Deportes y Recreación
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                
-                <table border="0" cellpadding="0" cellspacing="0" height="40" width="100%">
-                    <tr><td></td></tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+    <!-- Barra de colores institucional -->
+    <div style="height: 4px; background: linear-gradient(to right, #00a651 25%, #f7941d 25%, #f7941d 50%, #00aeef 50%, #00aeef 75%, #ed1c24 75%);"></div>
 
 </body>
 </html>

@@ -423,49 +423,73 @@
                 document.getElementById(field).value = '';
             });
             // Limpiar imágenes si cambió de opción
-            const imgInput = document.getElementById('imagenes');
-            if (imgInput) {
-                imgInput.value = '';
-                document.getElementById('previewImagenes').innerHTML = '';
-                document.getElementById('previewImagenes').classList.add('hidden');
-                document.getElementById('contadorImagenes').classList.add('hidden');
+            if (typeof limpiarImagenes === 'function') {
+                limpiarImagenes();
             }
         }
     });
 
-    // ✅ Previsualización de imágenes
+    // Almacén de archivos acumulados
+    let archivosAcumulados = [];
+
+    // Previsualización de imágenes con acumulación
     function previsualizarImagenes(input) {
+        const previewContainer = document.getElementById('previewImagenes');
+        const contador = document.getElementById('contadorImagenes');
+        const numImagenes = document.getElementById('numImagenes');
+        
+        if (input.files && input.files.length > 0) {
+            // Agregar nuevos archivos al array acumulado
+            const nuevosArchivos = Array.from(input.files);
+            
+            // Validar que no exceda 5 en total
+            if (archivosAcumulados.length + nuevosArchivos.length > 5) {
+                alert(`Solo puede seleccionar un máximo de 5 imágenes. Ya tiene ${archivosAcumulados.length} imagen(es).`);
+                input.value = '';
+                return;
+            }
+            
+            // Validar tamaño de nuevos archivos
+            for (const file of nuevosArchivos) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert(`La imagen "${file.name}" excede el límite de 2MB`);
+                    input.value = '';
+                    return;
+                }
+            }
+            
+            // Agregar archivos válidos
+            archivosAcumulados = [...archivosAcumulados, ...nuevosArchivos];
+            
+            // Actualizar el input con todos los archivos usando DataTransfer
+            actualizarInputArchivos(input);
+            renderizarPreviews();
+        }
+    }
+    
+    function actualizarInputArchivos(input) {
+        const dataTransfer = new DataTransfer();
+        archivosAcumulados.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
+    
+    function renderizarPreviews() {
         const previewContainer = document.getElementById('previewImagenes');
         const contador = document.getElementById('contadorImagenes');
         const numImagenes = document.getElementById('numImagenes');
         
         previewContainer.innerHTML = '';
         
-        if (input.files && input.files.length > 0) {
-            // Validar máximo 5 imágenes
-            if (input.files.length > 5) {
-                alert('Solo puede seleccionar un máximo de 5 imágenes');
-                input.value = '';
-                previewContainer.classList.add('hidden');
-                contador.classList.add('hidden');
-                return;
-            }
-            
+        if (archivosAcumulados.length > 0) {
             previewContainer.classList.remove('hidden');
             contador.classList.remove('hidden');
-            numImagenes.textContent = input.files.length;
+            numImagenes.textContent = archivosAcumulados.length;
             
-            Array.from(input.files).forEach((file, index) => {
-                // Validar tamaño (máx 2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert(`La imagen "${file.name}" excede el límite de 2MB`);
-                    return;
-                }
-                
+            archivosAcumulados.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const wrapper = document.createElement('div');
-                    wrapper.className = 'relative aspect-square';
+                    wrapper.className = 'relative aspect-square group';
                     
                     const img = document.createElement('img');
                     img.src = e.target.result;
@@ -473,11 +497,22 @@
                     img.alt = 'Imagen ' + (index + 1);
                     
                     const badge = document.createElement('span');
-                    badge.className = 'absolute top-1 right-1 bg-gray-800 text-white text-xs px-1.5 py-0.5 rounded';
+                    badge.className = 'absolute top-1 left-1 bg-gray-800 text-white text-xs px-1.5 py-0.5 rounded';
                     badge.textContent = index + 1;
+                    
+                    // Botón para eliminar imagen
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.onclick = function(e) {
+                        e.preventDefault();
+                        eliminarImagen(index);
+                    };
                     
                     wrapper.appendChild(img);
                     wrapper.appendChild(badge);
+                    wrapper.appendChild(removeBtn);
                     previewContainer.appendChild(wrapper);
                 };
                 reader.readAsDataURL(file);
@@ -485,6 +520,25 @@
         } else {
             previewContainer.classList.add('hidden');
             contador.classList.add('hidden');
+        }
+    }
+    
+    function eliminarImagen(index) {
+        archivosAcumulados.splice(index, 1);
+        const input = document.getElementById('imagenes');
+        actualizarInputArchivos(input);
+        renderizarPreviews();
+    }
+    
+    // Limpiar archivos cuando cambia la opción de asistieron
+    function limpiarImagenes() {
+        archivosAcumulados = [];
+        const input = document.getElementById('imagenes');
+        if (input) {
+            input.value = '';
+            document.getElementById('previewImagenes').innerHTML = '';
+            document.getElementById('previewImagenes').classList.add('hidden');
+            document.getElementById('contadorImagenes').classList.add('hidden');
         }
     }
 </script>
