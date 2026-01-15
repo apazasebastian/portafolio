@@ -65,6 +65,7 @@ class IncidenciasController extends Controller
 
         // PASO 2: Validar campos condicionales solo si asistieron = SÍ
         $validated = $baseValidated;
+        $imagenesGuardadas = [];
         
         if ($baseValidated['asistieron'] === 'si') {
             $additionalValidated = $request->validate([
@@ -72,6 +73,8 @@ class IncidenciasController extends Controller
                 'cantidad_personas' => 'required|integer|min:1|max:500',
                 'hora_inicio_real' => 'required|date_format:H:i',
                 'hora_fin_real' => 'required|date_format:H:i|after:hora_inicio_real',
+                'imagenes' => 'nullable|array|max:5',
+                'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             ], [
                 'estado_recinto.required' => 'Debe seleccionar el estado del recinto',
                 'estado_recinto.in' => 'El estado del recinto no es válido',
@@ -84,9 +87,22 @@ class IncidenciasController extends Controller
                 'hora_fin_real.required' => 'Debe ingresar la hora de finalización',
                 'hora_fin_real.date_format' => 'La hora de finalización debe tener el formato HH:MM',
                 'hora_fin_real.after' => 'La hora de finalización debe ser posterior a la hora de inicio',
+                'imagenes.max' => 'Solo puede subir un máximo de 5 imágenes',
+                'imagenes.*.image' => 'El archivo debe ser una imagen',
+                'imagenes.*.mimes' => 'Las imágenes deben ser JPG, PNG o WebP',
+                'imagenes.*.max' => 'Cada imagen no puede exceder 2MB',
             ]);
             
             $validated = array_merge($baseValidated, $additionalValidated);
+            
+            // Procesar y guardar imágenes
+            if ($request->hasFile('imagenes')) {
+                foreach ($request->file('imagenes') as $imagen) {
+                    $nombreArchivo = 'incidencia_' . $reservaId . '_' . time() . '_' . uniqid() . '.' . $imagen->getClientOriginalExtension();
+                    $ruta = $imagen->storeAs('incidencias', $nombreArchivo, 'public');
+                    $imagenesGuardadas[] = $ruta;
+                }
+            }
         }
         
         // ✅ CONSTRUIR DESCRIPCIÓN COMPLETA
@@ -102,6 +118,9 @@ class IncidenciasController extends Controller
             $descripcionCompleta .= "Cantidad de Personas: " . $validated['cantidad_personas'] . "\n";
             $descripcionCompleta .= "Hora Real de Inicio: " . $validated['hora_inicio_real'] . "\n";
             $descripcionCompleta .= "Hora Real de Finalización: " . $validated['hora_fin_real'] . "\n";
+            if (count($imagenesGuardadas) > 0) {
+                $descripcionCompleta .= "Imágenes adjuntas: " . count($imagenesGuardadas) . "\n";
+            }
         }
         
         $descripcionCompleta .= "\n---\n\n";
@@ -114,6 +133,7 @@ class IncidenciasController extends Controller
             'tipo' => $validated['tipo'],
             'descripcion' => $descripcionCompleta,
             'estado' => 'reportada',
+            'imagenes' => count($imagenesGuardadas) > 0 ? $imagenesGuardadas : null,
         ]);
 
         // REGISTRAR EN AUDITORÍA
@@ -129,6 +149,7 @@ class IncidenciasController extends Controller
                 'hora_inicio_real' => $validated['hora_inicio_real'] ?? null,
                 'hora_fin_real' => $validated['hora_fin_real'] ?? null,
                 'descripcion' => $validated['descripcion'],
+                'imagenes' => count($imagenesGuardadas) > 0 ? count($imagenesGuardadas) . ' imágenes' : null,
                 'estado' => 'reportada',
                 'reserva_id' => $reserva->id,
             ]

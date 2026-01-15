@@ -84,6 +84,32 @@
                     <p class="text-gray-900 whitespace-pre-line">{{ $incidencia->descripcion }}</p>
                 </div>
             </div>
+
+            @if($incidencia->imagenes && count($incidencia->imagenes) > 0)
+            <!-- Imágenes de Evidencia -->
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-600 mb-2">
+                    Imágenes de Evidencia ({{ count($incidencia->imagenes) }})
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    @foreach($incidencia->imagenes as $index => $imagen)
+                    <a href="{{ asset('storage/' . $imagen) }}" target="_blank" 
+                       class="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-orange-400 transition-all hover:shadow-md">
+                        <img src="{{ asset('storage/' . $imagen) }}" 
+                             alt="Evidencia {{ $index + 1 }}"
+                             class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                            </svg>
+                        </div>
+                        <span class="absolute bottom-1 right-1 bg-gray-800 text-white text-xs px-1.5 py-0.5 rounded">{{ $index + 1 }}</span>
+                    </a>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Haz clic en una imagen para verla en tamaño completo</p>
+            </div>
+            @endif
         </div>
 
         <!-- Información de la Reserva Relacionada -->

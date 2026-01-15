@@ -16,11 +16,13 @@ class Incidencia extends Model
         'tipo',
         'descripcion',
         'estado',
+        'imagenes',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'imagenes' => 'array',
     ];
 
     // --- RELACIONES ---

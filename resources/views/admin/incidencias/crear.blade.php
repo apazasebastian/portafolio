@@ -68,7 +68,7 @@
 
         <!-- Formulario de Incidencia -->
         <div class="bg-white rounded-lg shadow-md p-6">
-            <form action="{{ route('admin.incidencias.store', ['reservaId' => $reserva->id]) }}" method="POST">
+            <form action="{{ route('admin.incidencias.store', ['reservaId' => $reserva->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Tipo de Incidencia -->
@@ -94,7 +94,7 @@
                     @enderror
                 </div>
 
-                <!-- ✅ NUEVO: Asistieron -->
+                <!-- NUEVO: Asistieron -->
                 <div class="mb-6">
                     <label for="asistieron" class="block text-sm font-medium text-gray-700 mb-2">
                         ¿Asistieron? <span class="text-red-500">*</span>
@@ -114,7 +114,7 @@
                     @enderror
                 </div>
 
-                <!-- ✅ CAMPOS CONDICIONALES: Mostrar si asistieron = SÍ -->
+                <!-- CAMPOS CONDICIONALES: Mostrar si asistieron = SÍ -->
                 <div id="camposAsistieron" class="space-y-6 hidden mb-6">
                     <!-- Estado del Recinto -->
                     <div>
@@ -179,6 +179,44 @@
                             @enderror
                             <p class="text-xs text-gray-500 mt-1">Hora prevista: {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}</p>
                         </div>
+                    </div>
+
+                    <!-- Subida de Imágenes -->
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Imágenes de Evidencia (Opcional - Máximo 5)
+                        </label>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Puede adjuntar imágenes del estado del recinto después del uso (ej: daños, estado de limpieza, etc.)
+                        </p>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
+                            <input type="file" name="imagenes[]" id="imagenes" multiple 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp"
+                                   class="hidden"
+                                   onchange="previsualizarImagenes(this)">
+                            <label for="imagenes" class="cursor-pointer">
+                                <svg class="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span class="text-sm text-gray-600">Haz clic para seleccionar imágenes</span>
+                                <p class="text-xs text-gray-400 mt-1">JPG, PNG o WebP (máx. 2MB cada una)</p>
+                            </label>
+                        </div>
+                        
+                        <!-- Vista previa de imágenes -->
+                        <div id="previewImagenes" class="mt-4 grid grid-cols-5 gap-2 hidden"></div>
+                        
+                        <p id="contadorImagenes" class="mt-2 text-xs text-gray-500 hidden">
+                            <span id="numImagenes">0</span>/5 imágenes seleccionadas
+                        </p>
+                        
+                        @error('imagenes')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        @error('imagenes.*')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -364,13 +402,13 @@
 </div>
 
 <script>
-    // ✅ JAVASCRIPT: Mostrar/ocultar campos según "Asistieron"
+    // JAVASCRIPT: Mostrar/ocultar campos según "Asistieron"
     document.getElementById('asistieron').addEventListener('change', function() {
         const camposAsistieron = document.getElementById('camposAsistieron');
         const fieldsSi = ['estado_recinto', 'cantidad_personas', 'hora_inicio_real', 'hora_fin_real'];
         
         if (this.value === 'si') {
-            // Mostrar campos
+            // Mostrar campos de "Sí asistieron"
             camposAsistieron.classList.remove('hidden');
             // Hacer campos requeridos
             fieldsSi.forEach(field => {
@@ -379,13 +417,76 @@
         } else {
             // Ocultar campos
             camposAsistieron.classList.add('hidden');
-            // Hacer campos no requeridos
+            // Hacer campos no requeridos y limpiar
             fieldsSi.forEach(field => {
                 document.getElementById(field).required = false;
-                document.getElementById(field).value = ''; // Limpiar valores
+                document.getElementById(field).value = '';
             });
+            // Limpiar imágenes si cambió de opción
+            const imgInput = document.getElementById('imagenes');
+            if (imgInput) {
+                imgInput.value = '';
+                document.getElementById('previewImagenes').innerHTML = '';
+                document.getElementById('previewImagenes').classList.add('hidden');
+                document.getElementById('contadorImagenes').classList.add('hidden');
+            }
         }
     });
+
+    // ✅ Previsualización de imágenes
+    function previsualizarImagenes(input) {
+        const previewContainer = document.getElementById('previewImagenes');
+        const contador = document.getElementById('contadorImagenes');
+        const numImagenes = document.getElementById('numImagenes');
+        
+        previewContainer.innerHTML = '';
+        
+        if (input.files && input.files.length > 0) {
+            // Validar máximo 5 imágenes
+            if (input.files.length > 5) {
+                alert('Solo puede seleccionar un máximo de 5 imágenes');
+                input.value = '';
+                previewContainer.classList.add('hidden');
+                contador.classList.add('hidden');
+                return;
+            }
+            
+            previewContainer.classList.remove('hidden');
+            contador.classList.remove('hidden');
+            numImagenes.textContent = input.files.length;
+            
+            Array.from(input.files).forEach((file, index) => {
+                // Validar tamaño (máx 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert(`La imagen "${file.name}" excede el límite de 2MB`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative aspect-square';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'w-full h-full object-cover rounded border border-gray-300';
+                    img.alt = 'Imagen ' + (index + 1);
+                    
+                    const badge = document.createElement('span');
+                    badge.className = 'absolute top-1 right-1 bg-gray-800 text-white text-xs px-1.5 py-0.5 rounded';
+                    badge.textContent = index + 1;
+                    
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(badge);
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            previewContainer.classList.add('hidden');
+            contador.classList.add('hidden');
+        }
+    }
 </script>
 
 @endsection
