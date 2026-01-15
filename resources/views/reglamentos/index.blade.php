@@ -163,7 +163,7 @@
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Prohibiciones</h2>
                 <div class="space-y-4">
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r">
-                        <p class="font-semibold text-red-800 mb-2">⚠️ Está estrictamente prohibido:</p>
+                        <p class="font-semibold text-red-800 mb-2">Está estrictamente prohibido:</p>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,7 +172,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Bebidas Alcohólicas</p>
+                                <p class="text-gray-800">Bebidas Alcohólicas</p>
                                 <p class="text-sm text-gray-600">Está prohibido el ingreso y consumo de alcohol en todas las instalaciones.</p>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Fumar</p>
+                                <p class="text-gray-800">Fumar</p>
                                 <p class="text-sm text-gray-600">Prohibido fumar en todas las áreas del recinto, incluyendo zonas exteriores.</p>
                             </div>
                         </div>
@@ -192,7 +192,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Mascotas</p>
+                                <p class="text-gray-800">Mascotas</p>
                                 <p class="text-sm text-gray-600">No se permite el ingreso de mascotas a las instalaciones deportivas.</p>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Comercio Ambulante</p>
+                                <p class="text-gray-800">Comercio Ambulante</p>
                                 <p class="text-sm text-gray-600">No está permitida la venta ambulante dentro de las instalaciones.</p>
                             </div>
                         </div>
@@ -212,7 +212,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Conductas Violentas</p>
+                                <p class="text-gray-800">Conductas Violentas</p>
                                 <p class="text-sm text-gray-600">Cualquier acto de violencia resultará en expulsión inmediata y prohibición de futuras reservas.</p>
                             </div>
                         </div>
@@ -222,7 +222,7 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="font-semibold text-gray-800">Daños a Instalaciones</p>
+                                <p class="text-gray-800">Daños a Instalaciones</p>
                                 <p class="text-sm text-gray-600">Está prohibido dañar equipamiento, mobiliario o infraestructura del recinto.</p>
                             </div>
                         </div>
