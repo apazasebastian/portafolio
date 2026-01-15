@@ -33,6 +33,11 @@ Route::get('/calendario', [CalendarioController::class, 'index'])->name('calenda
 Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('api.disponibilidad');
 
+// Página de Reglamentos
+Route::get('/reglamentos', function () {
+    return view('reglamentos.index');
+})->name('reglamentos');
+
 
 
 /*

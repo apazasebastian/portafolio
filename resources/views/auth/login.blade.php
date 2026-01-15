@@ -76,12 +76,6 @@
                 Volver al calendario
             </a>
         </div>
-
-        <!-- Credenciales de prueba -->
-        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p class="text-sm font-medium text-yellow-800">Usuario de prueba:</p>
-            <p class="text-xs text-yellow-700">jefe.recintos@municipalidadarica.cl / password123</p>
-        </div>
     </div>
 </div>
 @endsection
