@@ -37,7 +37,7 @@ class Recinto extends Model
     }
 
     /**
-     * ⚠️ ACTUALIZADO: Verifica disponibilidad con fechas específicas ⚠️
+     * ACTUALIZADO: Verifica disponibilidad con fechas especificas
      */
     public function disponibleEn($fecha, $horaInicio, $horaFin)
     {
@@ -53,7 +53,7 @@ class Recinto extends Model
             $diasCerrados = [];
         }
 
-        // ⚠️ VERIFICAR DÍAS COMPLETOS CERRADOS ⚠️
+        // VERIFICAR DIAS COMPLETOS CERRADOS
         $diasCompletos = [];
         if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
             $diasCompletos = $diasCerrados['dias_completos'];
@@ -66,7 +66,7 @@ class Recinto extends Model
             return false;
         }
 
-        // ⚠️ VERIFICAR BLOQUEOS POR FECHA ESPECÍFICA ⚠️
+        // VERIFICAR BLOQUEOS POR FECHA ESPECIFICA
         if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
             foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
                 // Verificar si el bloqueo es para esta fecha específica
@@ -149,7 +149,7 @@ class Recinto extends Model
     }
 
     /**
-     * ⚠️ ACTUALIZADO: Obtener bloqueos para una fecha específica ⚠️
+     * ACTUALIZADO: Obtener bloqueos para una fecha especifica
      */
     public function getBloqueosPorFecha($fecha)
     {

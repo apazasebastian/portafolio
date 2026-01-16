@@ -379,7 +379,7 @@ class EstadisticasController extends Controller
             $desde = Carbon::parse($fechaInicio)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
             $hasta = Carbon::parse($fechaFin)->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
 
-            // ⚠️ REGISTRAR EN AUDITORÍA ANTES DE RETORNAR ⚠️
+            // REGISTRAR EN AUDITORIA ANTES DE RETORNAR
             AuditLog::log(
                 'exportar_pdf',
                 "Exportación de estadísticas a PDF (período: {$fechaInicio} a {$fechaFin}, {$totalReservas} registros)"

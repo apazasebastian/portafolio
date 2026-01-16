@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // ⚠️ REGISTRAR MIDDLEWARE PERSONALIZADO (NUEVO) ⚠️
+        // REGISTRAR MIDDLEWARE PERSONALIZADO (NUEVO)
         $middleware->alias([
             'jefeRecintos' => \App\Http\Middleware\EnsureUserIsJefeRecintos::class,
         ]);

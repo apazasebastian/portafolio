@@ -63,7 +63,7 @@
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                 </svg>
                 <div class="text-sm text-blue-700">
-                    <p class="font-medium mb-1">📧 Correo de Confirmación Enviado</p>
+                    <p class="font-medium mb-1">Correo de Confirmación Enviado</p>
                     <p>Hemos enviado un correo de confirmación a: <strong>{{ $reserva->email }}</strong></p>
                 </div>
             </div>

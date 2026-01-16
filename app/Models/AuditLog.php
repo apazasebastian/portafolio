@@ -160,7 +160,7 @@ class AuditLog extends Model
     }
 
     /**
-     * ⚠️ SIN EMOJIS - Solo símbolos simples
+     * Iconos de accion - Solo simbolos simples
      */
     public function getActionIconAttribute()
     {
@@ -186,7 +186,7 @@ class AuditLog extends Model
             'desactivar_evento' => '⊗',
             
             // Incidencias
-            'crear_incidencia' => '⚠',
+            'crear_incidencia' => '!',
             'cambiar_estado_incidencia' => '↻',
             'resolver_incidencia' => '✓',
             

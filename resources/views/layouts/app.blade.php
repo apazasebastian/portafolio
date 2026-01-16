@@ -167,7 +167,7 @@
                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                         </svg>
-                        <span class="hidden sm:inline">Contacto: </span>+56 58 2205500
+                        <span class="hidden sm:inline">Contacto: </span>+56 432380004
                     </span>
                     <span class="hidden md:flex items-center">
                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -239,88 +239,88 @@
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
                 <!-- Logo y Título -->
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('home') }}" class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 xl:space-x-4">
+                    <a href="{{ route('home') }}" class="flex items-center space-x-2 xl:space-x-3">
                         <!-- Logo de la Municipalidad -->
                         <img src="{{ asset('images/logos/logo-header.png') }}" 
                              alt="Municipalidad de Arica" 
-                             class="h-16 w-auto"
+                             class="h-12 xl:h-16 w-auto"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <!-- Fallback: Icono SVG si no hay logo -->
-                        <div class="w-16 h-16 bg-primary rounded-full items-center justify-center hidden">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-12 h-12 xl:w-16 xl:h-16 bg-primary rounded-full items-center justify-center hidden">
+                            <svg class="w-8 h-8 xl:w-10 xl:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-xl font-bold text-primary">Sistema de Reservas</h1>
-                            <p class="text-sm text-gray-600">Recintos Deportivos Arica</p>
+                            <h1 class="text-lg xl:text-xl font-bold text-primary">Sistema de Reservas</h1>
+                            <p class="text-xs xl:text-sm text-gray-600 hidden lg:block">Recintos Deportivos Arica</p>
                         </div>
                     </a>
                 </div>
                 
                 <!-- Navegación Desktop -->
-                <nav class="hidden lg:flex items-center space-x-1">
+                <nav class="hidden xl:flex items-center space-x-0.5">
                     <a href="{{ route('home') }}" 
-                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                         </svg>
                         Inicio
                     </a>
                     <a href="{{ route('calendario') }}" 
-                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('calendario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('calendario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                         </svg>
                         Calendario
                     </a>
                     <a href="{{ route('reglamentos') }}" 
-                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
                         </svg>
                         Reglamentos
                     </a>
                     <a href="{{ route('cancelacion.formulario') }}" 
-                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                         </svg>
-                        Cancelar Reserva
+                        Cancelar
                     </a>
                     <a href="{{ route('segunda-etapa') }}" 
-                       class="nav-link px-4 py-2 rounded-lg flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r  to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
-                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                         </svg>
-                        Segunda Etapa
+                        2da Etapa
                     </a>
                     
                     
                     @auth
                         <!-- Menú Administrativo -->
-                        <div class="h-8 w-px bg-gray-300 mx-2"></div>
+                        <div class="h-6 w-px bg-gray-300 mx-1"></div>
                         
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Panel Admin
                         </a>
                         @if(auth()->user()->role !== 'encargado_recinto')
                             <a href="{{ route('admin.recintos.index') }}" 
-                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Recintos
                             </a>
                             <a href="{{ route('admin.eventos.index') }}" 
-                            class="nav-link px-4 py-2 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Eventos
                             </a>
                         @endif
                         
-                        <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
+                        <form method="POST" action="{{ route('logout') }}" class="inline ml-1">
                             @csrf
                             <button type="submit" 
-                                    class="nav-link px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 flex items-center">
+                                    class="nav-link px-2 xl:px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 flex items-center text-sm">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                 </svg>
@@ -329,17 +329,17 @@
                         </form>
                     @else
                         <a href="{{ route('login') }}" 
-                           class="nav-link px-4 py-2 rounded-lg bg-secondary text-white hover:bg-blue-700 flex items-center">
+                           class="nav-link px-2 xl:px-3 py-2 rounded-lg bg-secondary text-white hover:bg-blue-700 flex items-center text-sm">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                             </svg>
-                            Acceso Admin
+                            Admin
                         </a>
                     @endauth
                 </nav>
 
                 <!-- Botón Menú Móvil -->
-                <button id="mobile-menu-button" class="lg:hidden text-primary focus:outline-none">
+                <button id="mobile-menu-button" class="xl:hidden text-primary focus:outline-none">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
@@ -347,7 +347,7 @@
             </div>
 
             <!-- Menú Móvil -->
-            <nav id="mobile-menu" class="hidden lg:hidden pb-4 border-t border-gray-200">
+            <nav id="mobile-menu" class="hidden xl:hidden pb-4 border-t border-gray-200">
                 <div class="space-y-1 pt-4">
                     <a href="{{ route('home') }}" 
                        class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
