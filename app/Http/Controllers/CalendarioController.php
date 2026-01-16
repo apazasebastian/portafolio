@@ -7,15 +7,31 @@ use App\Models\Reserva;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador del Calendario de Reservas
+ * 
+ * Maneja la visualizacion del calendario donde los usuarios pueden ver
+ * que dias y horarios estan disponibles para reservar un recinto deportivo.
+ */
 class CalendarioController extends Controller
 {
+    /**
+     * Muestra el calendario de disponibilidad de recintos
+     * 
+     * Esta pagina permite a los ciudadanos ver todos los recintos activos
+     * y las reservas existentes de los proximos 30 dias.
+     */
     public function index()
     {
+        // Obtiene solo los recintos que estan activos y disponibles para reservar
         $recintos = Recinto::activos()->get();
         
+        // Define el rango de fechas a mostrar (desde hoy hasta 30 dias despues)
         $fechaInicio = Carbon::now()->startOfDay();
         $fechaFin = Carbon::now()->addDays(30)->endOfDay();
         
+        // Obtiene todas las reservas aprobadas y vigentes para mostrar en el calendario
+        // Las agrupa por recinto y por fecha para facilitar la visualizacion
         $reservas = Reserva::with('recinto')
             ->aprobadas()
             ->whereNull('fecha_cancelacion')
@@ -27,32 +43,40 @@ class CalendarioController extends Controller
     }
     
     /**
-     *  ACTUALIZADO: API de disponibilidad con fechas específicas 
+     * Consulta la disponibilidad horaria de un recinto para una fecha especifica
+     * 
+     * Esta funcion es llamada por JavaScript cuando el usuario selecciona
+     * una fecha en el calendario. Retorna todas las franjas horarias del dia
+     * indicando cuales estan libres, ocupadas o bloqueadas.
      */
     public function disponibilidad(Request $request)
     {
         $recintoId = $request->get('recinto_id');
         $fecha = $request->get('fecha');
         
+        // Valida que se hayan enviado los parametros requeridos
         if (!$recintoId || !$fecha) {
             return response()->json(['error' => 'Parámetros inválidos'], 400);
         }
         
+        // Busca el recinto en la base de datos
         $recinto = Recinto::find($recintoId);
         if (!$recinto) {
             return response()->json(['error' => 'Recinto no encontrado'], 404);
         }
         
+        // Convierte la fecha recibida a un formato que podamos trabajar
         try {
             $fechaCarbon = Carbon::parse($fecha);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Fecha inválida'], 400);
         }
         
+        // Obtiene el dia de la semana (lunes, martes, etc.) para verificar cierres
         $diaSemana = strtolower($fechaCarbon->format('l'));
         $fechaString = $fechaCarbon->format('Y-m-d');
         
-        // Obtener días cerrados con manejo de errores
+        // Lee la configuracion de dias cerrados del recinto
         $diasCerrados = [];
         if (is_array($recinto->dias_cerrados)) {
             $diasCerrados = $recinto->dias_cerrados;
@@ -64,7 +88,8 @@ class CalendarioController extends Controller
             }
         }
         
-        // Verificar si es día completo cerrado
+        // Verifica si este dia de la semana esta cerrado completamente
+        // Por ejemplo: todos los domingos cerrado
         $diasCompletos = [];
         if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
             $diasCompletos = $diasCerrados['dias_completos'];
@@ -74,7 +99,8 @@ class CalendarioController extends Controller
         
         $esDiaCerrado = in_array($diaSemana, $diasCompletos);
         
-        //  OBTENER BLOQUEOS PARA ESTA FECHA ESPECÍFICA 
+        // Busca bloqueos especificos para esta fecha
+        // Por ejemplo: el 25 de diciembre cerrado de 12:00 a 23:00
         $bloqueosFecha = [];
         if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
             foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
@@ -84,7 +110,7 @@ class CalendarioController extends Controller
             }
         }
         
-        // Obtener horarios disponibles con manejo de errores
+        // Obtiene el horario de funcionamiento del recinto (hora apertura y cierre)
         $horarios = [];
         if (is_array($recinto->horarios_disponibles)) {
             $horarios = $recinto->horarios_disponibles;
@@ -96,10 +122,11 @@ class CalendarioController extends Controller
             }
         }
         
+        // Si no hay horarios definidos, usa valores por defecto (8am a 11pm)
         $horaInicio = $horarios['inicio'] ?? '08:00';
         $horaFin = $horarios['fin'] ?? '23:00';
         
-        // Obtener reservas
+        // Obtiene las reservas existentes para esta fecha (aprobadas o pendientes)
         $reservas = Reserva::where('recinto_id', $recintoId)
             ->where('fecha_reserva', $fecha)
             ->whereIn('estado', ['aprobada', 'pendiente'])
@@ -107,18 +134,19 @@ class CalendarioController extends Controller
             ->orderBy('hora_inicio')
             ->get();
         
-        // Generar franjas horarias con manejo de errores
+        // Genera las franjas horarias del dia (una por cada hora)
+        // Cada franja indica si esta disponible, ocupada o bloqueada
         $franjasHorarias = [];
         try {
-            // Usar timezone de la aplicación en lugar de hardcodear
             $timezone = config('app.timezone', 'UTC');
             $horaActual = Carbon::createFromFormat('H:i', $horaInicio, $timezone);
             $horaFinCarbon = Carbon::createFromFormat('H:i', $horaFin, $timezone);
             
-            // Protección contra bucles infinitos
+            // Limite de seguridad para evitar bucles infinitos
             $maxIteraciones = 24;
             $iteracion = 0;
             
+            // Recorre hora por hora desde la apertura hasta el cierre
             while ($horaActual < $horaFinCarbon && $iteracion < $maxIteraciones) {
                 $siguienteHora = $horaActual->copy()->addHour();
                 
@@ -127,32 +155,31 @@ class CalendarioController extends Controller
                 $reservaInfo = null;
                 $motivoBloqueo = null;
                 
-                // Verificar bloqueos para esta fecha específica
+                // Verifica si esta hora tiene algun bloqueo configurado
                 foreach ($bloqueosFecha as $bloqueo) {
                     try {
                         $bloqueInicio = Carbon::createFromFormat('H:i', $bloqueo['hora_inicio'], $timezone);
                         $bloqueFin = Carbon::createFromFormat('H:i', $bloqueo['hora_fin'], $timezone);
                         
+                        // Si la franja actual se cruza con el bloqueo, se marca como bloqueada
                         if ($horaActual->lt($bloqueFin) && $siguienteHora->gt($bloqueInicio)) {
                             $bloqueada = true;
                             $motivoBloqueo = $bloqueo['motivo'] ?? 'Bloqueado';
                             break;
                         }
                     } catch (\Exception $e) {
-                        // Si hay error parseando un bloqueo, continuar con el siguiente
                         continue;
                     }
                 }
                 
-                // Verificar reservas
+                // Si no esta bloqueada, verifica si hay alguna reserva en esta hora
                 if (!$bloqueada) {
                     foreach ($reservas as $reserva) {
                         try {
-                            // Parsear las horas de la reserva
                             $reservaHoraInicio = $reserva->hora_inicio;
                             $reservaHoraFin = $reserva->hora_fin;
                             
-                            // Si son objetos Carbon, convertirlos a string
+                            // Convierte las horas a un formato comparable
                             if ($reservaHoraInicio instanceof Carbon) {
                                 $reservaHoraInicio = $reservaHoraInicio->format('H:i');
                             }
@@ -163,6 +190,7 @@ class CalendarioController extends Controller
                             $reservaInicio = Carbon::createFromFormat('H:i', $reservaHoraInicio, $timezone);
                             $reservaFin = Carbon::createFromFormat('H:i', $reservaHoraFin, $timezone);
                             
+                            // Si la franja actual se cruza con la reserva, se marca como ocupada
                             if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
                                 $ocupada = true;
                                 $reservaInfo = [
@@ -175,12 +203,12 @@ class CalendarioController extends Controller
                                 break;
                             }
                         } catch (\Exception $e) {
-                            // Si hay error parseando una reserva, continuar con la siguiente
                             continue;
                         }
                     }
                 }
                 
+                // Agrega la informacion de esta franja horaria al resultado
                 $franjasHorarias[] = [
                     'hora_inicio' => $horaActual->format('H:i'),
                     'hora_fin' => $siguienteHora->format('H:i'),
@@ -198,6 +226,7 @@ class CalendarioController extends Controller
             return response()->json(['error' => 'Error generando disponibilidad'], 500);
         }
         
+        // Retorna toda la informacion de disponibilidad en formato JSON
         return response()->json([
             'recinto' => $recinto->nombre,
             'fecha' => $fechaCarbon->locale('es')->isoFormat('dddd, D [de] MMMM [de] YYYY'),

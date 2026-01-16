@@ -6,10 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
+/**
+ * Modelo de Recinto Deportivo
+ * 
+ * Representa un recinto o cancha deportiva que puede ser reservada.
+ * Contiene informacion sobre el nombre del recinto, su capacidad maxima,
+ * los horarios en que esta disponible, y los dias que permanece cerrado.
+ */
 class Recinto extends Model
 {
     use HasFactory;
 
+    /**
+     * Campos que se pueden llenar al crear o actualizar un recinto
+     */
     protected $fillable = [
         'nombre', 
         'descripcion', 
@@ -20,24 +30,49 @@ class Recinto extends Model
         'imagen_url'
     ];
 
+    /**
+     * Conversion automatica de tipos de datos
+     */
     protected $casts = [
         'horarios_disponibles' => 'array',
         'dias_cerrados' => 'array',
         'activo' => 'boolean'
     ];
 
+    // =========================================================================
+    // RELACIONES - Conexiones con otras tablas de la base de datos
+    // =========================================================================
+
+    /**
+     * Obtiene todas las reservas que se han hecho para este recinto
+     */
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
     }
 
+    /**
+     * Obtiene los encargados asignados a este recinto
+     * Los encargados son funcionarios que administran el recinto dia a dia
+     */
     public function encargados()
     {
         return $this->hasMany(User::class, 'recinto_asignado_id');
     }
 
+    // =========================================================================
+    // VERIFICACION DE DISPONIBILIDAD
+    // =========================================================================
+
     /**
-     * ACTUALIZADO: Verifica disponibilidad con fechas especificas
+     * Verifica si el recinto esta disponible para una fecha y horario especifico
+     * 
+     * Esta es la funcion principal para saber si alguien puede reservar.
+     * Verifica que:
+     * 1. No sea un dia de la semana en que el recinto esta cerrado
+     * 2. No tenga un bloqueo especial para esa fecha
+     * 3. El horario este dentro del horario de funcionamiento
+     * 4. No exista otra reserva en el mismo horario
      */
     public function disponibleEn($fecha, $horaInicio, $horaFin)
     {
@@ -45,7 +80,7 @@ class Recinto extends Model
         $diaSemana = strtolower($fechaCarbon->format('l'));
         $fechaString = $fechaCarbon->format('Y-m-d');
 
-        // Obtener días cerrados
+        // Lee la configuracion de dias cerrados del recinto
         $diasCerrados = $this->dias_cerrados;
         if (is_string($diasCerrados)) {
             $diasCerrados = json_decode($diasCerrados, true) ?? [];
@@ -53,12 +88,12 @@ class Recinto extends Model
             $diasCerrados = [];
         }
 
-        // VERIFICAR DIAS COMPLETOS CERRADOS
+        // Primero verifica si es un dia de la semana que siempre esta cerrado
+        // Por ejemplo: todos los domingos cerrado
         $diasCompletos = [];
         if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
             $diasCompletos = $diasCerrados['dias_completos'];
         } elseif (!isset($diasCerrados['dias_completos']) && !isset($diasCerrados['rangos_bloqueados'])) {
-            // Retrocompatibilidad: si no tiene la nueva estructura, usar el array completo
             $diasCompletos = $diasCerrados;
         }
 
@@ -66,15 +101,15 @@ class Recinto extends Model
             return false;
         }
 
-        // VERIFICAR BLOQUEOS POR FECHA ESPECIFICA
+        // Verifica si hay bloqueos especiales para esta fecha especifica
+        // Por ejemplo: el 25 de diciembre cerrado de 12:00 a 23:00
         if (isset($diasCerrados['rangos_bloqueados']) && is_array($diasCerrados['rangos_bloqueados'])) {
             foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
-                // Verificar si el bloqueo es para esta fecha específica
                 if (isset($bloqueo['fecha']) && $bloqueo['fecha'] === $fechaString) {
                     $bloqueInicio = $bloqueo['hora_inicio'] ?? '00:00';
                     $bloqueFin = $bloqueo['hora_fin'] ?? '23:59';
                     
-                    // Verificar si hay solapamiento entre el horario solicitado y el bloqueado
+                    // Verifica si el horario solicitado choca con el bloqueo
                     if ($this->hayConflictoHorario($horaInicio, $horaFin, $bloqueInicio, $bloqueFin)) {
                         return false;
                     }
@@ -82,7 +117,7 @@ class Recinto extends Model
             }
         }
 
-        // Verificar si está dentro del horario del recinto
+        // Verifica que el horario solicitado este dentro del horario de funcionamiento
         $horarioInicio = $this->horarios_disponibles['inicio'] ?? '08:00';
         $horarioFin = $this->horarios_disponibles['fin'] ?? '23:00';
         
@@ -90,12 +125,13 @@ class Recinto extends Model
             return false;
         }
 
-        // Verificar conflictos con reservas APROBADAS o PENDIENTES
+        // Finalmente, verifica si hay otras reservas que ocupen el mismo horario
         $conflictos = $this->reservas()
             ->where('fecha_reserva', $fecha)
             ->whereIn('estado', ['aprobada', 'pendiente'])
             ->whereNull('fecha_cancelacion')
             ->where(function($query) use ($horaInicio, $horaFin) {
+                // Busca cualquier reserva que se cruce con el horario solicitado
                 $query->where(function($q) use ($horaInicio, $horaFin) {
                     $q->where('hora_inicio', '<=', $horaInicio)
                       ->where('hora_fin', '>', $horaInicio);
@@ -109,26 +145,29 @@ class Recinto extends Model
             })
             ->exists();
 
+        // Si no hay conflictos, esta disponible
         return !$conflictos;
     }
 
     /**
-     * Verifica si dos rangos de horarios se solapan
+     * Verifica si dos rangos de horarios se cruzan o solapan
+     * 
+     * Por ejemplo, 10:00-12:00 y 11:00-13:00 se cruzan
+     * pero 10:00-12:00 y 14:00-16:00 no se cruzan
      */
     private function hayConflictoHorario($inicio1, $fin1, $inicio2, $fin2)
     {
-        // Convertir a timestamps para comparación fácil
         $t1_inicio = strtotime($inicio1);
         $t1_fin = strtotime($fin1);
         $t2_inicio = strtotime($inicio2);
         $t2_fin = strtotime($fin2);
 
-        // Hay conflicto si los rangos se solapan
         return ($t1_inicio < $t2_fin && $t1_fin > $t2_inicio);
     }
 
     /**
-     * Obtener las reservas del día (aprobadas y no canceladas)
+     * Obtiene todas las reservas confirmadas para un dia especifico
+     * Util para mostrar la agenda del dia en el panel del encargado
      */
     public function reservasDelDia($fecha)
     {
@@ -140,16 +179,26 @@ class Recinto extends Model
             ->get();
     }
 
+    // =========================================================================
+    // SCOPES - Filtros reutilizables para consultas
+    // =========================================================================
+
     /**
-     * Scope para obtener solo recintos activos
+     * Filtra solo los recintos que estan activos y disponibles para reservar
+     * Los recintos inactivos no aparecen en el calendario publico
      */
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
     }
 
+    // =========================================================================
+    // METODOS DE CONSULTA
+    // =========================================================================
+
     /**
-     * ACTUALIZADO: Obtener bloqueos para una fecha especifica
+     * Obtiene los bloqueos especiales configurados para una fecha especifica
+     * Se usa para mostrar al usuario por que no puede reservar ciertos horarios
      */
     public function getBloqueosPorFecha($fecha)
     {
@@ -162,7 +211,6 @@ class Recinto extends Model
 
         $bloqueos = [];
         foreach ($diasCerrados['rangos_bloqueados'] as $bloqueo) {
-            // Solo incluir bloqueos de esta fecha específica
             if (isset($bloqueo['fecha']) && $bloqueo['fecha'] === $fechaString) {
                 $bloqueos[] = $bloqueo;
             }

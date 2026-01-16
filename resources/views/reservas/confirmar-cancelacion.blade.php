@@ -74,7 +74,7 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Motivo de la Cancelación</h3>
             
-            <form method="POST" action="{{ route('cancelacion.procesar', $reserva->codigo_cancelacion) }}">
+            <form id="formCancelacion" method="POST" action="{{ route('cancelacion.procesar', $reserva->codigo_cancelacion) }}">
                 @csrf
                 
                 <div class="mb-6">
@@ -120,7 +120,7 @@
                     </a>
                     
                     <button type="submit" 
-                            onclick="return confirm('¿Estás completamente seguro de cancelar esta reserva? Esta acción no se puede deshacer.')"
+                            id="btnCancelar"
                             class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-xl">
                         Sí, Cancelar Reserva
                     </button>
@@ -130,4 +130,44 @@
 
     </div>
 </div>
+
+<!-- Overlay de Carga para Cancelación -->
+<div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4 text-center">
+        <!-- Spinner animado -->
+        <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Procesando cancelación...</h3>
+        <p class="text-gray-600">Estamos cancelando tu reserva y enviando la confirmación por correo electrónico. Por favor espera.</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('formCancelacion').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Mostrar modal de confirmación personalizado
+        const confirmado = await window.customConfirm({
+            title: 'Cancelar Reserva',
+            message: '¿Estás completamente seguro de cancelar esta reserva? Esta acción no se puede deshacer.',
+            type: 'danger',
+            confirmText: 'Sí, cancelar reserva',
+            cancelText: 'No, mantener reserva'
+        });
+        
+        if (confirmado) {
+            // Mostrar el overlay de carga
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
+            
+            // Deshabilitar el boton para evitar doble envio
+            document.getElementById('btnCancelar').disabled = true;
+            document.getElementById('btnCancelar').textContent = 'Procesando...';
+            
+            // Enviar el formulario
+            this.submit();
+        }
+    });
+</script>
 @endsection

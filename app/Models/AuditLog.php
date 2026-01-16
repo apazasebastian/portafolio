@@ -5,10 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo de Registro de Auditoria
+ * 
+ * Guarda un historial de todas las acciones importantes realizadas en el sistema.
+ * Por ejemplo: cuando alguien aprueba una reserva, crea un recinto, reporta
+ * una incidencia, etc. Esto permite saber quien hizo que y cuando.
+ */
 class AuditLog extends Model
 {
     use HasFactory;
 
+    /**
+     * Campos que se guardan en cada registro de auditoria
+     */
     protected $fillable = [
         'user_id',
         'user_name',
@@ -24,14 +34,21 @@ class AuditLog extends Model
         'user_agent',
     ];
 
+    /**
+     * Conversion automatica de tipos de datos
+     */
     protected $casts = [
         'old_values' => 'array',
         'new_values' => 'array',
         'created_at' => 'datetime',
     ];
 
+    // =========================================================================
+    // RELACIONES - Conexiones con otras tablas
+    // =========================================================================
+
     /**
-     * Relación con el usuario que realizó la acción
+     * Obtiene el usuario que realizo la accion
      */
     public function user()
     {
@@ -39,15 +56,24 @@ class AuditLog extends Model
     }
 
     /**
-     * Relación polimórfica con el modelo auditado
+     * Obtiene el elemento sobre el que se realizo la accion
+     * Puede ser una reserva, un recinto, una incidencia, etc.
      */
     public function auditable()
     {
         return $this->morphTo();
     }
 
+    // =========================================================================
+    // METODO PRINCIPAL - Para registrar acciones
+    // =========================================================================
+
     /**
-     * Registrar una acción en el log de auditoría
+     * Registra una nueva accion en el historial
+     * 
+     * Este metodo se llama desde cualquier parte del sistema cuando queremos
+     * dejar registro de algo importante. Guarda automaticamente quien lo hizo,
+     * desde que computador, y los detalles de la accion.
      */
     public static function log($action, $description, $auditable = null, $oldValues = null, $newValues = null)
     {
@@ -67,8 +93,13 @@ class AuditLog extends Model
         ]);
     }
 
+    // =========================================================================
+    // SCOPES - Filtros reutilizables para buscar en el historial
+    // =========================================================================
+
     /**
-     * Scope para filtrar por acción
+     * Filtra el historial por un tipo de accion especifico
+     * Ejemplo: todas las aprobaciones de reservas
      */
     public function scopeOfAction($query, $action)
     {
@@ -76,7 +107,8 @@ class AuditLog extends Model
     }
 
     /**
-     * Scope para filtrar por usuario
+     * Filtra el historial por un usuario especifico
+     * Ejemplo: todas las acciones de Juan Perez
      */
     public function scopeByUser($query, $userId)
     {
@@ -84,83 +116,76 @@ class AuditLog extends Model
     }
 
     /**
-     * Scope para filtrar por fecha
+     * Filtra el historial entre dos fechas
+     * Ejemplo: todas las acciones del ultimo mes
      */
     public function scopeBetweenDates($query, $from, $to)
     {
         return $query->whereBetween('created_at', [$from, $to]);
     }
 
+    // =========================================================================
+    // ESTILOS - Colores e iconos para mostrar en la interfaz
+    // =========================================================================
+
     /**
-     * Obtener clases CSS de Tailwind completas según la acción
+     * Obtiene los colores CSS para mostrar la accion en la interfaz
+     * Cada tipo de accion tiene un color distintivo:
+     * - Verde: acciones positivas (aprobar, crear, activar)
+     * - Rojo: acciones negativas (rechazar, eliminar)
+     * - Amarillo: cancelaciones
+     * - Azul: ediciones
      */
     public function getActionColorAttribute()
     {
         return match($this->action) {
-            // Reservas - Verde (aprobadas)
+            // Reservas
             'aprobar_reserva' => 'bg-green-100 text-green-800 border border-green-200',
-            // Reservas - Rojo (rechazadas)
             'rechazar_reserva' => 'bg-red-100 text-red-800 border border-red-200',
-            // Reservas - Amarillo (canceladas)
             'cancelar_reserva' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-            // Reservas - Azul (creadas)
             'crear_reserva' => 'bg-blue-100 text-blue-800 border border-blue-200',
             
-            // Recintos - Verde (crear)
+            // Recintos
             'crear_recinto' => 'bg-green-100 text-green-800 border border-green-200',
-            // Recintos - Azul (editar)
             'editar_recinto' => 'bg-blue-100 text-blue-800 border border-blue-200',
-            // Recintos - Rojo (eliminar)
             'eliminar_recinto' => 'bg-red-100 text-red-800 border border-red-200',
-            // Recintos - Verde (activar)
             'activar_recinto' => 'bg-green-100 text-green-800 border border-green-200',
-            // Recintos - Gris (desactivar)
             'desactivar_recinto' => 'bg-gray-100 text-gray-800 border border-gray-200',
             
-            // Eventos - Verde (crear)
+            // Eventos
             'crear_evento' => 'bg-green-100 text-green-800 border border-green-200',
-            // Eventos - Azul (editar)
             'editar_evento' => 'bg-blue-100 text-blue-800 border border-blue-200',
-            // Eventos - Rojo (eliminar)
             'eliminar_evento' => 'bg-red-100 text-red-800 border border-red-200',
-            // Eventos - Verde (activar)
             'activar_evento' => 'bg-green-100 text-green-800 border border-green-200',
-            // Eventos - Gris (desactivar)
             'desactivar_evento' => 'bg-gray-100 text-gray-800 border border-gray-200',
             
-            // Incidencias - Naranja (crear)
+            // Incidencias
             'crear_incidencia' => 'bg-orange-100 text-orange-800 border border-orange-200',
-            // Incidencias - Azul (cambiar estado)
             'cambiar_estado_incidencia' => 'bg-blue-100 text-blue-800 border border-blue-200',
-            // Incidencias - Verde (resolver)
             'resolver_incidencia' => 'bg-green-100 text-green-800 border border-green-200',
             
-            // Exportaciones - Verde (Excel)
+            // Exportaciones
             'exportar_excel' => 'bg-green-100 text-green-800 border border-green-200',
-            // Exportaciones - Rojo (PDF)
             'exportar_pdf' => 'bg-red-100 text-red-800 border border-red-200',
             
-            // Usuarios - Verde (crear)
+            // Usuarios
             'crear_usuario' => 'bg-green-100 text-green-800 border border-green-200',
-            // Usuarios - Azul (editar)
             'editar_usuario' => 'bg-blue-100 text-blue-800 border border-blue-200',
-            // Usuarios - Rojo (eliminar)
             'eliminar_usuario' => 'bg-red-100 text-red-800 border border-red-200',
-            // Usuarios - Púrpura (cambiar rol)
             'cambiar_rol_usuario' => 'bg-purple-100 text-purple-800 border border-purple-200',
             
-            // Sesiones - Gris
+            // Sesiones
             'login' => 'bg-gray-100 text-gray-800 border border-gray-200',
             'logout' => 'bg-gray-100 text-gray-800 border border-gray-200',
             'acceso_denegado' => 'bg-red-100 text-red-800 border border-red-200',
             
-            // Por defecto - Gris
             default => 'bg-gray-100 text-gray-800 border border-gray-200',
         };
     }
 
     /**
-     * Iconos de accion - Solo simbolos simples
+     * Obtiene un icono simple para representar cada tipo de accion
+     * Se usan simbolos basicos para compatibilidad con todos los navegadores
      */
     public function getActionIconAttribute()
     {
@@ -210,7 +235,8 @@ class AuditLog extends Model
     }
 
     /**
-     * Obtener nombre legible de la acción
+     * Obtiene el nombre de la accion en español y legible
+     * Convierte codigos como "aprobar_reserva" en "Aprobar Reserva"
      */
     public function getActionNameAttribute()
     {
@@ -244,7 +270,7 @@ class AuditLog extends Model
             'exportar_excel' => 'Exportar Excel',
             'exportar_pdf' => 'Exportar PDF',
             
-            // Usuarios () Queda para una segunda etapa, ya los usuarios se crean por el medio de php artisan.
+            // Usuarios (pendiente para segunda etapa)
             'crear_usuario' => 'Crear Usuario',
             'editar_usuario' => 'Editar Usuario',
             'eliminar_usuario' => 'Eliminar Usuario',

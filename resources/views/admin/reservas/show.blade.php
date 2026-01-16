@@ -135,8 +135,7 @@
                 <form action="{{ route('admin.reservas.aprobar', $reserva) }}" method="POST">
                     @csrf
                     <button type="submit" 
-                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition" 
-                            onclick="return confirm('¿Estás seguro de aprobar esta reserva?')">
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
                         Aprobar Reserva
                     </button>
                 </form>
@@ -172,4 +171,53 @@
         </div>
     </div>
 </div>
+
+<!-- Overlay de Carga -->
+<div id="loadingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4 text-center">
+        <!-- Spinner animado -->
+        <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+        <h3 id="loadingTitle" class="text-xl font-bold text-gray-800 mb-2">Procesando solicitud...</h3>
+        <p id="loadingMessage" class="text-gray-600">Enviando notificaciones por correo electrónico. Por favor espere.</p>
+    </div>
+</div>
+
+<script>
+    // Funcion para mostrar el overlay de carga
+    function showLoader(title, message) {
+        document.getElementById('loadingTitle').textContent = title || 'Procesando solicitud...';
+        document.getElementById('loadingMessage').textContent = message || 'Por favor espere.';
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+        document.getElementById('loadingOverlay').classList.add('flex');
+    }
+
+    // Aprobar reserva con modal personalizado
+    document.querySelectorAll('form[action*="aprobar"]').forEach(function(form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const confirmado = await window.customConfirm({
+                title: 'Aprobar Reserva',
+                message: '¿Estás seguro de aprobar esta reserva? Se enviará una confirmación al solicitante.',
+                type: 'success',
+                confirmText: 'Sí, aprobar',
+                cancelText: 'Cancelar'
+            });
+            
+            if (confirmado) {
+                showLoader('Aprobando reserva...', 'Enviando confirmación al solicitante y notificando al encargado del recinto.');
+                form.submit();
+            }
+        });
+    });
+
+    // Rechazar reserva - el formulario de rechazo ya tiene validación
+    document.querySelectorAll('form[action*="rechazar"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            showLoader('Rechazando reserva...', 'Enviando notificación de rechazo al solicitante.');
+        });
+    });
+</script>
 @endsection

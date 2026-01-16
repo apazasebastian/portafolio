@@ -8,10 +8,17 @@ use App\Models\Reserva;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de Incidencias
+ * 
+ * Permite a los encargados de recinto reportar incidencias despues de que
+ * se use un recinto. Por ejemplo: si el grupo no asistio, si dejaron el
+ * recinto en mal estado, o si hubo algun dano en las instalaciones.
+ */
 class IncidenciasController extends Controller
 {
     /**
-     * Redirigir al dashboard (no hay vista de listado)
+     * Redirige al panel principal (no hay listado de incidencias separado)
      */
     public function index()
     {
@@ -19,13 +26,18 @@ class IncidenciasController extends Controller
     }
 
     /**
-     * Mostrar formulario para crear incidencia
+     * Muestra el formulario para reportar una nueva incidencia
+     * 
+     * Solo se pueden reportar incidencias de reservas que ya terminaron
+     * y que fueron aprobadas. Esto asegura que el reporte sea sobre
+     * un uso real del recinto.
      */
     public function crear($reservaId)
     {
+        // Busca la reserva con sus datos del recinto e incidencias previas
         $reserva = Reserva::with(['recinto', 'incidencias'])->findOrFail($reservaId);
         
-        // Validar que la reserva pueda tener incidencia reportada
+        // Verifica que sea una reserva finalizada y aprobada
         if (!$reserva->puedeReportarIncidencia()) {
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Esta reserva no puede tener incidencias reportadas. Debe estar aprobada y finalizada.');
@@ -35,20 +47,23 @@ class IncidenciasController extends Controller
     }
 
     /**
-     * Guardar nueva incidencia
+     * Guarda una nueva incidencia en el sistema
+     * 
+     * Valida los datos del formulario y crea el registro de incidencia.
+     * Si el grupo si asistio, se piden datos adicionales como cuantas
+     * personas habia y en que estado quedo el recinto.
      */
     public function store(Request $request, $reservaId)
     {
         $reserva = Reserva::findOrFail($reservaId);
         
-        // Validar que la reserva pueda tener incidencia
+        // Verificacion de seguridad: la reserva debe poder tener incidencia
         if (!$reserva->puedeReportarIncidencia()) {
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Esta reserva no puede tener incidencias reportadas.');
         }
         
-        // ✅ VALIDACIÓN EN DOS PASOS: Base + Condicional
-        // PASO 1: Validar campos base
+        // Primero valida los campos basicos que siempre se requieren
         $baseValidated = $request->validate([
             'tipo' => 'required|in:problema_posuso,dano,otro',
             'asistieron' => 'required|in:si,no',
@@ -63,7 +78,7 @@ class IncidenciasController extends Controller
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres',
         ]);
 
-        // PASO 2: Validar campos condicionales solo si asistieron = SÍ
+        // Si indicaron que si asistieron, valida campos adicionales
         $validated = $baseValidated;
         $imagenesGuardadas = [];
         
@@ -95,7 +110,7 @@ class IncidenciasController extends Controller
             
             $validated = array_merge($baseValidated, $additionalValidated);
             
-            // Procesar y guardar imágenes
+            // Guarda las imagenes subidas
             if ($request->hasFile('imagenes')) {
                 foreach ($request->file('imagenes') as $imagen) {
                     $nombreArchivo = 'incidencia_' . $reservaId . '_' . time() . '_' . uniqid() . '.' . $imagen->getClientOriginalExtension();
@@ -105,14 +120,12 @@ class IncidenciasController extends Controller
             }
         }
         
-        // ✅ CONSTRUIR DESCRIPCIÓN COMPLETA
+        // Construye la descripcion completa que se guardara
         $descripcionCompleta = "REPORTE DE INCIDENCIA\n";
         $descripcionCompleta .= "======================\n\n";
-        
-        // Agregar información de asistencia
         $descripcionCompleta .= "¿Asistieron?: " . ($validated['asistieron'] === 'si' ? 'SÍ' : 'NO') . "\n";
         
-        // Si asistieron, agregar campos adicionales
+        // Si asistieron, agrega los datos adicionales
         if ($validated['asistieron'] === 'si') {
             $descripcionCompleta .= "Estado del Recinto: " . ($validated['estado_recinto'] === 'buen_estado' ? 'Buen Estado' : 'Mal Estado') . "\n";
             $descripcionCompleta .= "Cantidad de Personas: " . $validated['cantidad_personas'] . "\n";
@@ -127,7 +140,7 @@ class IncidenciasController extends Controller
         $descripcionCompleta .= "Descripción de la Incidencia:\n";
         $descripcionCompleta .= $validated['descripcion'];
         
-        // Crear la incidencia
+        // Crea el registro de incidencia en la base de datos
         $incidencia = Incidencia::create([
             'reserva_id' => $reserva->id,
             'tipo' => $validated['tipo'],
@@ -136,7 +149,7 @@ class IncidenciasController extends Controller
             'imagenes' => count($imagenesGuardadas) > 0 ? $imagenesGuardadas : null,
         ]);
 
-        // REGISTRAR EN AUDITORÍA
+        // Registra esta accion en el historial de auditoria
         AuditLog::log(
             action: 'crear_incidencia',
             description: "Creó incidencia de tipo '{$this->getNombreTipo($validated['tipo'])}' para la reserva #{$reserva->id} en {$reserva->recinto->nombre}",
@@ -160,17 +173,23 @@ class IncidenciasController extends Controller
     }
 
     /**
-     * Mostrar detalles de una incidencia
+     * Muestra los detalles completos de una incidencia
      */
     public function show(Incidencia $incidencia)
     {
+        // Carga los datos relacionados: reserva, recinto, quien aprobo
         $incidencia->load(['reserva.recinto', 'reserva.aprobadaPor']);
         
         return view('admin.incidencias.show', compact('incidencia'));
     }
 
     /**
-     * Cambiar estado de una incidencia
+     * Cambia el estado de una incidencia
+     * 
+     * Los estados posibles son:
+     * - Reportada: recien creada, pendiente de revision
+     * - En Revision: alguien ya la esta revisando
+     * - Resuelta: el problema fue solucionado
      */
     public function cambiarEstado(Request $request, Incidencia $incidencia)
     {
@@ -178,14 +197,14 @@ class IncidenciasController extends Controller
             'estado' => 'required|in:reportada,en_revision,resuelta',
         ]);
 
-        // Guardar estado anterior
+        // Guarda el estado anterior para el registro de auditoria
         $oldEstado = $incidencia->estado;
         
         $incidencia->update([
             'estado' => $validated['estado'],
         ]);
 
-        // REGISTRAR EN AUDITORÍA
+        // Registra el cambio en el historial
         AuditLog::log(
             action: 'cambiar_estado_incidencia',
             description: "Cambió el estado de la incidencia #{$incidencia->id} de '{$this->getNombreEstado($oldEstado)}' a '{$this->getNombreEstado($validated['estado'])}'",
@@ -199,17 +218,18 @@ class IncidenciasController extends Controller
     }
 
     /**
-     * Eliminar incidencia
+     * Elimina una incidencia del sistema
      */
     public function destroy(Incidencia $incidencia)
     {
+        // Guarda los datos antes de eliminar para el registro
         $reservaId = $incidencia->reserva_id;
         $incidenciaId = $incidencia->id;
         $tipo = $incidencia->tipo;
         $descripcion = $incidencia->descripcion;
         $estado = $incidencia->estado;
 
-        // REGISTRAR EN AUDITORÍA ANTES DE ELIMINAR
+        // Registra la eliminacion en el historial
         AuditLog::log(
             action: 'eliminar_incidencia',
             description: "Eliminó la incidencia #{$incidenciaId} (Tipo: {$this->getNombreTipo($tipo)}, Estado: {$this->getNombreEstado($estado)})",
@@ -229,8 +249,12 @@ class IncidenciasController extends Controller
             ->with('success', 'Incidencia eliminada correctamente.');
     }
 
+    // =========================================================================
+    // FUNCIONES AUXILIARES - Convierten codigos a nombres legibles
+    // =========================================================================
+
     /**
-     * Obtener nombre legible del tipo de incidencia
+     * Convierte el codigo del tipo de incidencia a un nombre legible
      */
     private function getNombreTipo($tipo)
     {
@@ -243,7 +267,7 @@ class IncidenciasController extends Controller
     }
 
     /**
-     * Obtener nombre legible del estado
+     * Convierte el codigo de estado a un nombre legible
      */
     private function getNombreEstado($estado)
     {

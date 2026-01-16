@@ -649,7 +649,120 @@
     </div>
     <!-- Fin del contenedor principal -->
 
+    <!-- Modal de Confirmación Personalizado -->
+    <div id="customConfirmModal" class="fixed inset-0 z-50 hidden">
+        <!-- Overlay oscuro -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" id="confirmModalOverlay"></div>
+        
+        <!-- Contenedor del modal -->
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all w-full max-w-md" id="confirmModalContent">
+                    <!-- Icono y Header -->
+                    <div class="p-6 pb-4">
+                        <div class="flex items-center justify-center mb-4">
+                            <div id="confirmModalIcon" class="w-16 h-16 rounded-full flex items-center justify-center bg-red-100">
+                                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <h3 id="confirmModalTitle" class="text-xl font-bold text-gray-900 text-center mb-2">
+                            ¿Estás seguro?
+                        </h3>
+                        
+                        <p id="confirmModalMessage" class="text-gray-600 text-center">
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="flex gap-3 p-4 pt-2 bg-gray-50">
+                        <button type="button" id="confirmModalCancel" 
+                                class="flex-1 px-4 py-3 text-gray-700 font-semibold bg-gray-200 hover:bg-gray-300 rounded-xl transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="button" id="confirmModalAccept" 
+                                class="flex-1 px-4 py-3 text-white font-semibold bg-red-600 hover:bg-red-700 rounded-xl transition-colors">
+                            Confirmar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Sistema de Modal de Confirmación Personalizado
+        window.customConfirm = function(options) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const title = document.getElementById('confirmModalTitle');
+                const message = document.getElementById('confirmModalMessage');
+                const acceptBtn = document.getElementById('confirmModalAccept');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+                const icon = document.getElementById('confirmModalIcon');
+                
+                // Configurar textos
+                title.textContent = options.title || '¿Estás seguro?';
+                message.textContent = options.message || 'Esta acción no se puede deshacer.';
+                acceptBtn.textContent = options.confirmText || 'Confirmar';
+                cancelBtn.textContent = options.cancelText || 'Cancelar';
+                
+                // Configurar colores según el tipo
+                const type = options.type || 'danger';
+                acceptBtn.className = 'flex-1 px-4 py-3 text-white font-semibold rounded-xl transition-colors ';
+                
+                if (type === 'danger') {
+                    icon.className = 'w-16 h-16 rounded-full flex items-center justify-center bg-red-100';
+                    icon.innerHTML = '<svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                    acceptBtn.className += 'bg-red-600 hover:bg-red-700';
+                } else if (type === 'success') {
+                    icon.className = 'w-16 h-16 rounded-full flex items-center justify-center bg-green-100';
+                    icon.innerHTML = '<svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                    acceptBtn.className += 'bg-green-600 hover:bg-green-700';
+                } else if (type === 'warning') {
+                    icon.className = 'w-16 h-16 rounded-full flex items-center justify-center bg-yellow-100';
+                    icon.innerHTML = '<svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                    acceptBtn.className += 'bg-yellow-600 hover:bg-yellow-700';
+                } else if (type === 'info') {
+                    icon.className = 'w-16 h-16 rounded-full flex items-center justify-center bg-blue-100';
+                    icon.innerHTML = '<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                    acceptBtn.className += 'bg-blue-600 hover:bg-blue-700';
+                }
+                
+                // Mostrar modal
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                // Limpiar eventos anteriores
+                const newAcceptBtn = acceptBtn.cloneNode(true);
+                const newCancelBtn = cancelBtn.cloneNode(true);
+                acceptBtn.parentNode.replaceChild(newAcceptBtn, acceptBtn);
+                cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+                
+                // Eventos de cierre
+                function closeModal(result) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                    resolve(result);
+                }
+                
+                newAcceptBtn.addEventListener('click', () => closeModal(true));
+                newCancelBtn.addEventListener('click', () => closeModal(false));
+                document.getElementById('confirmModalOverlay').addEventListener('click', () => closeModal(false));
+                
+                // Cerrar con Escape
+                document.addEventListener('keydown', function escHandler(e) {
+                    if (e.key === 'Escape') {
+                        closeModal(false);
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                });
+            });
+        };
+
         // Toggle menú móvil
         document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');

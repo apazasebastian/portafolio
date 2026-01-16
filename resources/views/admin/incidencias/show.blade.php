@@ -197,11 +197,11 @@
                 Volver a Incidencias
             </a>
             
-            <form action="{{ route('admin.incidencias.destroy', $incidencia) }}" method="POST" class="flex-1"
-                  onsubmit="return confirm('¿Está seguro de eliminar esta incidencia? Esta acción no se puede deshacer.')">
+            <form id="formEliminarIncidencia" action="{{ route('admin.incidencias.destroy', $incidencia) }}" method="POST" class="flex-1">
                 @csrf
                 @method('DELETE')
-                <button type="submit" 
+                <button type="button" 
+                        onclick="confirmarEliminarIncidencia()"
                         class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-md transition-colors">
                     Eliminar Incidencia
                 </button>
@@ -209,4 +209,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    async function confirmarEliminarIncidencia() {
+        const confirmado = await window.customConfirm({
+            title: 'Eliminar Incidencia',
+            message: '¿Está seguro de eliminar esta incidencia? Esta acción no se puede deshacer.',
+            type: 'danger',
+            confirmText: 'Sí, eliminar',
+            cancelText: 'Cancelar'
+        });
+        
+        if (confirmado) {
+            document.getElementById('formEliminarIncidencia').submit();
+        }
+    }
+</script>
 @endsection
