@@ -178,7 +178,7 @@
                     </span>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <span class="hidden lg:inline">Municipalidad de Arica</span>
+                    <span class="hidden lg:inline">Redes Sociales</span>
                     <!-- Redes Sociales -->
                     <div class="flex items-center space-x-2">
                         <!-- Facebook -->
@@ -268,13 +268,7 @@
                         </svg>
                         Inicio
                     </a>
-                    <a href="{{ route('calendario') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('calendario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                        </svg>
-                        Calendario
-                    </a>
+
                     <a href="{{ route('reglamentos') }}" 
                        class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -356,13 +350,7 @@
                         </svg>
                         Inicio
                     </a>
-                    <a href="{{ route('calendario') }}" 
-                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('calendario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                        </svg>
-                        Calendario
-                    </a>
+
                     <a href="{{ route('reglamentos') }}" 
                        class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
