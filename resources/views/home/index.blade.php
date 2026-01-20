@@ -257,6 +257,275 @@
             </div>
         </div>
     </div>
+
+    <!-- ==================== SECCIÓN NUESTROS RECINTOS ==================== -->
+    <div class="mb-8">
+        <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-6 py-4 rounded-t-lg">
+            <h2 class="text-2xl font-bold flex items-center">
+                <svg class="w-7 h-7 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-.707 1.707L10 19.414l-5.293-1.707A1 1 0 014 16V4z" clip-rule="evenodd"/>
+                </svg>
+                Nuestros Recintos Deportivos
+            </h2>
+            <p class="text-blue-200 mt-1">Conoce las instalaciones disponibles para la comunidad</p>
+        </div>
+        <div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-gray-200 rounded-b-lg p-6 shadow-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                @foreach($recintos as $recinto)
+                @php
+                    // Datos de contacto por recinto
+                    $datosRecintos = [
+                        1 => ['direccion' => 'Pablo Picasso 2150, Arica', 'telefono' => '(58) 260 9502', 'coords' => '-18.4783,-70.3126'],
+                        2 => ['direccion' => 'Ginebra 3708, Arica', 'telefono' => '(58) 220 0000', 'coords' => '-18.4856,-70.2987'],
+                        3 => ['direccion' => 'Rafael Sotomayor 600, Arica', 'telefono' => '(58) 220 6582', 'coords' => '-18.4742,-70.3148'],
+                        4 => ['direccion' => 'España 121, Arica', 'telefono' => '(58) 220 0001', 'coords' => '-18.4697,-70.3213'],
+                    ];
+                    $info = $datosRecintos[$recinto->id] ?? ['direccion' => 'Arica', 'telefono' => 'No disponible', 'coords' => '-18.4783,-70.3126'];
+                    
+                    // Imagen del recinto
+                    $imagenUrl = $recinto->imagen_url 
+                        ? asset('storage/' . $recinto->imagen_url) 
+                        : 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800';
+                @endphp
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <!-- Imagen del recinto -->
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="{{ $imagenUrl }}" 
+                             alt="{{ $recinto->nombre }}" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                             onerror="this.src='https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <h3 class="text-white font-bold text-lg drop-shadow-lg">{{ $recinto->nombre }}</h3>
+                        </div>
+                        <!-- Badge de capacidad -->
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                            <span class="text-sm font-bold text-blue-800">
+                                <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                                </svg>
+                                {{ $recinto->capacidad_maxima }}
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Contenido -->
+                    <div class="p-4">
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $recinto->descripcion }}</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center text-gray-500">
+                                <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="truncate">{{ $info['direccion'] }}</span>
+                            </div>
+                            <div class="flex items-center text-gray-500">
+                                <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                </svg>
+                                <span>{{ $info['telefono'] }}</span>
+                            </div>
+                        </div>
+                        <!-- Botón Ver Disponibilidad -->
+                        <a href="{{ route('calendario') }}?recinto={{ $recinto->id }}" 
+                           class="mt-4 block w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg">
+                            Ver Disponibilidad
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECCIÓN CONTACTO ==================== -->
+    <div class="mb-4">
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-2xl">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <!-- Formulario de Contacto -->
+                <div class="p-8 lg:p-12">
+                    <h2 class="text-3xl font-bold text-white mb-2">Contáctanos</h2>
+                    <p class="text-gray-400 mb-8">¿Tienes alguna consulta sobre nuestros recintos? Escríbenos</p>
+                    
+                    <form id="formContacto" class="space-y-5">
+                        @csrf
+                        <!-- Selector de Recinto -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Recinto de interés</label>
+                            <select id="selectRecinto" name="recinto_id" 
+                                    class="w-full bg-gray-700/50 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
+                                <option value="">Selecciona un recinto...</option>
+                                @foreach($recintos as $recinto)
+                                @php
+                                    $encargadoEmails = [
+                                        1 => 'carlosapazac33@gmail.com',
+                                        2 => 'gomezchurabrayan@gmail.com',
+                                        3 => 'reservas@muniarica.cl',
+                                        4 => 'apazasebastian@gmail.com',
+                                    ];
+                                @endphp
+                                <option value="{{ $recinto->id }}" data-email="{{ $encargadoEmails[$recinto->id] ?? 'reservas@muniarica.cl' }}">
+                                    {{ $recinto->nombre }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <!-- Email del encargado (auto-rellenado) -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Email del encargado</label>
+                            <input type="email" id="emailEncargado" name="email_encargado" readonly
+                                   class="w-full bg-gray-600/30 border border-gray-600 text-gray-400 rounded-lg px-4 py-3 cursor-not-allowed"
+                                   placeholder="Se llenará automáticamente...">
+                        </div>
+                        
+                        <!-- Nombre -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Nombre y Apellido</label>
+                            <input type="text" name="nombre" required
+                                   class="w-full bg-gray-700/50 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder-gray-500"
+                                   placeholder="Ingresa tu nombre completo">
+                        </div>
+                        
+                        <!-- Email del usuario -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Tu Email</label>
+                            <input type="email" name="email" required
+                                   class="w-full bg-gray-700/50 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder-gray-500"
+                                   placeholder="tucorreo@ejemplo.com">
+                        </div>
+                        
+                        <!-- Teléfono -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Teléfono</label>
+                            <input type="tel" name="telefono"
+                                   class="w-full bg-gray-700/50 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder-gray-500"
+                                   placeholder="+56 9 1234 5678">
+                        </div>
+                        
+                        <!-- Mensaje -->
+                        <div>
+                            <label class="block text-gray-300 text-sm font-medium mb-2">Mensaje</label>
+                            <textarea name="mensaje" rows="4" required
+                                      class="w-full bg-gray-700/50 border border-gray-600 text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all placeholder-gray-500 resize-none"
+                                      placeholder="Cuéntanos tu consulta..."></textarea>
+                        </div>
+                        
+                        <!-- Botón Enviar -->
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                            ENVIAR MENSAJE
+                        </button>
+                    </form>
+                    
+                    <!-- Info de contacto adicional -->
+                    <div class="mt-8 pt-6 border-t border-gray-700">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div class="flex items-center text-gray-400">
+                                <svg class="w-5 h-5 mr-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                </svg>
+                                <span>+56 58 220 5500</span>
+                            </div>
+                            <div class="flex items-center text-gray-400">
+                                <svg class="w-5 h-5 mr-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                                </svg>
+                                <span>reservas@muniarica.cl</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mapa y Ubicaciones -->
+                <div class="bg-gray-700/30 p-6 lg:p-8 flex flex-col">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        Ubicación de Recintos
+                    </h3>
+                    
+                    <!-- Lista de ubicaciones -->
+                    <div class="space-y-3 mb-6">
+                        <button onclick="cambiarMapa(1, 'Epicentro 1', '-18.4783,-70.3126')" 
+                                class="w-full text-left bg-gray-800/50 hover:bg-gray-800 border border-gray-600 hover:border-orange-500 rounded-lg p-3 transition-all group">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-white group-hover:text-orange-400 transition-colors">Epicentro 1</p>
+                                    <p class="text-sm text-gray-400">Pablo Picasso 2150</p>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </button>
+                        <button onclick="cambiarMapa(2, 'Epicentro 2', '-18.4856,-70.2987')" 
+                                class="w-full text-left bg-gray-800/50 hover:bg-gray-800 border border-gray-600 hover:border-orange-500 rounded-lg p-3 transition-all group">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-white group-hover:text-orange-400 transition-colors">Epicentro 2</p>
+                                    <p class="text-sm text-gray-400">Ginebra 3708</p>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </button>
+                        <button onclick="cambiarMapa(3, 'Fortín Sotomayor', '-18.4742,-70.3148')" 
+                                class="w-full text-left bg-gray-800/50 hover:bg-gray-800 border border-gray-600 hover:border-orange-500 rounded-lg p-3 transition-all group">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-white group-hover:text-orange-400 transition-colors">Fortín Sotomayor</p>
+                                    <p class="text-sm text-gray-400">Rafael Sotomayor 600</p>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </button>
+                        <button onclick="cambiarMapa(4, 'Piscina Olímpica', '-18.4697,-70.3213')" 
+                                class="w-full text-left bg-gray-800/50 hover:bg-gray-800 border border-gray-600 hover:border-orange-500 rounded-lg p-3 transition-all group">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-white group-hover:text-orange-400 transition-colors">Piscina Olímpica</p>
+                                    <p class="text-sm text-gray-400">España 121</p>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- Mapa Google Maps Embed -->
+                    <div class="flex-grow rounded-xl overflow-hidden border-2 border-gray-600 min-h-[300px]">
+                        <iframe id="mapaRecinto"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3768.1!2d-70.3126!3d-18.4783!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDI4JzQyLjAiUyA3MMKwMTgnNDUuNCJX!5e0!3m2!1ses!2scl!4v1"
+                                class="w-full h-full min-h-[300px]"
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                    
+                    <!-- Indicador del recinto seleccionado -->
+                    <div class="mt-4 bg-orange-500/20 border border-orange-500/40 rounded-lg p-3 text-center">
+                        <p class="text-orange-400 font-medium" id="recintoMapaLabel">
+                            <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            Selecciona un recinto para ver su ubicación
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal ¿Cómo Reservar? -->
@@ -693,6 +962,77 @@ document.getElementById('modalSeleccionRecinto')?.addEventListener('click', func
     if (e.target === this) {
         cerrarModalRecinto();
     }
+});
+
+// ==================== FUNCIONES LANDING PAGE ====================
+
+// Auto-rellenar email del encargado al seleccionar recinto
+document.getElementById('selectRecinto')?.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const email = selectedOption.dataset.email || '';
+    document.getElementById('emailEncargado').value = email;
+});
+
+// Cambiar mapa según recinto seleccionado
+function cambiarMapa(recintoId, nombreRecinto, coords) {
+    const [lat, lng] = coords.split(',');
+    const mapaIframe = document.getElementById('mapaRecinto');
+    const label = document.getElementById('recintoMapaLabel');
+    
+    // Construir URL del mapa con las coordenadas
+    const mapUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${encodeURIComponent(nombreRecinto)}!5e0!3m2!1ses!2scl!4v1`;
+    
+    mapaIframe.src = mapUrl;
+    label.innerHTML = `
+        <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+        </svg>
+        Mostrando: <strong>${nombreRecinto}</strong>
+    `;
+    
+    // También actualizar el selector del formulario
+    document.getElementById('selectRecinto').value = recintoId;
+    document.getElementById('selectRecinto').dispatchEvent(new Event('change'));
+}
+
+// Manejo del formulario de contacto (estructura sin envío)
+document.getElementById('formContacto')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Por ahora solo mostrar confirmación visual
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = `
+        <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Enviando...
+    `;
+    btn.disabled = true;
+    
+    // Simular envío (después puedes conectar con backend)
+    setTimeout(() => {
+        btn.innerHTML = `
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            ¡Mensaje Enviado!
+        `;
+        btn.classList.remove('from-orange-500', 'to-orange-600');
+        btn.classList.add('from-green-500', 'to-green-600');
+        
+        // Restaurar después de 3 segundos
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('from-green-500', 'to-green-600');
+            btn.classList.add('from-orange-500', 'to-orange-600');
+            this.reset();
+            document.getElementById('emailEncargado').value = '';
+        }, 3000);
+    }, 1500);
 });
 </script>
 @endsection

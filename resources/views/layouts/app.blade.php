@@ -776,5 +776,81 @@
             });
         });
     </script>
+
+    <!-- n8n Chat Widget - Asistente Virtual Municipal -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <script type="module">
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+        createChat({
+            webhookUrl: 'http://localhost:5678/webhook/2909c8f6-6893-4bfa-a978-ac78c275d88e/chat',
+            mode: 'window',
+            showWelcomeScreen: true,
+            defaultLanguage: 'es',
+            initialMessages: [
+                '¡Hola! 👋 Soy el asistente virtual del Sistema de Reservas de Recintos Deportivos de la Municipalidad de Arica.',
+                '¿En qué puedo ayudarte hoy? Puedo responder consultas sobre disponibilidad, recintos y el proceso de reserva.'
+            ],
+            i18n: {
+                es: {
+                    title: 'Asistente Municipal',
+                    subtitle: 'Sistema de Reservas Deportivas',
+                    footer: '',
+                    getStarted: 'Iniciar Conversación',
+                    inputPlaceholder: 'Escribe tu mensaje...',
+                    closeButtonTooltip: 'Cerrar chat',
+                },
+            },
+            theme: {
+                // Colores institucionales de la municipalidad
+                '--chat--color-primary': '#1e3a8a',
+                '--chat--color-primary-shade-50': '#3b5998',
+                '--chat--color-primary-shade-100': '#1e3a8a',
+                '--chat--color-secondary': '#f59e0b',
+                '--chat--color-secondary-shade-50': '#fbbf24',
+                '--chat--color-white': '#ffffff',
+                '--chat--color-light': '#f8fafc',
+                '--chat--color-light-shade-50': '#e2e8f0',
+                '--chat--color-light-shade-100': '#cbd5e1',
+                '--chat--color-medium': '#64748b',
+                '--chat--color-dark': '#1e293b',
+                '--chat--color-disabled': '#94a3b8',
+                '--chat--color-typing': '#64748b',
+                '--chat--spacing': '1rem',
+                '--chat--border-radius': '0.75rem',
+                '--chat--transition-duration': '0.15s',
+
+                '--chat--window--width': '400px',
+                '--chat--window--height': '600px',
+
+                '--chat--header-height': 'auto',
+                '--chat--header--padding': '1rem',
+                '--chat--header--background': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                '--chat--header--color': '#ffffff',
+
+                '--chat--textarea--height': '50px',
+                '--chat--message--bot--background': '#f1f5f9',
+                '--chat--message--bot--color': '#1e293b',
+                '--chat--message--user--background': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                '--chat--message--user--color': '#ffffff',
+                '--chat--message--pre--background': '#1e293b',
+                
+                '--chat--toggle--background': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                '--chat--toggle--hover--background': 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)',
+                '--chat--toggle--active--background': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                '--chat--toggle--color': '#ffffff',
+                '--chat--toggle--size': '60px',
+            },
+        });
+    </script>
+    <style>
+        /* Ajustes adicionales para el chat widget */
+        .n8n-chat .chat-toggle {
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.4);
+        }
+        .n8n-chat .chat-toggle:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </body>
 </html>
