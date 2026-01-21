@@ -3,7 +3,7 @@
 @section('title', 'Estadísticas y Reportes')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
     
     <!-- Header -->
     <div class="mb-8">

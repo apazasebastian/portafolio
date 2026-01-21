@@ -3,7 +3,7 @@
 @section('title', 'Confirmar Cancelación')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
     <div class="max-w-3xl mx-auto">
         
         <div class="mb-6">
