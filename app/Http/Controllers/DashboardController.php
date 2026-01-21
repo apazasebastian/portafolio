@@ -150,14 +150,19 @@ class DashboardController extends Controller
 
             return response()->json([
                 'html' => $html,
-                'paginacion' => $reservas->links()->toHtml(),
+                'pagination' => [
+                    'current_page' => $reservas->currentPage(),
+                    'last_page' => $reservas->lastPage(),
+                    'has_more_pages' => $reservas->hasMorePages(),
+                    'on_first_page' => $reservas->onFirstPage(),
+                ],
                 'total' => $reservas->total(),
                 'desde' => $reservas->firstItem() ?? 0,
                 'hasta' => $reservas->lastItem() ?? 0
             ]);
         }
 
-        return view('admin.dashboard', compact(
+        $response = response()->view('admin.dashboard', compact(
             'reservasPendientes',
             'reservasHoy',
             'reservasEstesMes',
@@ -170,6 +175,13 @@ class DashboardController extends Controller
             'recintos',
             'todasReservasCalendario'
         ));
+
+        // Prevenir caché para evitar problemas al navegar con botón atrás
+        $response->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        $response->header('Pragma', 'no-cache');
+        $response->header('Expires', '0');
+
+        return $response;
     }
 
     /**

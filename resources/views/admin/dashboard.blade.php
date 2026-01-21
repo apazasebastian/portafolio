@@ -903,8 +903,8 @@ function cargarReservasDashboard(pagina = 1) {
     
     tablaContainer.style.opacity = '0.5';
 
-    // Construir URL con parámetros
-    const params = new URLSearchParams({
+    // Construir URL con parámetros PARA FETCH (incluye ajax)
+    const fetchParams = new URLSearchParams({
         estado: estado,
         recinto_id: recintoId,
         deporte: deporte,
@@ -912,11 +912,22 @@ function cargarReservasDashboard(pagina = 1) {
         buscar_rut: buscarRut,
         buscar_organizacion: buscarOrg,
         page: pagina,
-        ajax: '1'
+        ajax: '1'  // Solo para el fetch
+    });
+
+    // Construir URL para el historial (SIN ajax)
+    const historyParams = new URLSearchParams({
+        estado: estado,
+        recinto_id: recintoId,
+        deporte: deporte,
+        fecha: fecha,
+        buscar_rut: buscarRut,
+        buscar_organizacion: buscarOrg,
+        page: pagina
     });
 
     // Hacer petición AJAX
-    fetch(`{{ route('admin.dashboard') }}?${params.toString()}`, {
+    fetch(`{{ route('admin.dashboard') }}?${fetchParams.toString()}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
@@ -937,7 +948,27 @@ function cargarReservasDashboard(pagina = 1) {
         
         // Actualizar paginación y contador
         const paginacionContainer = document.querySelector('.px-6.py-4.border-t.border-gray-200.bg-gray-50');
-        if (paginacionContainer) {
+        if (paginacionContainer && data.pagination) {
+            const p = data.pagination;
+            let paginacionHTML = '';
+            
+            // Botón Anterior
+            if (p.on_first_page) {
+                paginacionHTML += '<span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">Anterior</span>';
+            } else {
+                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page - 1})" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Anterior</button>`;
+            }
+            
+            // Info de página
+            paginacionHTML += `<span class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md font-medium">Página ${p.current_page} de ${p.last_page}</span>`;
+            
+            // Botón Siguiente
+            if (p.has_more_pages) {
+                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page + 1})" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Siguiente</button>`;
+            } else {
+                paginacionHTML += '<span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">Siguiente</span>';
+            }
+            
             paginacionContainer.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-600">
@@ -945,13 +976,13 @@ function cargarReservasDashboard(pagina = 1) {
                         a <span class="font-semibold text-gray-900">${data.hasta}</span> 
                         de <span class="font-semibold text-gray-900">${data.total}</span> reservas
                     </div>
-                    <div>${data.paginacion}</div>
+                    <div class="flex items-center gap-2">${paginacionHTML}</div>
                 </div>
             `;
         }
 
-        // Actualizar URL sin recargar
-        const newUrl = `{{ route('admin.dashboard') }}?${params.toString()}`;
+        // Actualizar URL sin recargar - IMPORTANTE: sin el parámetro ajax
+        const newUrl = `{{ route('admin.dashboard') }}?${historyParams.toString()}`;
         window.history.pushState({path: newUrl}, '', newUrl);
     })
     .catch(error => {
@@ -1024,9 +1055,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Manejar clics en paginación
     document.addEventListener('click', function(e) {
-        if (e.target.matches('.pagination a') || e.target.closest('.pagination a')) {
+        const link = e.target.closest('a[href*="page="]');
+        
+        if (link && link.closest('.px-6.py-4.border-t')) {
             e.preventDefault();
-            const link = e.target.matches('.pagination a') ? e.target : e.target.closest('.pagination a');
             const url = new URL(link.href);
             const page = url.searchParams.get('page');
             cargarReservasDashboard(page);
@@ -1059,6 +1091,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Recargar sin filtros
             cargarReservasDashboard();
         });
+    }
+
+    // Detectar navegación con botón "atrás" y forzar recarga completa
+    // Detectar cuando el usuario usa botón atrás/adelante (popstate)
+    window.addEventListener('popstate', function(event) 
+    {
+        window.location.reload();
+    });
+
+    // También detectar con performance API
+    if (performance.navigation.type === 2) {
+        // El usuario llegó usando botón atrás/adelante
+        window.location.reload();
     }
 });
 </script>
