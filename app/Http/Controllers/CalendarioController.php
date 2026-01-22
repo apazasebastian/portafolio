@@ -20,11 +20,34 @@ class CalendarioController extends Controller
      * 
      * Esta pagina permite a los ciudadanos ver todos los recintos activos
      * y las reservas existentes de los proximos 30 dias.
+     * Ahora puede filtrar por un recinto especifico si se pasa recinto_id
      */
-    public function index()
+    public function index(Request $request)
     {
         // Obtiene solo los recintos que estan activos y disponibles para reservar
         $recintos = Recinto::activos()->get();
+        
+        // Verifica si se esta filtrando por un recinto especifico
+        $recintoSeleccionado = null;
+        $encargadoInfo = null;
+        
+        if ($request->has('recinto')) {
+            $recintoId = $request->get('recinto');
+            $recintoSeleccionado = Recinto::activos()->find($recintoId);
+            
+            // Si existe el recinto, obtener informacion del encargado
+            if ($recintoSeleccionado) {
+                // Datos de encargados por recinto (hardcoded por ahora)
+                $encargadosData = [
+                    1 => ['nombre' => 'Carlos Apaza', 'email' => 'carlosapazac33@gmail.com', 'direccion' => 'Pablo Picasso 2150, Arica'],
+                    2 => ['nombre' => 'Brayan Gomez', 'email' => 'gomezchurabrayan@gmail.com', 'direccion' => 'Ginebra 3708, Arica'],
+                    3 => ['nombre' => 'Jefe de Recintos', 'email' => 'reservas@muniarica.cl', 'direccion' => 'Rafael Sotomayor 600, Arica'],
+                    4 => ['nombre' => 'Sebastian Apaza', 'email' => 'apazasebastian@gmail.com', 'direccion' => 'España 121, Arica'],
+                ];
+                
+                $encargadoInfo = $encargadosData[$recintoId] ?? null;
+            }
+        }
         
         // Define el rango de fechas a mostrar (desde hoy hasta 30 dias despues)
         $fechaInicio = Carbon::now()->startOfDay();
@@ -39,7 +62,7 @@ class CalendarioController extends Controller
             ->get()
             ->groupBy(['recinto_id', 'fecha_reserva']);
         
-        return view('calendario.index', compact('recintos', 'reservas', 'fechaInicio', 'fechaFin'));
+        return view('calendario.index', compact('recintos', 'reservas', 'fechaInicio', 'fechaFin', 'recintoSeleccionado', 'encargadoInfo'));
     }
     
     /**
@@ -240,5 +263,104 @@ class CalendarioController extends Controller
             'total_reservas' => $reservas->count(),
             'bloqueos_dia' => $bloqueosFecha
         ]);
+    }
+    
+    /**
+     * Calcula el estado general de un dia para un recinto
+     * Retorna: 'DISPONIBLE', 'OCUPADO', o 'MANTENIMIENTO'
+     */
+    public function estadoDia(Request $request)
+    {
+        $recintoId = $request->get('recinto_id');
+        $fecha = $request->get('fecha');
+        
+        if (!$recintoId || !$fecha) {
+            return response()->json(['error' => 'Parámetros inválidos'], 400);
+        }
+        
+        $recinto = Recinto::find($recintoId);
+        if (!$recinto) {
+            return response()->json(['error' => 'Recinto no encontrado'], 404);
+        }
+        
+        try {
+            $fechaCarbon = Carbon::parse($fecha);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Fecha inválida'], 400);
+        }
+        
+        $diaSemana = strtolower($fechaCarbon->format('l'));
+        $fechaString = $fechaCarbon->format('Y-m-d');
+        
+        // Verificar si esta cerrado por mantenimiento
+        $diasCerrados = [];
+        if (is_array($recinto->dias_cerrados)) {
+            $diasCerrados = $recinto->dias_cerrados;
+        } elseif (is_string($recinto->dias_cerrados) && !empty($recinto->dias_cerrados)) {
+            try {
+                $diasCerrados = json_decode($recinto->dias_cerrados, true) ?? [];
+            } catch (\Exception $e) {
+                $diasCerrados = [];
+            }
+        }
+        
+        $diasCompletos = [];
+        if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
+            $diasCompletos = $diasCerrados['dias_completos'];
+        } elseif (!isset($diasCerrados['dias_completos']) && !isset($diasCerrados['rangos_bloqueados'])) {
+            $diasCompletos = $diasCerrados;
+        }
+        
+        if (in_array($diaSemana, $diasCompletos)) {
+            return response()->json(['estado' => 'MANTENIMIENTO']);
+        }
+        
+        // Obtener horarios y calcular bloques totales
+        $horarios = [];
+        if (is_array($recinto->horarios_disponibles)) {
+            $horarios = $recinto->horarios_disponibles;
+        } elseif (is_string($recinto->horarios_disponibles) && !empty($recinto->horarios_disponibles)) {
+            try {
+                $horarios = json_decode($recinto->horarios_disponibles, true) ?? [];
+            } catch (\Exception $e) {
+                $horarios = [];
+            }
+        }
+        
+        $horaInicio = $horarios['inicio'] ?? '08:00';
+        $horaFin = $horarios['fin'] ?? '23:00';
+        
+        try {
+            $horaActual = Carbon::createFromFormat('H:i', $horaInicio);
+            $horaFinCarbon = Carbon::createFromFormat('H:i', $horaFin);
+            
+            $totalBloques = 0;
+            $bloquesOcupados = 0;
+            
+            while ($horaActual < $horaFinCarbon) {
+                $totalBloques++;
+                $siguienteHora = $horaActual->copy()->addHour();
+                
+                // Verificar si esta ocupado
+                $disponible = $recinto->disponibleEn($fecha, $horaActual->format('H:i'), $siguienteHora->format('H:i'));
+                
+                if (!$disponible) {
+                    $bloquesOcupados++;
+                }
+                
+                $horaActual = $siguienteHora;
+            }
+            
+            // Si todos los bloques estan ocupados, retorna OCUPADO
+            if ($totalBloques > 0 && $bloquesOcupados === $totalBloques) {
+                return response()->json(['estado' => 'OCUPADO']);
+            }
+            
+            // Si hay al menos un bloque disponible, retorna DISPONIBLE
+            return response()->json(['estado' => 'DISPONIBLE']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error calculando estado'], 500);
+        }
     }
 }

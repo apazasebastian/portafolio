@@ -33,6 +33,10 @@ Route::get('/calendario', [CalendarioController::class, 'index'])->name('calenda
 Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'])
     ->name('api.disponibilidad');
 
+// API para obtener el estado de un día (disponible/ocupado/mantenimiento)
+Route::get('/api/estado-dia', [CalendarioController::class, 'estadoDia'])
+    ->name('api.estadoDia');
+
 // Página de Reglamentos
 Route::get('/reglamentos', function () {
     return view('reglamentos.index');

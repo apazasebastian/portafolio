@@ -142,7 +142,7 @@
     </div>
 </div>
 
-<!-- ==================== SECCIÓN NUESTROS RECINTOS ==================== -->
+<!-- seccion de recintos, para el autollenado de los encargados -->
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
     <div class="mb-8">
         <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white px-6 py-4-lg">
