@@ -262,32 +262,20 @@
                 <!-- Navegación Desktop -->
                 <nav class="hidden xl:flex items-center space-x-0.5">
                     <a href="{{ route('home') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                        </svg>
+                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Inicio
                     </a>
 
                     <a href="{{ route('reglamentos') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
-                        </svg>
+                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Reglamentos
                     </a>
                     <a href="{{ route('cancelacion.formulario') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
+                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Cancelar
                     </a>
                     <a href="{{ route('segunda-etapa') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 rounded-lg flex items-center text-sm {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                        </svg>
+                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
                         2da Etapa
                     </a>
                     
@@ -297,16 +285,16 @@
                         <div class="h-6 w-px bg-gray-300 mx-1"></div>
                         
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Panel Admin
                         </a>
                         @if(auth()->user()->role !== 'encargado_recinto')
                             <a href="{{ route('admin.recintos.index') }}" 
-                            class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Recintos
                             </a>
                             <a href="{{ route('admin.eventos.index') }}" 
-                            class="nav-link px-2 xl:px-3 py-2 rounded-lg text-sm {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Eventos
                             </a>
                         @endif
@@ -314,19 +302,13 @@
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-1">
                             @csrf
                             <button type="submit" 
-                                    class="nav-link px-2 xl:px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 flex items-center text-sm">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
+                                    class="nav-link px-2 xl:px-3 py-2 bg-red-600 text-white hover:bg-red-700 flex items-center text-sm">
                                 Salir
                             </button>
                         </form>
                     @else
                         <a href="{{ route('login') }}" 
-                           class="nav-link px-2 xl:px-3 py-2 rounded-lg bg-secondary text-white hover:bg-blue-700 flex items-center text-sm">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                            </svg>
+                           class="nav-link px-2 xl:px-3 py-2 bg-secondary text-white hover:bg-blue-700 flex items-center text-sm">
                             Admin
                         </a>
                     @endauth
@@ -344,32 +326,20 @@
             <nav id="mobile-menu" class="hidden xl:hidden pb-4 border-t border-gray-200">
                 <div class="space-y-1 pt-4">
                     <a href="{{ route('home') }}" 
-                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                        </svg>
+                       class="block px-4 py-3  flex items-center {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Inicio
                     </a>
 
                     <a href="{{ route('reglamentos') }}" 
-                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
-                        </svg>
+                       class="block px-4 py-3 flex items-center {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Reglamentos
                     </a>
                     <a href="{{ route('cancelacion.formulario') }}" 
-                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
+                       class="block px-4 py-3 flex items-center {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                         Cancelar Reserva
                     </a>
                     <a href="{{ route('segunda-etapa') }}" 
-                       class="block px-4 py-3 rounded-lg flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700' }}">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
-                        </svg>
+                       class="block px-4 py-3 flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700' }}">
                         Segunda Etapa
                     </a>
                     
@@ -379,25 +349,25 @@
                         </div>
                         
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="block px-4 py-3  {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Panel Admin
                         </a>
                         @if(auth()->user()->role !== 'encargado_recinto')
                             <a href="{{ route('admin.recintos.index') }}" 
-                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="block px-4 py-3  {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Recintos
                             </a>
                             <a href="{{ route('admin.eventos.index') }}" 
-                            class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="block px-4 py-3  {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                                 Eventos
                             </a>
                         @endif
                         <a href="{{ route('admin.reservas.index') }}" 
-                           class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.reservas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="block px-4 py-3  {{ request()->routeIs('admin.reservas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Reservas
                         </a>
                         <a href="{{ route('admin.estadisticas.index') }}" 
-                           class="block px-4 py-3 rounded-lg {{ request()->routeIs('admin.estadisticas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="block px-4 py-3  {{ request()->routeIs('admin.estadisticas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
                             Estadísticas
                         </a>
                         
