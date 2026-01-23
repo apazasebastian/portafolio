@@ -258,19 +258,32 @@ function cargarCalendario() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     
+    // Calcular fecha máxima (60 días desde hoy)
+    const fechaMaxima = new Date();
+    fechaMaxima.setDate(fechaMaxima.getDate() + 60);
+    fechaMaxima.setHours(0, 0, 0, 0);
+    
     for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
         const fecha = new Date(año, mes, dia);
         fecha.setHours(0, 0, 0, 0);
         const fechaString = fecha.toISOString().split('T')[0];
         const esPasado = fecha <= hoy;
+        const fueraDeRango = fecha > fechaMaxima;
         
         const btn = document.createElement('button');
         btn.className = 'aspect-square border border-gray-300 flex flex-col items-center justify-center p-2 transition-colors';
         btn.innerHTML = `<span class="text-lg font-bold text-gray-800">${String(dia).padStart(2, '0')}</span><span class="text-xs font-medium mt-1 loading-estado" data-fecha="${fechaString}">...</span>`;
         
-        if (esPasado) {
+        if (esPasado || fueraDeRango) {
             btn.className += ' bg-gray-100 cursor-not-allowed';
             btn.disabled = true;
+            
+            // Si está fuera de rango, mostrar mensaje
+            if (fueraDeRango) {
+                const span = btn.querySelector('.loading-estado');
+                span.textContent = 'Fuera de rango';
+                span.className = 'text-xs font-medium mt-1 text-gray-400';
+            }
         } else {
             btn.className += ' bg-white hover:bg-gray-50 cursor-pointer';
             btn.onclick = () => abrirDia(fechaString);
@@ -278,8 +291,8 @@ function cargarCalendario() {
         
         grid.appendChild(btn);
         
-        // Cargar estado del día si no es pasado
-        if (!esPasado) {
+        // Cargar estado del día solo si no es pasado ni fuera de rango
+        if (!esPasado && !fueraDeRango) {
             cargarEstadoDia(fechaString);
         }
     }

@@ -62,7 +62,7 @@
         @else
             <!--  FORMULARIO NORMAL - SIN RESTRICCIÓN AL ENTRAR -->
             
-            <!-- Info del Recinto -->
+            {{-- Info del Recinto --}}
             @php
                 // Decodificar JSON si es necesario
                 $horarios = is_array($recinto->horarios_disponibles) 
@@ -72,6 +72,30 @@
                 $diasCerrados = is_array($recinto->dias_cerrados) 
                     ? $recinto->dias_cerrados 
                     : ($recinto->dias_cerrados ? json_decode($recinto->dias_cerrados, true) : null);
+                
+                // CAPTURAR PARÁMETROS DEL CALENDARIO
+                $fechaDeCalendario = request()->get('fecha');
+                $bloquesDeCalendario = request()->get('bloques');
+                
+                // Procesar bloques si existen
+                $horaInicioAuto = null;
+                $horaFinAuto = null;
+                
+                if ($bloquesDeCalendario) {
+                    $bloquesArray = explode(',', $bloquesDeCalendario);
+                    if (count($bloquesArray) > 0) {
+                        // Primer bloque para hora de inicio
+                        $primerBloque = explode('-', $bloquesArray[0]);
+                        $horaInicioAuto = $primerBloque[0] ?? null;
+                        
+                        // Último bloque para hora de fin
+                        $ultimoBloque = explode('-', end($bloquesArray));
+                        $horaFinAuto = $ultimoBloque[1] ?? null;
+                    }
+                }
+                
+                // Determinar si los campos deben estar deshabilitados
+                $camposDeshabilitados = $fechaDeCalendario && $horaInicioAuto && $horaFinAuto;
             @endphp
             
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
@@ -288,15 +312,20 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <span class="text-red-500">*</span> Fecha
+                                @if($camposDeshabilitados)
+                                    <span class="ml-2 text-xs text-blue-600 font-medium">(Seleccionada desde calendario)</span>
+                                @endif
                             </label>
                             <input type="date" name="fecha_reserva" 
-                                   value="{{ old('fecha_reserva') }}" 
+                                   value="{{ $fechaDeCalendario ?? old('fecha_reserva') }}" 
                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
                                    max="{{ $fechaMaxima }}"
                                    required
-                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('fecha_reserva') border-red-500 @enderror">
+                                   {{ $camposDeshabilitados ? 'readonly' : '' }}
+                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ $camposDeshabilitados ? 'bg-gray-100 text-gray-700 cursor-not-allowed' : '' }} @error('fecha_reserva') border-red-500 @enderror">
                             
-                            <!-- Mensaje informativo -->
+                            {{-- Mensaje informativo --}}
+                            @if(!$camposDeshabilitados)
                             <div class="flex items-start mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                                 <svg class="w-4 h-4 mr-2 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -306,6 +335,7 @@
                                     <p class="mt-0.5">Desde mañana hasta <strong>{{ \Carbon\Carbon::parse($fechaMaxima)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}</strong> (60 días)</p>
                                 </div>
                             </div>
+                            @endif
                             
                             @error('fecha_reserva')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -315,14 +345,25 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <span class="text-red-500">*</span> Hora de Inicio
+                                @if($camposDeshabilitados)
+                                    <span class="ml-2 text-xs text-blue-600 font-medium">(Seleccionada desde calendario)</span>
+                                @endif
                             </label>
                             <select name="hora_inicio" required
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('hora_inicio') border-red-500 @enderror">
+                                    {{ $camposDeshabilitados ? 'disabled' : '' }}
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ $camposDeshabilitados ? 'bg-gray-100 text-gray-700 cursor-not-allowed' : '' }} @error('hora_inicio') border-red-500 @enderror">
                                 <option value="">Seleccionar</option>
                                 @for($h = 8; $h < 23; $h++)
-                                    <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
+                                    <option value="{{ sprintf('%02d:00', $h) }}" 
+                                            {{ ($horaInicioAuto == sprintf('%02d:00', $h)) || (old('hora_inicio') == sprintf('%02d:00', $h)) ? 'selected' : '' }}>
+                                        {{ sprintf('%02d:00', $h) }}
+                                    </option>
                                 @endfor
                             </select>
+                            {{-- Hidden field para enviar el valor cuando está disabled --}}
+                            @if($camposDeshabilitados)
+                                <input type="hidden" name="hora_inicio" value="{{ $horaInicioAuto }}">
+                            @endif
                             @error('hora_inicio')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -331,14 +372,25 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <span class="text-red-500">*</span> Hora de Término
+                                @if($camposDeshabilitados)
+                                    <span class="ml-2 text-xs text-blue-600 font-medium">(Seleccionada desde calendario)</span>
+                                @endif
                             </label>
                             <select name="hora_fin" required
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('hora_fin') border-red-500 @enderror">
+                                    {{ $camposDeshabilitados ? 'disabled' : '' }}
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ $camposDeshabilitados ? 'bg-gray-100 text-gray-700 cursor-not-allowed' : '' }} @error('hora_fin') border-red-500 @enderror">
                                 <option value="">Seleccionar</option>
                                 @for($h = 9; $h <= 23; $h++)
-                                    <option value="{{ sprintf('%02d:00', $h) }}">{{ sprintf('%02d:00', $h) }}</option>
+                                    <option value="{{ sprintf('%02d:00', $h) }}"
+                                            {{ ($horaFinAuto == sprintf('%02d:00', $h)) || (old('hora_fin') == sprintf('%02d:00', $h)) ? 'selected' : '' }}>
+                                        {{ sprintf('%02d:00', $h) }}
+                                    </option>
                                 @endfor
                             </select>
+                            {{-- Hidden field para enviar el valor cuando está disabled --}}
+                            @if($camposDeshabilitados)
+                                <input type="hidden" name="hora_fin" value="{{ $horaFinAuto }}">
+                            @endif
                             @error('hora_fin')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                             @enderror
