@@ -37,6 +37,10 @@ Route::get('/api/disponibilidad', [CalendarioController::class, 'disponibilidad'
 Route::get('/api/estado-dia', [CalendarioController::class, 'estadoDia'])
     ->name('api.estadoDia');
 
+// API para obtener estados de todos los días de un mes (optimizado)
+Route::get('/api/estados-mes', [CalendarioController::class, 'estadosMes'])
+    ->name('api.estadosMes');
+
 // Página de Reglamentos
 Route::get('/reglamentos', function () {
     return view('reglamentos.index');

@@ -363,4 +363,120 @@ class CalendarioController extends Controller
             return response()->json(['error' => 'Error calculando estado'], 500);
         }
     }
+    
+    /**
+     * Obtiene los estados de todos los días de un mes
+     * Retorna un array con fecha => estado para optimizar carga del calendario
+     */
+    public function estadosMes(Request $request)
+    {
+        $recintoId = $request->get('recinto_id');
+        $año = $request->get('año');
+        $mes = $request->get('mes'); // 1-12
+        
+        if (!$recintoId || !$año || !$mes) {
+            return response()->json(['error' => 'Parámetros inválidos'], 400);
+        }
+        
+        $recinto = Recinto::find($recintoId);
+        if (!$recinto) {
+            return response()->json(['error' => 'Recinto no encontrado'], 404);
+        }
+        
+        $estados = [];
+        
+        // Calcular primer y último día del mes
+        $primerDia = Carbon::create($año, $mes, 1);
+        $ultimoDia = $primerDia->copy()->endOfMonth();
+        
+        // Calcular límites de reserva
+        $hoy = Carbon::now()->startOfDay();
+        $fechaMaxima = Carbon::now()->addDays(60)->endOfDay();
+        
+        // Iterar cada día del mes
+        for ($dia = $primerDia->copy(); $dia->lte($ultimoDia); $dia->addDay()) {
+            $fechaString = $dia->format('Y-m-d');
+            
+            // Si es pasado, actual o fuera de rango, no procesar
+            if ($dia->lte($hoy) || $dia->gt($fechaMaxima)) {
+                continue;
+            }
+            
+            // Calcular estado del día
+            $diaSemana = strtolower($dia->format('l'));
+            
+            // Verificar si está cerrado por mantenimiento
+            $diasCerrados = [];
+            if (is_array($recinto->dias_cerrados)) {
+                $diasCerrados = $recinto->dias_cerrados;
+            } elseif (is_string($recinto->dias_cerrados) && !empty($recinto->dias_cerrados)) {
+                try {
+                    $diasCerrados = json_decode($recinto->dias_cerrados, true) ?? [];
+                } catch (\Exception $e) {
+                    $diasCerrados = [];
+                }
+            }
+            
+            $diasCompletos = [];
+            if (isset($diasCerrados['dias_completos']) && is_array($diasCerrados['dias_completos'])) {
+                $diasCompletos = $diasCerrados['dias_completos'];
+            } elseif (!isset($diasCerrados['dias_completos']) && !isset($diasCerrados['rangos_bloqueados'])) {
+                $diasCompletos = $diasCerrados;
+            }
+            
+            if (in_array($diaSemana, $diasCompletos)) {
+                $estados[$fechaString] = 'MANTENIMIENTO';
+                continue;
+            }
+            
+            // Obtener horarios
+            $horarios = [];
+            if (is_array($recinto->horarios_disponibles)) {
+                $horarios = $recinto->horarios_disponibles;
+            } elseif (is_string($recinto->horarios_disponibles) && !empty($recinto->horarios_disponibles)) {
+                try {
+                    $horarios = json_decode($recinto->horarios_disponibles, true) ?? [];
+                } catch (\Exception $e) {
+                    $horarios = [];
+                }
+            }
+            
+            $horaInicio = $horarios['inicio'] ?? '08:00';
+            $horaFin = $horarios['fin'] ?? '23:00';
+            
+            try {
+                $horaActual = Carbon::createFromFormat('H:i', $horaInicio);
+                $horaFinCarbon = Carbon::createFromFormat('H:i', $horaFin);
+                
+                $totalBloques = 0;
+                $bloquesOcupados = 0;
+                
+                while ($horaActual < $horaFinCarbon) {
+                    $totalBloques++;
+                    $siguienteHora = $horaActual->copy()->addHour();
+                    
+                    // Verificar si está ocupado
+                    $disponible = $recinto->disponibleEn($fechaString, $horaActual->format('H:i'), $siguienteHora->format('H:i'));
+                    
+                    if (!$disponible) {
+                        $bloquesOcupados++;
+                    }
+                    
+                    $horaActual = $siguienteHora;
+                }
+                
+                // Determinar estado
+                if ($totalBloques > 0 && $bloquesOcupados === $totalBloques) {
+                    $estados[$fechaString] = 'OCUPADO';
+                } else {
+                    $estados[$fechaString] = 'DISPONIBLE';
+                }
+                
+            } catch (\Exception $e) {
+                $estados[$fechaString] = 'DISPONIBLE';
+            }
+        }
+        
+        return response()->json(['estados' => $estados]);
+    }
 }

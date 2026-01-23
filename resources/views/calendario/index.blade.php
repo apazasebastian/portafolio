@@ -290,15 +290,57 @@ function cargarCalendario() {
         }
         
         grid.appendChild(btn);
+    }
+    
+    // Cargar todos los estados del mes de una sola vez (optimizado)
+    cargarEstadosMes(año, mes + 1); // mes + 1 porque JS usa 0-11 y backend usa 1-12
+}
+
+// Cargar estados de todos los días del mes (una sola llamada)
+async function cargarEstadosMes(año, mes) {
+    try {
+        const response = await fetch(`/api/estados-mes?recinto_id=${RECINTO_ID}&año=${año}&mes=${mes}`);
+        const data = await response.json();
         
-        // Cargar estado del día solo si no es pasado ni fuera de rango
-        if (!esPasado && !fueraDeRango) {
-            cargarEstadoDia(fechaString);
+        if (data.estados) {
+            // Aplicar estados a cada día
+            Object.keys(data.estados).forEach(fecha => {
+                const estado = data.estados[fecha];
+                const elementos = document.querySelectorAll(`[data-fecha="${fecha}"]`);
+                
+                elementos.forEach(el => {
+                    let clase = '';
+                    let texto = estado;
+                    
+                    if (estado === 'DISPONIBLE') {
+                        clase = 'text-green-600';
+                    } else if (estado === 'OCUPADO') {
+                        clase = 'text-red-600';
+                    } else if (estado === 'MANTENIMIENTO') {
+                        clase = 'text-orange-600';
+                    }
+                    
+                    el.textContent = texto;
+                    el.className = `text-xs font-medium mt-1 ${clase}`;
+                    
+                    // Si está ocupado o en mantenimiento, deshabilitar el botón
+                    if (estado !== 'DISPONIBLE') {
+                        const btn = el.closest('button');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.className = btn.className.replace('hover:bg-gray-50 cursor-pointer', 'cursor-not-allowed');
+                            btn.onclick = null;
+                        }
+                    }
+                });
+            });
         }
+    } catch (error) {
+        console.error('Error cargando estados del mes:', error);
     }
 }
 
-// Cargar estado de un día
+// Cargar estado de un día (mantener para compatibilidad, pero ya no se usa en el calendario mensual)
 async function cargarEstadoDia(fecha) {
     try {
         const response = await fetch(`/api/estado-dia?recinto_id=${RECINTO_ID}&fecha=${fecha}`);
