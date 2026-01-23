@@ -276,7 +276,7 @@
                     </a>
                     <a href="{{ route('segunda-etapa') }}" 
                        class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
-                        2da Etapa
+                        Segunda Etapa
                     </a>
                     
                     
@@ -440,7 +440,7 @@
         
         <!-- Header del Footer: Logo + Redes Sociales -->
         <div class="bg-gray-900 border-b border-gray-800">
-            <div class="container mx-auto px-4 py-6">
+            <div class="container mx-auto px-4 py-2">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <!-- Logo y Título -->
                     <div class="flex items-center space-x-4 mb-4 md:mb-0">
@@ -498,8 +498,8 @@
         </div>
         
         <!-- Contenido Principal del Footer -->
-        <div class="container mx-auto px-4 py-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="container mx-auto px-4 py-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 <!-- Columna 1: Más Información -->
                 <div>
@@ -530,8 +530,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('calendario') }}" class="text-gray-400 hover:text-white transition-colors">
-                                Calendario de Reservas
+                            <a href="{{ route('segunda-etapa') }}" class="text-gray-400 hover:text-white transition-colors">
+                                Segunda Etapa
                             </a>
                         </li>
                         <li>
@@ -598,7 +598,7 @@
         </div>
         
         <!-- Copyright -->
-        <div class="border-t border-gray-800 py-4">
+        <div class="border-t border-gray-800 py-1">
             <p class="text-center text-sm text-gray-500">
                 Ilustre Municipalidad de Arica
             </p>

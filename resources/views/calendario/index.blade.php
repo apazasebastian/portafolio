@@ -192,7 +192,7 @@
         <div id="horariosContent" class="hidden p-6">
             {{-- Mensaje de error continuidad --}}
             <div id="mensajeErrorContinuidad" class="hidden bg-red-50 border border-red-200 p-4 mb-4">
-                <p class="text-red-800 text-sm font-medium">El bloque de reserva debe ser continuo</p>
+                <p class="text-red-800 text-sm font-medium">Los horarios seleccionado deben ser continuos</p>
             </div>
 
             {{-- Lista de bloques --}}
@@ -412,7 +412,8 @@ function toggleBloque(index) {
             checkbox.checked = true;
             document.getElementById('mensajeErrorContinuidad').classList.add('hidden');
         } else {
-            // Mostrar error
+            // Mostrar error y NO marcar el checkbox
+            checkbox.checked = false;
             document.getElementById('mensajeErrorContinuidad').classList.remove('hidden');
             setTimeout(() => {
                 document.getElementById('mensajeErrorContinuidad').classList.add('hidden');
