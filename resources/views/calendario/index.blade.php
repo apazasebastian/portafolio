@@ -77,9 +77,8 @@
                     {{-- Manager Info --}}
                     @if($encargadoInfo)
                     <div class="mb-6">
-                        <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">ENCARGADO</h4>
-                        <p class="text-sm text-gray-800 font-medium">{{ $encargadoInfo['nombre'] }}</p>
-                        <p class="text-sm text-gray-600">{{ $encargadoInfo['email'] }}</p>
+                        <h4 class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">CORREO</h4>
+                        <p class="text-sm text-gray-800 font-medium">{{ $encargadoInfo['email'] }}</p>
                     </div>
                     @endif
 

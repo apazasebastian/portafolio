@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Recinto;
 use App\Models\Reserva;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -35,17 +36,21 @@ class CalendarioController extends Controller
             $recintoId = $request->get('recinto');
             $recintoSeleccionado = Recinto::activos()->find($recintoId);
             
-            // Si existe el recinto, obtener informacion del encargado
+            // Si existe el recinto, obtener información del encargado desde la base de datos
             if ($recintoSeleccionado) {
-                // Datos de encargados por recinto (hardcoded por ahora)
-                $encargadosData = [
-                    1 => ['nombre' => 'Carlos Apaza', 'email' => 'carlosapazac33@gmail.com', 'direccion' => 'Pablo Picasso 2150, Arica'],
-                    2 => ['nombre' => 'Brayan Gomez', 'email' => 'gomezchurabrayan@gmail.com', 'direccion' => 'Ginebra 3708, Arica'],
-                    3 => ['nombre' => 'Jefe de Recintos', 'email' => 'reservas@muniarica.cl', 'direccion' => 'Rafael Sotomayor 600, Arica'],
-                    4 => ['nombre' => 'Sebastian Apaza', 'email' => 'apazasebastian@gmail.com', 'direccion' => 'España 121, Arica'],
-                ];
+                // Buscar encargado asignado a este recinto
+                $encargado = User::where('recinto_asignado_id', $recintoId)
+                                 ->where('role', 'encargado_recinto')
+                                 ->where('activo', 1)
+                                 ->first();
                 
-                $encargadoInfo = $encargadosData[$recintoId] ?? null;
+                // Si se encuentra un encargado, pasar su información
+                if ($encargado) {
+                    $encargadoInfo = [
+                        'nombre' => $encargado->name,
+                        'email' => $encargado->email,
+                    ];
+                }
             }
         }
         

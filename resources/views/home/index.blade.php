@@ -249,7 +249,7 @@
                                     $encargadoEmails = [
                                         1 => 'carlosapazac33@gmail.com',
                                         2 => 'gomezchurabrayan@gmail.com',
-                                        3 => 'reservas@muniarica.cl',
+                                        3 => 'sebastian.apaza@municipalidadarica.cl',
                                         4 => 'apazasebastian@gmail.com',
                                     ];
                                 @endphp
