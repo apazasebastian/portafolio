@@ -207,16 +207,4 @@ class ReservaController extends Controller
             ->with('success', 'Reserva enviada exitosamente. Recibirá una confirmación por correo electrónico.');
     }
     
-    /**
-     * Muestra los detalles de una reserva especifica
-     * 
-     * Esta pagina muestra toda la informacion de una reserva,
-     * incluyendo los datos de la organizacion y el recinto reservado.
-     */
-    public function show(Reserva $reserva)
-    {
-        // Carga la informacion del recinto junto con la reserva
-        $reserva->load('recinto');
-        return view('reservas.show', compact('reserva'));
-    }
 }

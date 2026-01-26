@@ -67,8 +67,6 @@ Route::get('/reservas/crear/{recinto}', [ReservaController::class, 'create'])
     ->name('reservas.create');
 Route::post('/reservas', [ReservaController::class, 'store'])
     ->name('reservas.store');
-Route::get('/reservas/{reserva}', [ReservaController::class, 'show'])
-    ->name('reservas.show');
 
 /*
 |--------------------------------------------------------------------------
