@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Evento;
 use App\Models\Recinto;
 use App\Models\Reserva;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -22,6 +23,25 @@ class HomeController extends Controller
         // Obtener todos los recintos activos
         $recintos = Recinto::activos()->get();
         
+        // Obtener emails de encargados desde la base de datos
+        $encargadoEmails = [];
+        $encargados = User::where('role', 'encargado_recinto')
+                          ->where('activo', 1)
+                          ->whereNotNull('recinto_asignado_id')
+                          ->get();
+        
+        foreach ($encargados as $encargado) {
+            $encargadoEmails[$encargado->recinto_asignado_id] = $encargado->email;
+        }
+        
+        // Direcciones de recintos para Google Maps (mismo formato que el calendario)
+        $direccionesRecintos = [
+            1 => 'Pablo Picasso 2150, Arica, Chile',  // Epicentro 1
+            2 => 'Ginebra 3708, Arica, Chile',        // Epicentro 2
+            3 => 'Rafael Sotomayor 600, Arica, Chile', // Fortín Sotomayor
+            4 => 'España 121, Arica, Chile',          // Piscina Olímpica
+        ];
+        
         // Obtener el mes actual y el siguiente
         $mesActual = Carbon::now()->startOfMonth();
         $mesSiguiente = Carbon::now()->addMonth()->startOfMonth();
@@ -35,6 +55,8 @@ class HomeController extends Controller
         return view('home.index', compact(
             'eventos',
             'recintos',
+            'encargadoEmails',
+            'direccionesRecintos',
             'mesActual',
             'mesSiguiente',
             'diasMesActual',

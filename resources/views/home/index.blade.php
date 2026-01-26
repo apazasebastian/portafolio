@@ -245,15 +245,9 @@
                                     class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all">
                                 <option value="">Selecciona un recinto...</option>
                                 @foreach($recintos as $recinto)
-                                @php
-                                    $encargadoEmails = [
-                                        1 => 'carlosapazac33@gmail.com',
-                                        2 => 'gomezchurabrayan@gmail.com',
-                                        3 => 'sebastian.apaza@municipalidadarica.cl',
-                                        4 => 'apazasebastian@gmail.com',
-                                    ];
-                                @endphp
-                                <option value="{{ $recinto->id }}" data-email="{{ $encargadoEmails[$recinto->id] ?? 'reservas@muniarica.cl' }}">
+                                <option value="{{ $recinto->id }}" 
+                                        data-email="{{ $encargadoEmails[$recinto->id] ?? 'reservas@muniarica.cl' }}"
+                                        data-direccion="{{ $direccionesRecintos[$recinto->id] ?? '' }}">
                                     {{ $recinto->nombre }}
                                 </option>
                                 @endforeach
@@ -325,7 +319,7 @@
                     <h3 class="text-3xl font-bold text-white mb-6 uppercase tracking-wide">UBICACIÓN DE RECINTOS</h3>
                     
                     <div class="space-y-3 mb-4">
-                        <button onclick="cambiarMapa(1, 'Epicentro 1', '-18.4783,-70.3126')" 
+                        <button onclick="cambiarMapa(1, 'Epicentro 1', 'Pablo Picasso 2150, Arica, Chile')" 
                                 class="w-full text-left bg-gray-700/50 hover:bg-gray-700 border-0 p-4 transition-all group">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -337,7 +331,7 @@
                                 </svg>
                             </div>
                         </button>
-                        <button onclick="cambiarMapa(2, 'Epicentro 2', '-18.4856,-70.2987')" 
+                        <button onclick="cambiarMapa(2, 'Epicentro 2', 'Ginebra 3708, Arica, Chile')" 
                                 class="w-full text-left bg-gray-700/50 hover:bg-gray-700 border-0 p-4 transition-all group">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -349,7 +343,7 @@
                                 </svg>
                             </div>
                         </button>
-                        <button onclick="cambiarMapa(3, 'Fortín Sotomayor', '-18.4742,-70.3148')" 
+                        <button onclick="cambiarMapa(3, 'Fortín Sotomayor', 'Rafael Sotomayor 600, Arica, Chile')" 
                                 class="w-full text-left bg-gray-700/50 hover:bg-gray-700 border-0 p-4 transition-all group">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -361,7 +355,7 @@
                                 </svg>
                             </div>
                         </button>
-                        <button onclick="cambiarMapa(4, 'Piscina Olímpica', '-18.4697,-70.3213')" 
+                        <button onclick="cambiarMapa(4, 'Piscina Olímpica', 'España 121, Arica, Chile')" 
                                 class="w-full text-left bg-gray-700/50 hover:bg-gray-700 border-0 p-4 transition-all group">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -487,20 +481,43 @@ document.getElementById('modalComoReservar')?.addEventListener('click', function
     if (e.target === this) cerrarModalComoReservar();
 });
 
-// Auto-rellenar email del encargado
+// Auto-rellenar email del encargado y actualizar mapa
 document.getElementById('selectRecinto')?.addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
     const email = selectedOption.dataset.email || '';
+    const direccion = selectedOption.dataset.direccion || '';
+    const nombreRecinto = selectedOption.text;
+    
+    // Actualizar email
     document.getElementById('emailEncargado').value = email;
+    
+    // Actualizar mapa si hay dirección
+    if (direccion && this.value) {
+        const mapaIframe = document.getElementById('mapaRecinto');
+        const label = document.getElementById('recintoMapaLabel');
+        
+        // Usar mismo formato que el calendario
+        const direccionEncoded = encodeURIComponent(direccion);
+        const mapUrl = `https://www.google.com/maps?q=${direccionEncoded}&output=embed&z=16`;
+        
+        mapaIframe.src = mapUrl;
+        label.innerHTML = `
+            <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+            Mostrando: <strong>${nombreRecinto}</strong>
+        `;
+    }
 });
 
-// Cambiar mapa
-function cambiarMapa(recintoId, nombreRecinto, coords) {
-    const [lat, lng] = coords.split(',');
+// Cambiar mapa (botones de la izquierda - ahora direccion en vez de coords)
+function cambiarMapa(recintoId, nombreRecinto, direccion) {
     const mapaIframe = document.getElementById('mapaRecinto');
     const label = document.getElementById('recintoMapaLabel');
     
-    const mapUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${encodeURIComponent(nombreRecinto)}!5e0!3m2!1ses!2scl!4v1`;
+    // Usar mismo formato que el calendario
+    const direccionEncoded = encodeURIComponent(direccion);
+    const mapUrl = `https://www.google.com/maps?q=${direccionEncoded}&output=embed&z=16`;
     
     mapaIframe.src = mapUrl;
     label.innerHTML = `
