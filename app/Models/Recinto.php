@@ -46,7 +46,7 @@ class Recinto extends Model
     /**
      * Obtiene todas las reservas que se han hecho para este recinto
      */
-    public function reservas()
+    public function reservas(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reserva::class);
     }
@@ -55,7 +55,7 @@ class Recinto extends Model
      * Obtiene los encargados asignados a este recinto
      * Los encargados son funcionarios que administran el recinto dia a dia
      */
-    public function encargados()
+    public function encargados(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(User::class, 'recinto_asignado_id');
     }
@@ -74,7 +74,7 @@ class Recinto extends Model
      * 3. El horario este dentro del horario de funcionamiento
      * 4. No exista otra reserva en el mismo horario
      */
-    public function disponibleEn($fecha, $horaInicio, $horaFin)
+    public function disponibleEn(string $fecha, string $horaInicio, string $horaFin): bool
     {
         $fechaCarbon = Carbon::parse($fecha);
         $diaSemana = strtolower($fechaCarbon->format('l'));
@@ -155,7 +155,7 @@ class Recinto extends Model
      * Por ejemplo, 10:00-12:00 y 11:00-13:00 se cruzan
      * pero 10:00-12:00 y 14:00-16:00 no se cruzan
      */
-    private function hayConflictoHorario($inicio1, $fin1, $inicio2, $fin2)
+    private function hayConflictoHorario(string $inicio1, string $fin1, string $inicio2, string $fin2): bool
     {
         $t1_inicio = strtotime($inicio1);
         $t1_fin = strtotime($fin1);
@@ -169,7 +169,7 @@ class Recinto extends Model
      * Obtiene todas las reservas confirmadas para un dia especifico
      * Util para mostrar la agenda del dia en el panel del encargado
      */
-    public function reservasDelDia($fecha)
+    public function reservasDelDia(string $fecha): \Illuminate\Database\Eloquent\Collection
     {
         return $this->reservas()
             ->where('fecha_reserva', $fecha)
@@ -187,9 +187,9 @@ class Recinto extends Model
      * Filtra solo los recintos que estan activos y disponibles para reservar
      * Los recintos inactivos no aparecen en el calendario publico
      */
-    public function scopeActivos($query)
+    public function scopeActivos(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('activo', true);
+        $query->where('activo', true);
     }
 
     // =========================================================================
@@ -200,7 +200,7 @@ class Recinto extends Model
      * Obtiene los bloqueos especiales configurados para una fecha especifica
      * Se usa para mostrar al usuario por que no puede reservar ciertos horarios
      */
-    public function getBloqueosPorFecha($fecha)
+    public function getBloqueosPorFecha(string $fecha): array
     {
         $fechaString = Carbon::parse($fecha)->format('Y-m-d');
         $diasCerrados = $this->dias_cerrados;

@@ -70,7 +70,7 @@ class Reserva extends Model
     /**
      * Obtiene el recinto donde se hara la reserva
      */
-    public function recinto()
+    public function recinto(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Recinto::class);
     }
@@ -78,7 +78,7 @@ class Reserva extends Model
     /**
      * Obtiene el usuario administrador que aprobo o rechazo la reserva
      */
-    public function aprobadaPor()
+    public function aprobadaPor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'aprobada_por');
     }
@@ -86,7 +86,7 @@ class Reserva extends Model
     /**
      * Obtiene la organizacion asociada a esta reserva
      */
-    public function organizacion()
+    public function organizacion(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Organizacion::class, 'nombre_organizacion', 'nombre');
     }
@@ -94,7 +94,7 @@ class Reserva extends Model
     /**
      * Obtiene todas las incidencias reportadas despues de esta reserva
      */
-    public function incidencias()
+    public function incidencias(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Incidencia::class);
     }
@@ -106,25 +106,62 @@ class Reserva extends Model
     /**
      * Filtra solo las reservas que estan esperando revision
      */
-    public function scopePendientes($query)
+    public function scopePendientes(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('estado', 'pendiente');
+        $query->where('estado', 'pendiente');
     }
 
     /**
      * Filtra solo las reservas que fueron aprobadas
      */
-    public function scopeAprobadas($query)
+    public function scopeAprobadas(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('estado', 'aprobada');
+        $query->where('estado', 'aprobada');
     }
 
     /**
      * Filtra solo las reservas que fueron rechazadas
      */
-    public function scopeRechazadas($query)
+    public function scopeRechazadas(\Illuminate\Database\Eloquent\Builder $query): void
     {
-        return $query->where('estado', 'rechazada');
+        $query->where('estado', 'rechazada');
+    }
+
+    /**
+     * Filtra solo las reservas que fueron canceladas
+     */
+    public function scopeCanceladas(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->whereNotNull('fecha_cancelacion');
+    }
+
+    /**
+     * Filtra  las reservas activas (no canceladas ni rechazadas)
+     */
+    public function scopeActivas(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->whereNull('fecha_cancelacion')
+              ->where('estado', '!=', 'rechazada');
+    }
+
+    /**
+     * Filtra reservas de una fecha específica
+     */
+    public function scopeDelDia(\Illuminate\Database\Eloquent\Builder $query, string $fecha): void
+    {
+        $query->where('fecha_reserva', $fecha);
+    }
+
+    /**
+     * Filtra reservas futuras (próximas)
+     */
+    public function scopeProximas(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->where('fecha_reserva', '>=', now()->format('Y-m-d'))
+              ->whereIn('estado', ['aprobada', 'pendiente'])
+              ->whereNull('fecha_cancelacion')
+              ->orderBy('fecha_reserva')
+              ->orderBy('hora_inicio');
     }
 
     // =========================================================================
@@ -135,28 +172,36 @@ class Reserva extends Model
      * Devuelve el RUT con formato chileno (puntos y guion)
      * Ejemplo: "12345678-9" en lugar de "123456789"
      */
-    public function getRutFormateadoAttribute()
+    protected function rutFormateado(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $rut = $this->rut;
-        if (strlen($rut) < 8) return $rut;
-        
-        $cuerpo = substr($rut, 0, -1);
-        $dv = substr($rut, -1);
-        
-        return number_format($cuerpo, 0, '', '.') . '-' . $dv;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                $rut = $this->rut;
+                if (!$rut || strlen($rut) < 8) return $rut;
+                
+                $cuerpo = substr($rut, 0, -1);
+                $dv = substr($rut, -1);
+                
+                return number_format((int)$cuerpo, 0, '', '.') . '-' . $dv;
+            }
+        );
     }
 
     /**
      * Calcula cuanto dura la reserva (diferencia entre hora inicio y fin)
      * Ejemplo: "2 horas"
      */
-    public function getDuracionAttribute()
+    protected function duracion(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $inicio = Carbon::parse($this->hora_inicio);
-        $fin = Carbon::parse($this->hora_fin);
-        
-        $horas = $inicio->diffInHours($fin);
-        return $horas . ' hora' . ($horas != 1 ? 's' : '');
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: function () {
+                $inicio = Carbon::parse($this->hora_inicio);
+                $fin = Carbon::parse($this->hora_fin);
+                
+                $horas = $inicio->diffInHours($fin);
+                return $horas . ' hora' . ($horas != 1 ? 's' : '');
+            }
+        );
     }
 
     // =========================================================================
@@ -278,13 +323,11 @@ class Reserva extends Model
     // EVENTOS DEL MODELO - Acciones automaticas al crear o modificar
     // =========================================================================
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         // Cuando se crea una nueva reserva, se genera automaticamente
         // el codigo de cancelacion que se entregara al ciudadano
-        static::creating(function ($reserva) {
+        static::creating(function (Reserva $reserva): void {
             if (empty($reserva->codigo_cancelacion)) {
                 $parte1 = Str::upper(Str::random(8));
                 $parte2 = Str::upper(Str::random(8));
