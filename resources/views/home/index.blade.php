@@ -42,7 +42,7 @@
                         
                         <div class="absolute bottom-0 left-0 right-0 p-8">
                             <div class="mb-3">
-                                <span class="inline-block bg-orange-500 text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
+                                <span class="inline-block bg-orange-700 text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
                                     NOVEDADES
                                 </span>
                             </div>
@@ -79,6 +79,7 @@
             <!-- Controles del Carrusel -->
             @if($eventos->count() > 1)
             <button onclick="prevSlide()" 
+                    aria-label="Anterior diapositiva"
                     class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 shadow-xl transition-all z-10">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -86,6 +87,7 @@
             </button>
 
             <button onclick="nextSlide()" 
+                    aria-label="Siguiente diapositiva"
                     class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 shadow-xl transition-all z-10">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -95,6 +97,7 @@
             <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
                 @foreach($eventos as $index => $evento)
                 <button onclick="goToSlide({{ $index }})" 
+                        aria-label="Ir a la diapositiva {{ $index + 1 }}"
                         class="carousel-indicator h-2.5 transition-all {{ $index === 0 ? 'bg-white w-8' : 'bg-white/50 w-2.5' }}" 
                         data-index="{{ $index }}">
                 </button>
@@ -106,7 +109,7 @@
         <div class="lg:col-span-2 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center" style="height: 400px;">
             <div class="text-center p-8">
                 <div class="mb-3">
-                    <span class="inline-block bg-orange-500 text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">NOVEDADES</span>
+                    <span class="inline-block bg-orange-700 text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">NOVEDADES</span>
                 </div>
                 <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">NOTICIAS Y EVENTOS</h2>
                 <p class="text-white text-sm">Actualmente estamos coordinando las próximas fechas y actividades.</p>
@@ -240,7 +243,7 @@
                     <form id="formContacto" class="space-y-5">
                         @csrf
                         <div>
-                            <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Recinto de interés</label>
+                            <label for="selectRecinto" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Recinto de interés</label>
                             <select id="selectRecinto" name="recinto_id" 
                                     class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all">
                                 <option value="">Selecciona un recinto...</option>
@@ -255,44 +258,44 @@
                         </div>
                         
                         <div>
-                            <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Email del encargado</label>
+                            <label for="emailEncargado" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Email del encargado</label>
                             <input type="email" id="emailEncargado" name="email_encargado" readonly
                                    class="w-full bg-gray-800/50 border-0 text-gray-500 px-4 py-3 cursor-not-allowed"
                                    placeholder="Se llenará automáticamente...">
                         </div>
                         
                         <div>
-                            <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Nombre y Apellido</label>
-                            <input type="text" name="nombre" required
+                            <label for="nombre" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Nombre y Apellido</label>
+                            <input type="text" id="nombre" name="nombre" required
                                    class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-600"
                                    placeholder="Ingresa tu nombre completo">
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Tu Email</label>
-                                <input type="email" name="email" required
+                                <label for="email" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Tu Email</label>
+                                <input type="email" id="email" name="email" required
                                        class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-600"
                                        placeholder="tucorreo@ejemplo.com">
                             </div>
                             
                             <div>
-                                <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Teléfono</label>
-                                <input type="tel" name="telefono"
+                                <label for="telefono" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono"
                                        class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-600"
                                        placeholder="+56 9 1234 5678">
                             </div>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Mensaje</label>
-                            <textarea name="mensaje" rows="4" required
+                            <label for="mensaje" class="block text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Mensaje</label>
+                            <textarea id="mensaje" name="mensaje" rows="4" required
                                       class="w-full bg-gray-800/80 border-0 text-white px-4 py-3 focus:ring-2 focus:ring-orange-500 transition-all placeholder-gray-600 resize-none"
                                       placeholder="Cuéntanos tu consulta..."></textarea>
                         </div>
                         
                         <button type="submit" 
-                                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 transition-all uppercase tracking-wider text-sm">
+                                class="w-full bg-orange-700 hover:bg-orange-800 text-white font-bold py-4 px-6 transition-all uppercase tracking-wider text-sm">
                             ▶ ENVIAR MENSAJE
                         </button>
                     </form>
@@ -371,6 +374,7 @@
                     
                     <div class="flex-grow overflow-hidden border-0 min-h-[300px] bg-gray-800/30">
                         <iframe id="mapaRecinto"
+                                title="Mapa de ubicación del recinto deportivo"
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3768.1!2d-70.3126!3d-18.4783!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDI4JzQyLjAiUyA3MMKwMTgnNDUuNCJX!5e0!3m2!1ses!2scl!4v1"
                                 class="w-full h-full min-h-[300px]"
                                 style="border:0;" 
@@ -402,7 +406,7 @@
                 <h3 class="text-xl font-bold">¿Cómo Reservar?</h3>
                 <p class="text-blue-100 text-sm">Video instructivo</p>
             </div>
-            <button onclick="cerrarModalComoReservar()" class="text-white hover:text-gray-200 transition-colors p-1">
+            <button onclick="cerrarModalComoReservar()" class="text-white hover:text-gray-200 transition-colors p-1" aria-label="Cerrar video">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -410,7 +414,7 @@
         </div>
         
         <div class="aspect-video bg-black">
-            <iframe id="videoComoReservar" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe id="videoComoReservar" title="Video instructivo sobre cómo reservar" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 </div>

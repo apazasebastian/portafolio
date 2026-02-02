@@ -315,7 +315,7 @@
                 </nav>
 
                 <!-- Botón Menú Móvil -->
-                <button id="mobile-menu-button" class="xl:hidden text-primary focus:outline-none">
+                <button id="mobile-menu-button" class="xl:hidden text-primary focus:outline-none" aria-label="Abrir menú">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
@@ -599,7 +599,7 @@
         
         <!-- Copyright -->
         <div class="border-t border-gray-800 py-1">
-            <p class="text-center text-sm text-gray-500">
+            <p class="text-center text-sm text-gray-400">
                 Ilustre Municipalidad de Arica
             </p>
         </div>
