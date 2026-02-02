@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 // Página principal - Inicio con carrusel y calendarios
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Formulario de contacto - envío de emails
+Route::post('/contacto', [HomeController::class, 'enviarContacto'])->name('contacto.enviar');
+
+
 // Calendario de disponibilidad semanal
 Route::get('/calendario', [CalendarioController::class, 'index'])->name('calendario');
 

@@ -736,7 +736,7 @@
     </script>
 
     <!-- n8n Chat Widget - Asistente Virtual Municipal -->
-    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <!-- <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
     <script type="module">
         import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
@@ -809,6 +809,6 @@
         .n8n-chat .chat-toggle:hover {
             transform: scale(1.05);
         }
-    </style>
+    </style> -->
 </body>
 </html>

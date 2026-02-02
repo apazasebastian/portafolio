@@ -8,8 +8,8 @@
 <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f5f5f5;">
     
     <!-- Header con logo institucional -->
-    <div style="background-color: #ffffff; padding: 20px 30px; text-align: center; border-bottom: 4px solid #1a1a8e;">
-        <img src="{{ $message->embed(public_path('images/logo-municipalidad.png')) }}" alt="Municipalidad de Arica" style="max-height: 60px; width: auto;">
+    <div style="background-color: #ffffff; padding: 0; text-align: center;">
+        <img src="{{ $message->embed(public_path('images/nuevo-logo-municipalidad.png')) }}" alt="Municipalidad de Arica" style="width: 100%; max-width: 600px; height: auto; display: block;">
     </div>
     
     <!-- Contenido principal -->
@@ -143,17 +143,9 @@
     </div>
 
     <!-- Footer institucional -->
-    <div style="background-color: #1a1a8e; padding: 20px 30px; text-align: center;">
-        <p style="color: #ffffff; font-size: 12px; margin: 0 0 5px 0;">
-            Este es un correo automático, por favor no responder.
-        </p>
-        <p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 0;">
-            © {{ date('Y') }} Municipalidad de Arica - Oficina de Deportes
-        </p>
+    <div style="padding: 0; text-align: center;">
+        <img src="{{ $message->embed(public_path('images/footer-municipalidad.png')) }}" alt="Footer Municipalidad de Arica" style="width: 100%; max-width: 600px; height: auto; display: block;">
     </div>
-
-    <!-- Barra de colores institucional -->
-    <div style="height: 4px; background: linear-gradient(to right, #00a651 25%, #f7941d 25%, #f7941d 50%, #00aeef 50%, #00aeef 75%, #ed1c24 75%);"></div>
 
 </body>
 </html>

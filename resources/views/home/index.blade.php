@@ -537,9 +537,11 @@ document.getElementById('formContacto')?.addEventListener('submit', function(e) 
     
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
+    const formData = new FormData(this);
     
+    // Mostrar estado de carga
     btn.innerHTML = `
-        <svg class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 animate-spin inline-block" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -547,25 +549,75 @@ document.getElementById('formContacto')?.addEventListener('submit', function(e) 
     `;
     btn.disabled = true;
     
-    setTimeout(() => {
+    // Enviar formulario via fetch
+    fetch('{{ route('contacto.enviar') }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar mensaje de éxito
+            btn.innerHTML = `
+                <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                ¡Mensaje Enviado!
+            `;
+            btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+            btn.classList.add('bg-green-500', 'hover:bg-green-600');
+            
+            // Resetear formulario después de 2 segundos
+            setTimeout(() => {
+                this.reset();
+                document.getElementById('emailEncargado').value = '';
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            }, 2000);
+        } else {
+            // Mostrar mensaje de error
+            btn.innerHTML = `
+                <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Error al enviar
+            `;
+            btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+            btn.classList.add('bg-red-500', 'hover:bg-red-600');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            }, 3000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Mostrar mensaje de error
         btn.innerHTML = `
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            <svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
-            ¡Mensaje Enviado!
+            Error de conexión
         `;
-        btn.classList.remove('from-orange-500', 'to-orange-600');
-        btn.classList.add('from-green-500', 'to-green-600');
+        btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+        btn.classList.add('bg-red-500', 'hover:bg-red-600');
         
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.disabled = false;
-            btn.classList.remove('from-green-500', 'to-green-600');
-            btn.classList.add('from-orange-500', 'to-orange-600');
-            this.reset();
-            document.getElementById('emailEncargado').value = '';
+            btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
         }, 3000);
-    }, 1500);
+    });
 });
 </script>
 @endsection
