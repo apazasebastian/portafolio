@@ -7,21 +7,7 @@
     <!-- Header de la página -->
     <div class="text-center mb-8">
         <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-3 tracking-tight">Segunda Etapa</h1>
-        <p class="text-xl text-gray-500 max-w-2xl mx-auto">Próximas funcionalidades y expansión del sistema de gestión deportiva municipal.</p>
-    </div>
-
-    <!-- Banner informativo -->
-    <div class="bg-orange-50 border-l-4 border-orange-500 p-6 mb-12 shadow-sm flex items-start">
-        <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <div class="ml-4">
-            <p class="text-orange-900 font-medium">
-                Estamos trabajando para expandir el sistema de reservas con nuevas funcionalidades y más recintos deportivos municipales.
-            </p>
-        </div>
+        <p class="text-gray-500 font-light text-lg">Próximas funcionalidades y expansión del sistema de gestión deportiva municipal.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">

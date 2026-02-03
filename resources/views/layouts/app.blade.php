@@ -178,7 +178,6 @@
                     </span>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <span class="hidden lg:inline">Redes Sociales</span>
                     <!-- Redes Sociales -->
                     <div class="flex items-center space-x-2">
                         <!-- Facebook -->
@@ -311,7 +310,7 @@
                         </form>
                     @else
                         <a href="{{ route('login') }}" 
-                           class="ml-4 px-6 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-blue-800 transition-colors uppercase tracking-wide shadow-sm hover:shadow">
+                           class="ml-4 px-6 py-2 bg-primary text-white text-sm font-semibold hover:bg-blue-800 transition-colors uppercase tracking-wide shadow-sm hover:shadow">
                             Admin
                         </a>
                     @endauth
