@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
     <!-- Header de la página -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-3 tracking-tight">Segunda Etapa</h1>
+        <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-3 tracking-tight">Segunda Etapa</h1>
         <p class="text-xl text-gray-500 max-w-2xl mx-auto">Próximas funcionalidades y expansión del sistema de gestión deportiva municipal.</p>
     </div>
 
@@ -28,7 +28,7 @@
         <!-- Columna Izquierda: Nuevos Recintos -->
         <div class="bg-white shadow-lg p-8 border border-gray-100 h-full flex flex-col">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Nuevos Recintos Deportivos</h2>
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-6">Nuevos Recintos Deportivos</h2>
                 <p class="text-gray-500 italic mb-8 border-b border-gray-100 pb-4">Próximamente estarán disponibles para reserva:</p>
                 
                 <div class="space-y-8">
@@ -66,7 +66,7 @@
         <div class="space-y-8">
             <!-- Sistema de Pago en Línea -->
             <div class="bg-white shadow-lg p-8 border border-gray-100">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Sistema de Pago en Línea</h2>
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-6">Sistema de Pago en Línea</h2>
                 <p class="text-gray-600 mb-6">Implementaremos un sistema de pago integrado para facilitar las reservas.</p>
                 
                 <ul class="space-y-4 mb-8">

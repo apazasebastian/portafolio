@@ -42,7 +42,7 @@
         }
         
         .nav-link:hover {
-            transform: translateY(-2px);
+            color: #1e3a8a; /* primary color */
         }
 
         /* Elementos decorativos de fondo */
@@ -260,55 +260,58 @@
                 </div>
                 
                 <!-- Navegación Desktop -->
-                <nav class="hidden xl:flex items-center space-x-0.5">
+                <!-- Navegación Desktop -->
+                <nav class="hidden xl:flex items-center space-x-8">
                     <a href="{{ route('home') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                       class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('home') ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                         Inicio
                     </a>
 
                     <a href="{{ route('reglamentos') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                       class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('reglamentos') ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                         Reglamentos
                     </a>
+                    
                     <a href="{{ route('cancelacion.formulario') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                       class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('cancelacion.formulario') ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                         Cancelar
                     </a>
+                    
                     <a href="{{ route('segunda-etapa') }}" 
-                       class="nav-link px-2 xl:px-3 py-2 flex items-center text-sm {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r to-orange text-orange-700 hover:from-orange-100 hover:to-orange-200' }}">
+                       class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('segunda-etapa') ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-orange-600 hover:border-orange-200' }}">
                         Segunda Etapa
                     </a>
                     
                     
                     @auth
                         <!-- Menú Administrativo -->
-                        <div class="h-6 w-px bg-gray-300 mx-1"></div>
+                        <div class="h-6 w-px bg-gray-200 mx-2"></div>
                         
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                           class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('admin.dashboard') ? 'border-secondary text-secondary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                             Panel Admin
                         </a>
                         @if(auth()->user()->role !== 'encargado_recinto')
                             <a href="{{ route('admin.recintos.index') }}" 
-                            class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('admin.recintos.*') ? 'border-secondary text-secondary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                                 Recintos
                             </a>
                             <a href="{{ route('admin.eventos.index') }}" 
-                            class="nav-link px-2 xl:px-3 py-2 text-sm {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                            class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('admin.eventos.*') ? 'border-secondary text-secondary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
                                 Eventos
                             </a>
                         @endif
                         
-                        <form method="POST" action="{{ route('logout') }}" class="inline ml-1">
+                        <form method="POST" action="{{ route('logout') }}" class="inline ml-4">
                             @csrf
                             <button type="submit" 
-                                    class="nav-link px-2 xl:px-3 py-2 bg-red-600 text-white hover:bg-red-700 flex items-center text-sm">
+                                    class="px-4 py-2 rounded-full border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors uppercase tracking-wide">
                                 Salir
                             </button>
                         </form>
                     @else
                         <a href="{{ route('login') }}" 
-                           class="nav-link px-2 xl:px-3 py-2 bg-secondary text-white hover:bg-blue-700 flex items-center text-sm">
+                           class="ml-4 px-6 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-blue-800 transition-colors uppercase tracking-wide shadow-sm hover:shadow">
                             Admin
                         </a>
                     @endauth
