@@ -94,12 +94,12 @@ class DashboardController extends Controller
         // Si es petición AJAX, devolver JSON con HTML de la tabla
         if ($request->ajax() || $request->get('ajax')) {
             $estadoConfig = [
-                'pendiente' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'border' => 'border-yellow-400'],
-                'aprobada' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'border' => 'border-green-400'],
-                'rechazada' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'border' => 'border-red-400']
+                'pendiente' => ['text' => 'text-yellow-600'],
+                'aprobada' => ['text' => 'text-green-600'],
+                'rechazada' => ['text' => 'text-red-600']
             ];
 
-            // Generar HTML de la tabla
+            // Generar HTML de la tabla (estilo minimalista)
             $html = '';
             
             if ($reservas->count() > 0) {
@@ -107,33 +107,31 @@ class DashboardController extends Controller
                     $config = $estadoConfig[$reserva->estado] ?? $estadoConfig['pendiente'];
                     $iniciales = strtoupper(substr($reserva->nombre_organizacion ?? $reserva->representante_nombre, 0, 2));
                     
-                    $html .= '<tr class="hover:bg-gray-50 transition-colors">';
-                    $html .= '<td class="px-6 py-4 whitespace-nowrap"><span class="text-sm font-mono font-bold text-gray-900">#' . $reserva->id . '</span></td>';
-                    $html .= '<td class="px-6 py-4"><div class="flex items-center">';
-                    $html .= '<div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-full flex items-center justify-center">';
+                    $html .= '<tr class="hover:bg-gray-50/50 transition-colors">';
+                    $html .= '<td class="px-6 py-5 whitespace-nowrap"><span class="text-sm text-gray-400 font-medium">#' . $reserva->id . '</span></td>';
+                    $html .= '<td class="px-6 py-5"><div class="flex items-center">';
+                    $html .= '<div class="flex-shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center">';
                     $html .= '<span class="text-white font-bold text-sm">' . $iniciales . '</span></div>';
-                    $html .= '<div class="ml-3"><div class="text-sm font-medium text-gray-900">' . e($reserva->nombre_organizacion ?? 'Sin organización') . '</div>';
-                    $html .= '<div class="text-xs text-gray-500">' . e($reserva->representante_nombre) . '</div></div></div></td>';
-                    $html .= '<td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">' . e($reserva->recinto->nombre ?? 'N/A') . '</div></td>';
-                    $html .= '<td class="px-6 py-4"><div class="text-sm"><div class="font-medium text-gray-900">' . $reserva->fecha_reserva->format('d/m/Y') . '</div>';
-                    $html .= '<div class="text-xs text-gray-600">' . \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') . ' - ' . \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') . '</div></div></td>';
-                    $html .= '<td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-300">' . e($reserva->deporte) . '</span></td>';
-                    $html .= '<td class="px-6 py-4 text-sm text-gray-900 text-center"><span class="font-semibold">' . $reserva->cantidad_personas . '</span></td>';
-                    $html .= '<td class="px-6 py-4 whitespace-nowrap"><div class="space-y-1">';
-                    $html .= '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ' . $config['bg'] . ' ' . $config['text'] . ' ' . $config['border'] . '">' . ucfirst($reserva->estado) . '</span>';
+                    $html .= '<div class="ml-4"><div class="text-sm font-bold text-gray-900">' . e($reserva->nombre_organizacion ?? 'Sin organización') . '</div>';
+                    $html .= '<div class="text-xs text-gray-400">' . e($reserva->representante_nombre) . '</div></div></div></td>';
+                    $html .= '<td class="px-6 py-5"><div class="text-sm text-gray-700">' . e($reserva->recinto->nombre ?? 'N/A') . '</div></td>';
+                    $html .= '<td class="px-6 py-5"><div class="text-sm"><div class="font-bold text-gray-900">' . $reserva->fecha_reserva->format('d/m/Y') . '</div>';
+                    $html .= '<div class="text-xs text-gray-400">' . \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') . ' - ' . \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') . '</div></div></td>';
+                    $html .= '<td class="px-6 py-5"><span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-200">' . e($reserva->deporte) . '</span></td>';
+                    $html .= '<td class="px-6 py-5 text-center"><span class="text-sm font-bold text-gray-900">' . $reserva->cantidad_personas . '</span></td>';
+                    $html .= '<td class="px-6 py-5 whitespace-nowrap"><div class="space-y-1">';
+                    $html .= '<span class="text-xs font-bold uppercase tracking-wide ' . $config['text'] . '">' . strtoupper($reserva->estado) . '</span>';
                     if ($reserva->fecha_cancelacion) {
-                        $html .= '<div><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-400">Cancelada</span></div>';
+                        $html .= '<div><span class="text-xs text-gray-400 italic">Cancelada</span></div>';
                     }
                     $html .= '</div></td>';
-                    $html .= '<td class="px-6 py-4 text-center"><div class="flex items-center justify-center gap-2 flex-wrap">';
-                    $html .= '<a href="' . route('admin.reservas.show', $reserva) . '" class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors" title="Ver detalles">';
-                    $html .= '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>Ver</a>';
+                    $html .= '<td class="px-6 py-5 text-right"><div class="flex items-center justify-end gap-4">';
+                    $html .= '<a href="' . route('admin.reservas.show', $reserva) . '" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors" title="Ver detalles">Ver</a>';
                     
                     if ($reserva->puedeReportarIncidencia() && !$reserva->fecha_cancelacion) {
-                        $html .= '<a href="' . route('admin.incidencias.crear', $reserva->id) . '" class="inline-flex items-center px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors" title="Reportar incidencia">';
-                        $html .= '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>Incidencia';
+                        $html .= '<a href="' . route('admin.incidencias.crear', $reserva->id) . '" class="text-sm font-medium text-orange-500 hover:text-orange-700 transition-colors" title="Reportar incidencia">Incidencia';
                         if ($reserva->tieneIncidencias()) {
-                            $html .= '<span class="ml-1 bg-white text-orange-600 rounded-full px-1.5 text-xs font-bold">' . $reserva->cantidadIncidencias() . '</span>';
+                            $html .= '<span class="ml-1 text-orange-600 font-bold">' . $reserva->cantidadIncidencias() . '</span>';
                         }
                         $html .= '</a>';
                     }
@@ -141,10 +139,10 @@ class DashboardController extends Controller
                     $html .= '</div></td></tr>';
                 }
             } else {
-                $html = '<tr><td colspan="8" class="px-6 py-12 text-center">';
-                $html .= '<svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
-                $html .= '<p class="text-lg font-medium text-gray-500 mt-4">No hay reservas que coincidan con los filtros</p>';
-                $html .= '<p class="text-sm text-gray-400 mt-1">Intenta cambiar los criterios de búsqueda</p>';
+                $html = '<tr><td colspan="8" class="px-6 py-16 text-center">';
+                $html .= '<svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
+                $html .= '<p class="text-base font-medium text-gray-400 mt-4">No hay reservas que coincidan con los filtros</p>';
+                $html .= '<p class="text-sm text-gray-300 mt-1">Intenta cambiar los criterios de búsqueda</p>';
                 $html .= '</td></tr>';
             }
 

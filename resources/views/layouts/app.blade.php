@@ -304,7 +304,7 @@
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-4">
                             @csrf
                             <button type="submit" 
-                                    class="px-4 py-2 rounded-full border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors uppercase tracking-wide">
+                                    class="px-4 py-2 border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors uppercase tracking-wide">
                                 Salir
                             </button>
                         </form>

@@ -80,61 +80,29 @@
     </div>
 
     <!-- Estadísticas -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ $reservasPendientes }}</h3>
-                    <p class="text-gray-600 text-sm">Reservas Pendientes</p>
-                </div>
-            </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="text-4xl font-bold text-gray-900 mb-2">{{ $reservasPendientes }}</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Reservas Pendientes</div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ $reservasHoy }}</h3>
-                    <p class="text-gray-600 text-sm">Reservas Hoy</p>
-                </div>
-            </div>
+        <!-- Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="text-4xl font-bold text-gray-900 mb-2">{{ $reservasHoy }}</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Reservas Hoy</div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ $reservasEstesMes }}</h3>
-                    <p class="text-gray-600 text-sm">Este Mes</p>
-                </div>
-            </div>
+        <!-- Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="text-4xl font-bold text-gray-900 mb-2">{{ $reservasEstesMes }}</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Este Mes</div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-2xl font-bold text-gray-800">{{ $recintosActivos }}</h3>
-                    <p class="text-gray-600 text-sm">Recintos Activos</p>
-                </div>
-            </div>
+        <!-- Card 4 -->
+        <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="text-4xl font-bold text-gray-900 mb-2">{{ $recintosActivos }}</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Recintos Activos</div>
         </div>
     </div>
 
@@ -315,164 +283,154 @@
         
 
 
-        <!-- Filtros Avanzados Mejorados -->
-<div class="px-6 py-4 bg-white border-b border-gray-200">
-    <form method="GET" action="{{ route('admin.dashboard') }}" class="space-y-4">
-        <input type="hidden" name="filtro" value="{{ request('filtro', 'todas') }}">
         
-        <!-- Primera fila: Estado, Recinto, Deporte, Fecha -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Estado -->
-            <div>
-                <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">
-                    Estado
-                </label>
-                <select name="estado" id="estado" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente" {{ request('estado') === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                    <option value="aprobada" {{ request('estado') === 'aprobada' ? 'selected' : '' }}>Aprobada</option>
-                    <option value="rechazada" {{ request('estado') === 'rechazada' ? 'selected' : '' }}>Rechazada</option>
-                    <option value="cancelada" {{ request('estado') === 'cancelada' ? 'selected' : '' }}>Cancelada</option>
-                </select>
-            </div>
+        <!-- Filtros Avanzados Minimalistas -->
+        <div class="px-8 py-8 bg-white mb-8 rounded-xl shadow-sm">
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="space-y-8">
+                <input type="hidden" name="filtro" value="{{ request('filtro', 'todas') }}">
+                
+                <!-- Headers Labels Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Estado -->
+                    <div class="group">
+                        <label for="estado" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Estado
+                        </label>
+                        <select name="estado" id="estado" class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium focus:border-blue-900 focus:outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente" {{ request('estado') === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                            <option value="aprobada" {{ request('estado') === 'aprobada' ? 'selected' : '' }}>Aprobada</option>
+                            <option value="rechazada" {{ request('estado') === 'rechazada' ? 'selected' : '' }}>Rechazada</option>
+                            <option value="cancelada" {{ request('estado') === 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                        </select>
+                    </div>
 
-            <!-- Recinto -->
-            <div>
-                <label for="recinto_id" class="block text-sm font-medium text-gray-700 mb-1">
-                    Recinto
-                </label>
-                <select name="recinto_id" id="recinto_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Todos los recintos</option>
-                    @foreach($recintos as $recinto)
-                        <option value="{{ $recinto->id }}" {{ request('recinto_id') == $recinto->id ? 'selected' : '' }}>
-                            {{ $recinto->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                    <!-- Recinto -->
+                    <div class="group">
+                        <label for="recinto_id" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Recinto
+                        </label>
+                        <select name="recinto_id" id="recinto_id" class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium focus:border-blue-900 focus:outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="">Todos los recintos</option>
+                            @foreach($recintos as $recinto)
+                                <option value="{{ $recinto->id }}" {{ request('recinto_id') == $recinto->id ? 'selected' : '' }}>
+                                    {{ $recinto->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-            <!-- Deporte -->
-            <div>
-                <label for="deporte" class="block text-sm font-medium text-gray-700 mb-1">
-                    Deporte
-                </label>
-                <select name="deporte" id="deporte" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Todos los deportes</option>
-                    <option value="Fútbol" {{ request('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
-                    <option value="Básquetbol" {{ request('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
-                    <option value="Vóleibol" {{ request('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
-                    <option value="Tenis" {{ request('deporte') == 'Tenis' ? 'selected' : '' }}>Tenis</option>
-                    <option value="Natación" {{ request('deporte') == 'Natación' ? 'selected' : '' }}>Natación</option>
-                </select>
-            </div>
+                    <!-- Deporte -->
+                    <div class="group">
+                        <label for="deporte" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Deporte
+                        </label>
+                        <select name="deporte" id="deporte" class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium focus:border-blue-900 focus:outline-none transition-colors appearance-none cursor-pointer">
+                            <option value="">Todos los deportes</option>
+                            <option value="Fútbol" {{ request('deporte') == 'Fútbol' ? 'selected' : '' }}>Fútbol</option>
+                            <option value="Básquetbol" {{ request('deporte') == 'Básquetbol' ? 'selected' : '' }}>Básquetbol</option>
+                            <option value="Vóleibol" {{ request('deporte') == 'Vóleibol' ? 'selected' : '' }}>Vóleibol</option>
+                            <option value="Tenis" {{ request('deporte') == 'Tenis' ? 'selected' : '' }}>Tenis</option>
+                            <option value="Natación" {{ request('deporte') == 'Natación' ? 'selected' : '' }}>Natación</option>
+                        </select>
+                    </div>
 
-            <!-- Fecha -->
-            <div>
-                <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha
-                </label>
-                <input type="date" name="fecha" id="fecha" value="{{ request('fecha') }}" 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-        </div>
-
-        <!-- Segunda fila: Búsqueda por RUT y Organización -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-            <!-- Búsqueda por RUT CON FORMATEO AUTOMÁTICO Y SOPORTE PARA K -->
-            <div>
-                <label for="buscar_rut" class="block text-sm font-medium text-gray-700 mb-1">
-                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Buscar por RUT
-                </label>
-                <input type="text" name="buscar_rut" id="buscar_rut" 
-                       placeholder="ej: 21.284.335-0" 
-                       value="{{ request('buscar_rut') }}"
-                       maxlength="12"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       title="Solo números y letra K">
-                <p class="text-xs text-gray-500 mt-1">Máximo 9 dígitos (se formatea automáticamente)</p>
-            </div>
-
-            <!-- Búsqueda por Organización -->
-            <div>
-                <label for="buscar_organizacion" class="block text-sm font-medium text-gray-700 mb-1">
-                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Buscar por Organización
-                </label>
-                <input type="text" name="buscar_organizacion" id="buscar_organizacion" 
-                       placeholder="Ingrese parte del nombre" 
-                       value="{{ request('buscar_organizacion') }}"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-        </div>
-
-        <!-- Tercera fila: Botones de acción -->
-        <div class="flex gap-2 pt-4 border-t border-gray-200">
-            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                Filtrar
-            </button>
-            <a href="{{ route('admin.dashboard') }}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
-                Limpiar
-            </a>
-        </div>
-
-        <!-- Indicadores de filtros activos -->
-        @if(request()->filled('estado') || request()->filled('recinto_id') || request()->filled('deporte') || request()->filled('fecha') || 
-            request()->filled('buscar_rut') || request()->filled('buscar_organizacion'))
-            <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-200">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2H3V3zm0 3h14v11a1 1 0 01-1 1H4a1 1 0 01-1-1V6z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-sm font-medium text-gray-700">Filtros activos:</span>
+                    <!-- Fecha -->
+                    <div class="group">
+                        <label for="fecha" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Fecha
+                        </label>
+                        <input type="date" name="fecha" id="fecha" value="{{ request('fecha') }}" 
+                               class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium focus:border-blue-900 focus:outline-none transition-colors">
+                    </div>
                 </div>
-                
-                @if(request('estado'))
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200">
-                         Estado: {{ ucfirst(request('estado')) }}
-                    </span>
+
+                <!-- Segunda fila: Búsquedas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                    <!-- Búsqueda por RUT -->
+                    <div class="group">
+                        <label for="buscar_rut" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Buscar por RUT
+                        </label>
+                        <input type="text" name="buscar_rut" id="buscar_rut" 
+                               placeholder="ej: 21.284.335-0" 
+                               value="{{ request('buscar_rut') }}"
+                               maxlength="12"
+                               class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium placeholder-gray-300 focus:border-blue-900 focus:outline-none transition-colors"
+                               title="Solo números y letra K">
+                        <p class="text-[10px] text-gray-300 mt-1">Máximo 9 dígitos (se formatea automáticamente)</p>
+                    </div>
+
+                    <!-- Búsqueda por Organización -->
+                    <div class="group">
+                        <label for="buscar_organizacion" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                            Buscar por Organización
+                        </label>
+                        <input type="text" name="buscar_organizacion" id="buscar_organizacion" 
+                               placeholder="Ingrese parte del nombre" 
+                               value="{{ request('buscar_organizacion') }}"
+                               class="w-full py-2 border-b-2 border-gray-200 bg-transparent text-gray-800 font-medium placeholder-gray-300 focus:border-blue-900 focus:outline-none transition-colors">
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex gap-4 pt-4 mt-4">
+                    <button type="submit" class="px-8 py-3 bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm tracking-wide rounded-lg transition-all shadow-md hover:shadow-lg">
+                        Filtrar
+                    </button>
+                    <a href="{{ route('admin.dashboard') }}" class="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm tracking-wide rounded-lg transition-all">
+                        Limpiar
+                    </a>
+                </div>
+
+                <!-- Indicadores de filtros activos -->
+                @if(request()->filled('estado') || request()->filled('recinto_id') || request()->filled('deporte') || request()->filled('fecha') || 
+                    request()->filled('buscar_rut') || request()->filled('buscar_organizacion'))
+                    <div class="flex flex-wrap items-center gap-2 pt-6 border-t border-gray-100">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">Filtros activos:</span>
+                        
+                        @if(request('estado'))
+                            <span class="px-3 py-1 bg-blue-50 text-blue-800 text-xs font-bold rounded hover:bg-blue-100 transition-colors">
+                                 ESTADO: {{ strtoupper(request('estado')) }}
+                            </span>
+                        @endif
+                        
+                        @if(request('recinto_id'))
+                            @php
+                                $recinto = $recintos->find(request('recinto_id'));
+                            @endphp
+                            <span class="px-3 py-1 bg-green-50 text-green-800 text-xs font-bold rounded hover:bg-green-100 transition-colors">
+                                 {{ strtoupper($recinto->nombre ?? 'Recinto') }}
+                            </span>
+                        @endif
+                        
+                        @if(request('deporte'))
+                            <span class="px-3 py-1 bg-purple-50 text-purple-800 text-xs font-bold rounded hover:bg-purple-100 transition-colors">
+                                 {{ strtoupper(request('deporte')) }}
+                            </span>
+                        @endif
+                        
+                        @if(request('fecha'))
+                            <span class="px-3 py-1 bg-orange-50 text-orange-800 text-xs font-bold rounded hover:bg-orange-100 transition-colors">
+                                 {{ \Carbon\Carbon::parse(request('fecha'))->format('d/m/Y') }}
+                            </span>
+                        @endif
+                        
+                        @if(request('buscar_rut'))
+                            <span class="px-3 py-1 bg-red-50 text-red-800 text-xs font-bold rounded hover:bg-red-100 transition-colors">
+                                 RUT: {{ request('buscar_rut') }}
+                            </span>
+                        @endif
+                        
+                        @if(request('buscar_organizacion'))
+                            <span class="px-3 py-1 bg-pink-50 text-pink-800 text-xs font-bold rounded hover:bg-pink-100 transition-colors">
+                                 ORG: {{ strtoupper(request('buscar_organizacion')) }}
+                            </span>
+                        @endif
+                    </div>
                 @endif
-                
-                @if(request('recinto_id'))
-                    @php
-                        $recinto = $recintos->find(request('recinto_id'));
-                    @endphp
-                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200">
-                         {{ $recinto->nombre ?? 'Recinto' }}
-                    </span>
-                @endif
-                
-                @if(request('deporte'))
-                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full border border-purple-200">
-                         {{ request('deporte') }}
-                    </span>
-                @endif
-                
-                @if(request('fecha'))
-                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full border border-orange-200">
-                         {{ \Carbon\Carbon::parse(request('fecha'))->format('d/m/Y') }}
-                    </span>
-                @endif
-                
-                @if(request('buscar_rut'))
-                    <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full border border-red-200">
-                         RUT: {{ request('buscar_rut') }}
-                    </span>
-                @endif
-                
-                @if(request('buscar_organizacion'))
-                    <span class="px-3 py-1 bg-pink-100 text-pink-800 text-xs font-medium rounded-full border border-pink-200">
-                         {{ request('buscar_organizacion') }}
-                    </span>
-                @endif
-            </div>
-        @endif
-    </form>
-</div>
+            </form>
+        </div>
 
 <!-- Script para formatear RUT automáticamente con soporte para K -->
 <script>
@@ -561,84 +519,84 @@ document.getElementById('buscar_rut').addEventListener('paste', function(e) {
 </script>
 
         <!-- Tabla de Reservas -->
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto bg-white rounded-xl shadow-sm">
             @if($reservas->count() > 0)
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Organización</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Recinto</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Fecha y Hora</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Deporte</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Personas</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Acciones</th>
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Organización</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Recinto</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha y Hora</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Deporte</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Personas</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-widest">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-50">
                         @foreach($reservas as $reserva)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-mono font-bold text-gray-900">#{{ $reserva->id }}</span>
+                        <tr class="hover:bg-gray-50/50 transition-colors">
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <span class="text-sm text-gray-400 font-medium">#{{ $reserva->id }}</span>
                             </td>
                             
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-5">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-gray-500 to-gray-700 rounded-full flex items-center justify-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-gray-800 rounded-full flex items-center justify-center">
                                         <span class="text-white font-bold text-sm">
                                             {{ strtoupper(substr($reserva->nombre_organizacion ?? $reserva->representante_nombre, 0, 2)) }}
                                         </span>
                                     </div>
-                                    <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">{{ $reserva->nombre_organizacion ?? 'Sin organización' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $reserva->representante_nombre }}</div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-bold text-gray-900">{{ $reserva->nombre_organizacion ?? 'Sin organización' }}</div>
+                                        <div class="text-xs text-gray-400">{{ $reserva->representante_nombre }}</div>
                                     </div>
                                 </div>
                             </td>
                             
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $reserva->recinto->nombre ?? 'N/A' }}</div>
+                            <td class="px-6 py-5">
+                                <div class="text-sm text-gray-700">{{ $reserva->recinto->nombre ?? 'N/A' }}</div>
                             </td>
                             
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-5">
                                 <div class="text-sm">
-                                    <div class="font-medium text-gray-900">{{ $reserva->fecha_reserva->format('d/m/Y') }}</div>
-                                    <div class="text-xs text-gray-600">
+                                    <div class="font-bold text-gray-900">{{ $reserva->fecha_reserva->format('d/m/Y') }}</div>
+                                    <div class="text-xs text-gray-400">
                                         {{ \Carbon\Carbon::parse($reserva->hora_inicio)->format('H:i') }} - 
                                         {{ \Carbon\Carbon::parse($reserva->hora_fin)->format('H:i') }}
                                     </div>
                                 </div>
                             </td>
 
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-300">
+                            <td class="px-6 py-5">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-200">
                                     {{ $reserva->deporte }}
                                 </span>
                             </td>
                             
-                            <td class="px-6 py-4 text-sm text-gray-900 text-center">
-                                <span class="font-semibold">{{ $reserva->cantidad_personas }}</span>
+                            <td class="px-6 py-5 text-center">
+                                <span class="text-sm font-bold text-gray-900">{{ $reserva->cantidad_personas }}</span>
                             </td>
                             
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-5 whitespace-nowrap">
                                 @php
                                     $estadoConfig = [
-                                        'pendiente' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'border' => 'border-yellow-400'],
-                                        'aprobada' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'border' => 'border-green-400'],
-                                        'rechazada' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'border' => 'border-red-400']
+                                        'pendiente' => ['text' => 'text-yellow-600'],
+                                        'aprobada' => ['text' => 'text-green-600'],
+                                        'rechazada' => ['text' => 'text-red-600']
                                     ];
                                     $config = $estadoConfig[$reserva->estado] ?? $estadoConfig['pendiente'];
                                 @endphp
                                 
                                 <div class="space-y-1">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $config['bg'] }} {{ $config['text'] }} {{ $config['border'] }}">
-                                        {{ ucfirst($reserva->estado) }}
+                                    <span class="text-xs font-bold uppercase tracking-wide {{ $config['text'] }}">
+                                        {{ strtoupper($reserva->estado) }}
                                     </span>
                                     
                                     @if($reserva->fecha_cancelacion)
                                         <div>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-400">
+                                            <span class="text-xs text-gray-400 italic">
                                                 Cancelada
                                             </span>
                                         </div>
@@ -646,28 +604,21 @@ document.getElementById('buscar_rut').addEventListener('paste', function(e) {
                                 </div>
                             </td>
                             
-                            <td class="px-6 py-4 text-center">
-                                <div class="flex items-center justify-center gap-2 flex-wrap">
+                            <td class="px-6 py-5 text-right">
+                                <div class="flex items-center justify-end gap-4">
                                     <a href="{{ route('admin.reservas.show', $reserva) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+                                       class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                                        title="Ver detalles">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
                                         Ver
                                     </a>
 
                                     @if($reserva->puedeReportarIncidencia() && !$reserva->fecha_cancelacion)
                                         <a href="{{ route('admin.incidencias.crear', $reserva->id) }}" 
-                                           class="inline-flex items-center px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors"
+                                           class="text-sm font-medium text-orange-500 hover:text-orange-700 transition-colors"
                                            title="Reportar incidencia">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
                                             Incidencia
                                             @if($reserva->tieneIncidencias())
-                                                <span class="ml-1 bg-white text-orange-600 rounded-full px-1.5 text-xs font-bold">
+                                                <span class="ml-1 text-orange-600 font-bold">
                                                     {{ $reserva->cantidadIncidencias() }}
                                                 </span>
                                             @endif
@@ -680,27 +631,40 @@ document.getElementById('buscar_rut').addEventListener('paste', function(e) {
                     </tbody>
                 </table>
 
-                <!-- Paginación -->
-                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <!-- Paginación Minimalista -->
+                <div class="px-6 py-4 border-t border-gray-100">
                     <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-600">
-                            Mostrando <span class="font-semibold text-gray-900">{{ $reservas->firstItem() ?? 0 }}</span> 
-                            a <span class="font-semibold text-gray-900">{{ $reservas->lastItem() ?? 0 }}</span> 
-                            de <span class="font-semibold text-gray-900">{{ $reservas->total() }}</span> reservas
+                        <div class="text-sm text-gray-400">
+                            Mostrando <span class="font-bold text-gray-700">{{ $reservas->firstItem() ?? 0 }}</span> a <span class="font-bold text-gray-700">{{ $reservas->lastItem() ?? 0 }}</span> 
+                            de <span class="font-bold text-gray-700">{{ $reservas->total() }}</span> reservas
                         </div>
                         
                         @if($reservas->hasPages())
-                            {{ $reservas->appends(request()->query())->links() }}
+                            <div class="flex items-center gap-4">
+                                @if($reservas->onFirstPage())
+                                    <span class="text-sm text-gray-300 cursor-not-allowed">Anterior</span>
+                                @else
+                                    <a href="{{ $reservas->appends(request()->query())->previousPageUrl() }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">Anterior</a>
+                                @endif
+                                
+                                <span class="text-sm font-bold text-gray-700">Página {{ $reservas->currentPage() }} de {{ $reservas->lastPage() }}</span>
+                                
+                                @if($reservas->hasMorePages())
+                                    <a href="{{ $reservas->appends(request()->query())->nextPageUrl() }}" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">Siguiente</a>
+                                @else
+                                    <span class="text-sm text-gray-300 cursor-not-allowed">Siguiente</span>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 </div>
             @else
-                <div class="px-6 py-12 text-center">
-                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="px-6 py-16 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <p class="text-lg font-medium text-gray-500 mt-4">No hay reservas que coincidan con los filtros</p>
-                    <p class="text-sm text-gray-400 mt-1">Intenta cambiar los criterios de búsqueda</p>
+                    <p class="text-base font-medium text-gray-400 mt-4">No hay reservas que coincidan con los filtros</p>
+                    <p class="text-sm text-gray-300 mt-1">Intenta cambiar los criterios de búsqueda</p>
                 </div>
             @endif
         </div>
@@ -941,42 +905,41 @@ function cargarReservasDashboard(pagina = 1) {
         tablaContainer.style.opacity = '1';
 
         // Actualizar tabla
-        const tbody = document.querySelector('tbody.bg-white.divide-y');
+        const tbody = document.querySelector('tbody.divide-y.divide-gray-50');
         if (tbody) {
             tbody.innerHTML = data.html;
         }
         
         // Actualizar paginación y contador
-        const paginacionContainer = document.querySelector('.px-6.py-4.border-t.border-gray-200.bg-gray-50');
+        const paginacionContainer = document.querySelector('.px-6.py-4.border-t.border-gray-100');
         if (paginacionContainer && data.pagination) {
             const p = data.pagination;
             let paginacionHTML = '';
             
-            // Botón Anterior
+            // Botón Anterior (estilo minimalista)
             if (p.on_first_page) {
-                paginacionHTML += '<span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">Anterior</span>';
+                paginacionHTML += '<span class="text-sm text-gray-300 cursor-not-allowed">Anterior</span>';
             } else {
-                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page - 1})" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Anterior</button>`;
+                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page - 1})" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">Anterior</button>`;
             }
             
             // Info de página
-            paginacionHTML += `<span class="px-4 py-2 bg-gray-50 text-gray-700 rounded-md font-medium">Página ${p.current_page} de ${p.last_page}</span>`;
+            paginacionHTML += `<span class="text-sm font-bold text-gray-700">Página ${p.current_page} de ${p.last_page}</span>`;
             
-            // Botón Siguiente
+            // Botón Siguiente (estilo minimalista)
             if (p.has_more_pages) {
-                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page + 1})" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Siguiente</button>`;
+                paginacionHTML += `<button type="button" onclick="cargarReservasDashboard(${p.current_page + 1})" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">Siguiente</button>`;
             } else {
-                paginacionHTML += '<span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-md cursor-not-allowed">Siguiente</span>';
+                paginacionHTML += '<span class="text-sm text-gray-300 cursor-not-allowed">Siguiente</span>';
             }
             
             paginacionContainer.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-600">
-                        Mostrando <span class="font-semibold text-gray-900">${data.desde}</span> 
-                        a <span class="font-semibold text-gray-900">${data.hasta}</span> 
-                        de <span class="font-semibold text-gray-900">${data.total}</span> reservas
+                    <div class="text-sm text-gray-400">
+                        Mostrando <span class="font-bold text-gray-700">${data.desde}</span> a <span class="font-bold text-gray-700">${data.hasta}</span> 
+                        de <span class="font-bold text-gray-700">${data.total}</span> reservas
                     </div>
-                    <div class="flex items-center gap-2">${paginacionHTML}</div>
+                    <div class="flex items-center gap-4">${paginacionHTML}</div>
                 </div>
             `;
         }
