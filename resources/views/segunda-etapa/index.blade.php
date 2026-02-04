@@ -57,7 +57,7 @@
                 
                 <ul class="space-y-4 mb-8">
                     <li class="flex items-center">
-                        <svg class="h-5 w-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="h-5 w-5 text-gray-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <div>
@@ -66,7 +66,7 @@
                         </div>
                     </li>
                     <li class="flex items-center">
-                        <svg class="h-5 w-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="h-5 w-5 text-gray-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <div>
@@ -75,7 +75,7 @@
                         </div>
                     </li>
                     <li class="flex items-center">
-                        <svg class="h-5 w-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="h-5 w-5 text-gray-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <div>
@@ -113,7 +113,7 @@
                 </div>
                 
                 <div class="mt-6 bg-white p-6 shadow-lg border border-gray-100 text-center">
-                    <h3 class="text-xl font-bold text-blue-900 mb-2">Vista Previa de la Plataforma</h3>
+                    <h3 class="text-xl font-bold text-black-900 mb-2">Vista Previa de la Plataforma</h3>
                     <p class="text-gray-600 text-sm">
                         Así se verá el nuevo sistema de reservas y pago integrado una vez completada esta etapa, brindando un acceso rápido y seguro a todos los recintos deportivos municipales.
                     </p>

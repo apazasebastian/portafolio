@@ -12,7 +12,7 @@
     </div>
 
     <!-- Info Box -->
-    <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-8 text-center mb-12">
+    <div class="border border-blue-100 bg-blue-50/30 p-8 text-center mb-12">
         <h3 class="text-xs font-bold text-blue-900 uppercase tracking-[0.2em] mb-4">¿Dónde encuentro mi código?</h3>
         <p class="text-gray-600 leading-relaxed text-sm">
             El código de cancelación fue enviado en el correo de aprobación de tu reserva.<br>
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Formulario -->
-    <div class="bg-white border border-gray-100 rounded-2xl p-10 shadow-sm mb-16">
+    <div class="bg-white border border-gray-100 p-10 shadow-sm mb-16">
         <form method="POST" action="{{ route('cancelacion.buscar') }}">
             @csrf
             
@@ -36,7 +36,7 @@
                        placeholder="EJ: ABC12DEF-GH34IJ56"
                        required
                        maxlength="17"
-                       class="w-full bg-gray-50 border border-gray-200 rounded-lg px-6 py-4 text-center text-xl font-mono text-gray-800 placeholder-gray-300 uppercase focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all @error('codigo') border-red-500 bg-red-50 @enderror">
+                       class="w-full bg-gray-50 border border-gray-200 px-6 py-4 text-center text-xl font-mono text-gray-800 placeholder-gray-300 uppercase focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all @error('codigo') border-red-500 bg-red-50 @enderror">
                 
                 @error('codigo')
                     <p class="mt-2 text-red-500 text-sm flex items-center justify-center">
@@ -49,7 +49,7 @@
             </div>
 
             <button type="submit" 
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 uppercase tracking-widest text-sm shadow-md hover:shadow-xl hover:-translate-y-0.5">
+                    class="w-full bg-blue-800 hover:bg-blue-800 text-white font-bold py-4 px-6 transition-all duration-300 uppercase tracking-widest text-sm shadow-md hover:shadow-xl hover:-translate-y-0.5">
                 Buscar Mi Reserva
             </button>
         </form>
