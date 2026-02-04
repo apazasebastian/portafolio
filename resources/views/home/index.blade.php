@@ -125,7 +125,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <!-- Imagen/Video Thumbnail -->
             <div class="relative group cursor-pointer" onclick="abrirModalComoReservar()">
-                <div class="relative overflow-hidden rounded-lg shadow-lg">
+                <div class="relative overflow-hidden shadow-lg">
                     <img src="{{ asset('images/ejemplo-video.jpg') }}" 
                          alt="Guía de Reservas" 
                          class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"

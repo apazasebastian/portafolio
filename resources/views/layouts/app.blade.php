@@ -275,67 +275,70 @@
             </div>
 
             <!-- Menú Móvil -->
-            <nav id="mobile-menu" class="hidden xl:hidden pb-4 border-t border-gray-200">
-                <div class="space-y-1 pt-4">
-                    <a href="{{ route('home') }}" 
-                       class="block px-4 py-3  flex items-center {{ request()->routeIs('home') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Inicio
-                    </a>
+            <nav id="mobile-menu" class="hidden xl:hidden border-t border-gray-100 bg-white shadow-lg">
+                <div class="container mx-auto px-4 py-4 max-h-[70vh] overflow-y-auto">
+                    <div class="space-y-1">
+                        <a href="{{ route('home') }}" 
+                           class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('home') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            Inicio
+                        </a>
 
-                    <a href="{{ route('reglamentos') }}" 
-                       class="block px-4 py-3 flex items-center {{ request()->routeIs('reglamentos') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Reglamentos
-                    </a>
-                    <a href="{{ route('cancelacion.formulario') }}" 
-                       class="block px-4 py-3 flex items-center {{ request()->routeIs('cancelacion.formulario') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                        Cancelar Reserva
-                    </a>
-                    <a href="{{ route('segunda-etapa') }}" 
-                       class="block px-4 py-3 flex items-center {{ request()->routeIs('segunda-etapa') ? 'bg-orange-500 text-white' : 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700' }}">
-                        Segunda Etapa
-                    </a>
-                    
-                    @auth
-                        <div class="border-t border-gray-200 my-2 pt-2">
-                            <p class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Administración</p>
-                        </div>
-                        
-                        <a href="{{ route('admin.dashboard') }}" 
-                           class="block px-4 py-3  {{ request()->routeIs('admin.dashboard') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Panel Admin
-                        </a>
-                        @if(auth()->user()->role !== 'encargado_recinto')
-                            <a href="{{ route('admin.recintos.index') }}" 
-                            class="block px-4 py-3  {{ request()->routeIs('admin.recintos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                                Recintos
-                            </a>
-                            <a href="{{ route('admin.eventos.index') }}" 
-                            class="block px-4 py-3  {{ request()->routeIs('admin.eventos.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                                Eventos
-                            </a>
-                        @endif
-                        <a href="{{ route('admin.reservas.index') }}" 
-                           class="block px-4 py-3  {{ request()->routeIs('admin.reservas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Reservas
-                        </a>
-                        <a href="{{ route('admin.estadisticas.index') }}" 
-                           class="block px-4 py-3  {{ request()->routeIs('admin.estadisticas.*') ? 'bg-secondary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-                            Estadísticas
+                        <a href="{{ route('reglamentos') }}" 
+                           class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('reglamentos') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            Reglamentos
                         </a>
                         
-                        <form method="POST" action="{{ route('logout') }}" class="mt-2">
-                            @csrf
-                            <button type="submit" 
-                                    class="w-full text-left px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700">
-                                Cerrar Sesión
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" 
-                           class="block px-4 py-3 rounded-lg bg-secondary text-white hover:bg-blue-700">
-                            Acceso Administrativo
+                        <a href="{{ route('cancelacion.formulario') }}" 
+                           class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('cancelacion.formulario') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            Cancelar
                         </a>
-                    @endauth
+                        
+                        <a href="{{ route('segunda-etapa') }}" 
+                           class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('segunda-etapa') ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            Segunda Etapa
+                        </a>
+                        
+                        @auth
+                            <div class="border-t border-gray-100 my-4 pt-4">
+                                <p class="px-4 mb-2 text-xs font-black text-gray-400 uppercase tracking-widest">Administración</p>
+                                
+                                <a href="{{ route('admin.dashboard') }}" 
+                                   class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    Dashboard
+                                </a>
+                                
+                                @if(auth()->user()->role !== 'encargado_recinto')
+                                    <a href="{{ route('admin.recintos.index') }}" 
+                                       class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('admin.recintos.*') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                        Recintos
+                                    </a>
+                                    <a href="{{ route('admin.eventos.index') }}" 
+                                       class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('admin.eventos.*') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                        Eventos
+                                    </a>
+                                    <a href="{{ route('admin.estadisticas.index') }}" 
+                                       class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('admin.estadisticas.*') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                        Estadísticas
+                                    </a>
+                                @endif
+                                
+                                <form method="POST" action="{{ route('logout') }}" class="mt-4 px-2">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="w-full text-center px-4 py-3 rounded-lg bg-red-50 text-red-600 border border-red-100 font-bold uppercase tracking-widest hover:bg-red-100 transition-colors shadow-sm">
+                                        Cerrar Sesión
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="border-t border-gray-100 my-4 pt-4 px-2">
+                                <a href="{{ route('login') }}" 
+                                   class="block w-full text-center px-4 py-3 rounded-lg bg-blue-900 text-white font-bold uppercase tracking-widest hover:bg-blue-800 transition-colors shadow-md">
+                                    Acceso Admin
+                                </a>
+                            </div>
+                        @endauth
+                    </div>
                 </div>
             </nav>
         </div>
