@@ -45,12 +45,9 @@
                                 COMUNICADO INSTITUCIONAL
                             </p>
                             
-                            <h1 class="text-4xl lg:text-5xl font-serif text-gray-900 mb-2 leading-tight">
-                                Noticias y Eventos
+                            <h1 class="text-4xl lg:text-5xl font-serif mb-6 leading-tight">
+                                <span class="text-gray-900">{{ $evento->titulo }}</span>
                             </h1>
-                            <h2 class="text-4xl lg:text-5xl font-serif text-blue-600 mb-6 leading-tight">
-                                Comunitarios
-                            </h2>
                             
                             <p class="text-gray-600 text-sm leading-relaxed mb-8">
                                 {{ $evento->descripcion }}

@@ -60,6 +60,6 @@ class AuthController extends Controller
         }
         
         Auth::logout();
-        return redirect()->route('calendario');
+        return redirect()->route('home');
     }
 }
