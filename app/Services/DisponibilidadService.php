@@ -322,6 +322,7 @@ class DisponibilidadService
 
     /**
      * Calcula los estados de todos los días de un mes
+     * OPTIMIZADO: Pre-carga todas las reservas del mes en una sola consulta
      */
     public function calcularEstadosMes(Recinto $recinto, int $año, int $mes): array
     {
@@ -333,6 +334,20 @@ class DisponibilidadService
         $hoy = Carbon::now()->startOfDay();
         $fechaMaxima = Carbon::now()->addDays(60)->endOfDay();
 
+        // OPTIMIZACIÓN: Pre-cargar todas las reservas del mes de una sola vez
+        $reservasPorFecha = Reserva::where('recinto_id', $recinto->id)
+            ->whereYear('fecha_reserva', $año)
+            ->whereMonth('fecha_reserva', $mes)
+            ->whereIn('estado', ['aprobada', 'pendiente'])
+            ->whereNull('fecha_cancelacion')
+            ->get()
+            ->groupBy('fecha_reserva');
+
+        // Pre-parsear configuración del recinto (solo una vez)
+        $diasCerrados = $this->parsearDiasCerrados($recinto);
+        $diasCompletos = $this->obtenerDiasCompletos($diasCerrados);
+        $horarios = $this->parsearHorarios($recinto);
+
         for ($dia = $primerDia->copy(); $dia->lte($ultimoDia); $dia->addDay()) {
             $fechaString = $dia->format('Y-m-d');
 
@@ -341,9 +356,117 @@ class DisponibilidadService
                 continue;
             }
 
-            $estados[$fechaString] = $this->calcularEstadoDia($recinto, $fechaString);
+            // Calcular estado usando datos pre-cargados
+            $estados[$fechaString] = $this->calcularEstadoDiaOptimizado(
+                $recinto,
+                $dia,
+                $diasCompletos,
+                $horarios,
+                $reservasPorFecha->get($fechaString, collect())
+            );
         }
 
         return $estados;
+    }
+
+    /**
+     * Versión optimizada de calcularEstadoDia que usa datos pre-cargados
+     * Evita consultas repetidas a la base de datos
+     */
+    private function calcularEstadoDiaOptimizado(
+        Recinto $recinto,
+        Carbon $fecha,
+        array $diasCompletos,
+        array $horarios,
+        $reservas
+    ): string {
+        $diaSemana = strtolower($fecha->format('l'));
+        $fechaString = $fecha->format('Y-m-d');
+
+        // Verificar si es día de mantenimiento
+        if ($this->esDiaCerrado($diasCompletos, $diaSemana)) {
+            return 'MANTENIMIENTO';
+        }
+
+        // Obtener bloqueos específicos para esta fecha
+        $diasCerrados = $this->parsearDiasCerrados($recinto);
+        $bloqueosFecha = $this->obtenerBloqueosFecha($diasCerrados, $fechaString);
+
+        // Calcular bloques ocupados o bloqueados
+        try {
+            $horaActual = Carbon::createFromFormat('H:i', $horarios['inicio']);
+            $horaFinCarbon = Carbon::createFromFormat('H:i', $horarios['fin']);
+            $timezone = config('app.timezone', 'UTC');
+
+            $totalBloques = 0;
+            $bloquesOcupados = 0;
+
+            while ($horaActual < $horaFinCarbon) {
+                $totalBloques++;
+                $siguienteHora = $horaActual->copy()->addHour();
+
+                $bloqueOcupado = false;
+
+                // 1. Verificar si hay bloqueo específico en este horario
+                foreach ($bloqueosFecha as $bloqueo) {
+                    try {
+                        $bloqueInicio = Carbon::createFromFormat('H:i', $bloqueo['hora_inicio'], $timezone);
+                        $bloqueFin = Carbon::createFromFormat('H:i', $bloqueo['hora_fin'], $timezone);
+
+                        // Si el bloque se solapa con el bloqueo, está ocupado
+                        if ($horaActual->lt($bloqueFin) && $siguienteHora->gt($bloqueInicio)) {
+                            $bloqueOcupado = true;
+                            break;
+                        }
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+
+                // 2. Si no está bloqueado, verificar si hay reserva
+                if (!$bloqueOcupado) {
+                    foreach ($reservas as $reserva) {
+                        try {
+                            $reservaHoraInicio = $reserva->hora_inicio;
+                            $reservaHoraFin = $reserva->hora_fin;
+
+                            if ($reservaHoraInicio instanceof Carbon) {
+                                $reservaHoraInicio = $reservaHoraInicio->format('H:i');
+                            }
+                            if ($reservaHoraFin instanceof Carbon) {
+                                $reservaHoraFin = $reservaHoraFin->format('H:i');
+                            }
+
+                            $reservaInicio = Carbon::createFromFormat('H:i', $reservaHoraInicio, $timezone);
+                            $reservaFin = Carbon::createFromFormat('H:i', $reservaHoraFin, $timezone);
+
+                            // Detectar solapamiento
+                            if ($horaActual->lt($reservaFin) && $siguienteHora->gt($reservaInicio)) {
+                                $bloqueOcupado = true;
+                                break;
+                            }
+                        } catch (\Exception $e) {
+                            continue;
+                        }
+                    }
+                }
+
+                if ($bloqueOcupado) {
+                    $bloquesOcupados++;
+                }
+
+                $horaActual = $siguienteHora;
+            }
+
+            // Si TODOS los bloques están ocupados o bloqueados, el día está OCUPADO
+            if ($totalBloques > 0 && $bloquesOcupados === $totalBloques) {
+                return 'OCUPADO';
+            }
+
+        } catch (\Exception $e) {
+            // En caso de error, asumir disponible
+        }
+
+        return 'DISPONIBLE';
     }
 }
