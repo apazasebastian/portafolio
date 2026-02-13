@@ -270,10 +270,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::prefix('incidencias')->name('incidencias.')->group(function () {
         Route::get('/', [IncidenciasController::class, 'index'])
             ->name('index');
-        Route::get('/crear/{reservaId}', [IncidenciasController::class, 'crear'])
+        Route::get('/crear/{reservaId?}', [IncidenciasController::class, 'crear'])
             ->name('crear');
-        Route::post('/guardar/{reservaId}', [IncidenciasController::class, 'store'])
+        Route::post('/guardar', [IncidenciasController::class, 'store'])
             ->name('store');
+        Route::post('/sin-incidencia', [IncidenciasController::class, 'reporteSinIncidencia'])
+            ->name('sin-incidencia');
         Route::get('/{incidencia}', [IncidenciasController::class, 'show'])
             ->name('show');
         Route::post('/{incidencia}/cambiar-estado', [IncidenciasController::class, 'cambiarEstado'])

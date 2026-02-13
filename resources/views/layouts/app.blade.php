@@ -250,6 +250,10 @@
                                 Eventos
                             </a>
                         @endif
+                        <a href="{{ route('admin.incidencias.index') }}" 
+                           class="nav-link text-sm font-semibold tracking-wide uppercase py-5 border-b-2 transition-colors {{ request()->routeIs('admin.incidencias.*') ? 'border-secondary text-secondary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200' }}">
+                            Reporte
+                        </a>
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline ml-4">
                             @csrf
@@ -321,6 +325,10 @@
                                         Estadísticas
                                     </a>
                                 @endif
+                                <a href="{{ route('admin.incidencias.index') }}" 
+                                   class="block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all {{ request()->routeIs('admin.incidencias.*') ? 'bg-blue-50 text-blue-900 border-l-4 border-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    Reporte
+                                </a>
                                 
                                 <form method="POST" action="{{ route('logout') }}" class="mt-4 px-2">
                                     @csrf

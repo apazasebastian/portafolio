@@ -8,11 +8,11 @@
         
         <!-- Breadcrumb -->
         <div class="mb-6">
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            <a href="{{ route('admin.incidencias.index') }}" class="text-blue-600 hover:text-blue-800 font-medium">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Volver al Dashboard
+                Volver
             </a>
         </div>
 
@@ -47,8 +47,9 @@
                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2
                     {{ $incidencia->estado === 'reportada' ? 'bg-yellow-100 text-yellow-800 border-yellow-400' : '' }}
                     {{ $incidencia->estado === 'en_revision' ? 'bg-blue-100 text-blue-800 border-blue-400' : '' }}
-                    {{ $incidencia->estado === 'resuelta' ? 'bg-green-100 text-green-800 border-green-400' : '' }}">
-                    {{ ucfirst(str_replace('_', ' ', $incidencia->estado)) }}
+                    {{ $incidencia->estado === 'resuelta' ? 'bg-green-100 text-green-800 border-green-400' : '' }}
+                    {{ $incidencia->estado === 'conforme' ? 'bg-emerald-100 text-emerald-800 border-emerald-400' : '' }}">
+                    {{ $incidencia->estado === 'conforme' ? 'Conforme' : ucfirst(str_replace('_', ' ', $incidencia->estado)) }}
                 </span>
             </div>
         </div>
@@ -65,6 +66,8 @@
                             Problema Post-Uso
                         @elseif($incidencia->tipo === 'dano')
                             Daño en Instalaciones
+                        @elseif($incidencia->tipo === 'informe')
+                            <span class="text-emerald-600">Informe de Conformidad</span>
                         @else
                             Otro
                         @endif
@@ -112,6 +115,7 @@
             @endif
         </div>
 
+        @if($incidencia->reserva_id)
         <!-- Información de la Reserva Relacionada -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Reserva Relacionada</h2>
@@ -157,7 +161,24 @@
                 </a>
             </div>
         </div>
+        @elseif($incidencia->recinto_id)
+        <!-- Información del Recinto (para informes sin reserva) -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Recinto Reportado</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div>
+                    <label class="block text-sm text-gray-600">Recinto</label>
+                    <p class="font-semibold text-gray-900">{{ $incidencia->recinto->nombre }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600">Reportado por</label>
+                    <p class="font-semibold text-gray-900">{{ $incidencia->reportado_por }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
 
+        @if($incidencia->tipo !== 'informe')
         <!-- Cambiar Estado -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Cambiar Estado</h2>
@@ -189,12 +210,13 @@
                 </div>
             </form>
         </div>
+        @endif
 
         <!-- Acciones -->
         <div class="flex gap-3">
-            <a href="{{ route('admin.incidencias.crear', $incidencia->reserva_id) }}" 
+            <a href="{{ route('admin.incidencias.index') }}" 
                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-md transition-colors text-center">
-                Volver a Incidencias
+                Volver a Reportes
             </a>
             
             <form id="formEliminarIncidencia" action="{{ route('admin.incidencias.destroy', $incidencia) }}" method="POST" class="flex-1">

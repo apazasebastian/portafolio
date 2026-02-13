@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Incidencia;
+use App\Models\Recinto;
 use App\Models\Reserva;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
@@ -18,122 +19,219 @@ use Illuminate\Http\Request;
 class IncidenciasController extends Controller
 {
     /**
-     * Redirige al panel principal (no hay listado de incidencias separado)
+     * Página de Reporte Diario
+     * 
+     * Muestra tarjetas de instalaciones con opción de reportar incidencia
+     * y un historial de reportes con filtros y paginación.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return redirect()->route('admin.dashboard');
+        // Obtener todos los recintos activos
+        $recintos = Recinto::where('activo', true)->get();
+
+        // Para cada recinto, encontrar la última reserva que permite reportar incidencia
+        $recintos->each(function ($recinto) {
+            $recinto->ultimaReservaReportable = Reserva::where('recinto_id', $recinto->id)
+                ->where('estado', 'aprobada')
+                ->where('fecha_reserva', '<', now()->toDateString())
+                ->orderBy('fecha_reserva', 'desc')
+                ->first();
+        });
+
+        // Consulta de incidencias con filtros
+        $query = Incidencia::with(['reserva.recinto', 'reserva.aprobadaPor', 'recinto'])
+            ->orderBy('created_at', 'desc');
+
+        // Filtro por fecha
+        if ($request->filled('fecha')) {
+            $query->whereDate('created_at', $request->fecha);
+        }
+
+        // Filtro por recinto
+        if ($request->filled('recinto_id')) {
+            $query->whereHas('reserva', function ($q) use ($request) {
+                $q->where('recinto_id', $request->recinto_id);
+            });
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        $incidencias = $query->paginate(10)->appends($request->query());
+
+        return view('admin.incidencias.index', compact('recintos', 'incidencias'));
     }
 
     /**
      * Muestra el formulario para reportar una nueva incidencia
      * 
-     * Solo se pueden reportar incidencias de reservas que ya terminaron
-     * y que fueron aprobadas. Esto asegura que el reporte sea sobre
-     * un uso real del recinto.
+     * Carga todas las reservas reportables (aprobadas y finalizadas).
+     * Si se pasa recinto_id como query param, filtra por ese recinto.
+     * Si se pasa reservaId en la URL, lo pre-selecciona.
      */
-    public function crear($reservaId)
+    public function crear(Request $request, $reservaId = null)
     {
-        // Busca la reserva con sus datos del recinto e incidencias previas
-        $reserva = Reserva::with(['recinto', 'incidencias'])->findOrFail($reservaId);
-        
-        // Verifica que sea una reserva finalizada y aprobada
-        if (!$reserva->puedeReportarIncidencia()) {
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Esta reserva no puede tener incidencias reportadas. Debe estar aprobada y finalizada.');
+        // Cargar reservas reportables SIN incidencia reportada, del más reciente al más antiguo
+        $query = Reserva::with('recinto')
+            ->where('estado', 'aprobada')
+            ->where('fecha_reserva', '<=', now()->toDateString())
+            ->whereNull('fecha_cancelacion')
+            ->doesntHave('incidencias')
+            ->orderBy('fecha_reserva', 'desc')
+            ->orderBy('hora_inicio', 'desc');
+
+        // Filtrar por recinto si viene de la página de reporte
+        if ($request->filled('recinto_id')) {
+            $query->where('recinto_id', $request->recinto_id);
         }
-        
-        return view('admin.incidencias.crear', compact('reserva'));
+
+        $reservas = $query->limit(50)->get();
+
+        // Pre-seleccionar reserva si viene por URL
+        $selectedReservaId = $reservaId ?? old('reserva_id');
+
+        return view('admin.incidencias.crear', compact('reservas', 'selectedReservaId'));
+    }
+
+    /**
+     * Registra un reporte sin incidencia para un recinto.
+     * 
+     * Crea un registro tipo 'informe' con estado 'conforme'
+     * sin referencia a ninguna reserva específica.
+     */
+    public function reporteSinIncidencia(Request $request)
+    {
+        $request->validate([
+            'recinto_id' => 'required|exists:recintos,id',
+        ]);
+
+        $recinto = \App\Models\Recinto::findOrFail($request->recinto_id);
+        $usuario = auth()->user();
+
+        // Solo puede haber un informe de conformidad por recinto por día.
+        // Si ya existe uno del mismo día, se elimina antes de crear el nuevo.
+        Incidencia::where('recinto_id', $recinto->id)
+            ->where('tipo', 'informe')
+            ->whereDate('created_at', now()->toDateString())
+            ->delete();
+
+        $fechaHoy = now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+        $descripcion = "INFORME DE CONFORMIDAD\n";
+        $descripcion .= "======================\n\n";
+        $descripcion .= "Recinto: {$recinto->nombre}\n";
+        $descripcion .= "Fecha del reporte: {$fechaHoy}\n";
+        $descripcion .= "Responsable: {$usuario->email}\n\n";
+        $descripcion .= "---\n\n";
+        $descripcion .= "Se certifica que el recinto deportivo \"{$recinto->nombre}\" se encuentra en condiciones normales de operación. ";
+        $descripcion .= "No se registraron incidencias, daños ni novedades durante el período evaluado. ";
+        $descripcion .= "Las instalaciones se encuentran en buen estado y aptas para su uso habitual.";
+
+        $incidencia = Incidencia::create([
+            'reserva_id' => null,
+            'recinto_id' => $recinto->id,
+            'tipo' => 'informe',
+            'descripcion' => $descripcion,
+            'estado' => 'conforme',
+            'reportado_por' => $usuario->email,
+            'imagenes' => null,
+        ]);
+
+        AuditLog::log(
+            action: 'crear_informe_conformidad',
+            description: "Registró informe de conformidad para {$recinto->nombre}",
+            auditable: $incidencia,
+            newValues: [
+                'tipo' => 'informe',
+                'estado' => 'conforme',
+                'recinto' => $recinto->nombre,
+                'reportado_por' => $usuario->email,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Informe de conformidad registrado para {$recinto->nombre}.",
+        ]);
     }
 
     /**
      * Guarda una nueva incidencia en el sistema
      * 
      * Valida los datos del formulario y crea el registro de incidencia.
-     * Si el grupo si asistio, se piden datos adicionales como cuantas
-     * personas habia y en que estado quedo el recinto.
+     * Ya no usa reservaId de la URL, sino del campo reserva_id del formulario.
      */
-    public function store(Request $request, $reservaId)
+    public function store(Request $request)
     {
-        $reserva = Reserva::findOrFail($reservaId);
-        
-        // Verificacion de seguridad: la reserva debe poder tener incidencia
-        if (!$reserva->puedeReportarIncidencia()) {
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Esta reserva no puede tener incidencias reportadas.');
-        }
-        
-        // Primero valida los campos basicos que siempre se requieren
-        $baseValidated = $request->validate([
+        // Valida todos los campos del formulario
+        $validated = $request->validate([
+            'reserva_id' => 'required|exists:reservas,id',
             'tipo' => 'required|in:problema_posuso,dano,otro',
-            'asistieron' => 'required|in:si,no',
             'descripcion' => 'required|string|min:10|max:1000',
+            'estado_recinto' => 'nullable|in:buen_estado,mal_estado',
+            'cantidad_personas' => 'nullable|integer|min:1|max:500',
+            'hora_inicio_real' => 'nullable|date_format:H:i',
+            'hora_fin_real' => 'nullable|date_format:H:i|after:hora_inicio_real',
+            'imagenes' => 'nullable|array|max:5',
+            'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
+            'reserva_id.required' => 'Debe seleccionar un evento',
+            'reserva_id.exists' => 'El evento seleccionado no es válido',
             'tipo.required' => 'Debe seleccionar un tipo de incidencia',
             'tipo.in' => 'El tipo de incidencia seleccionado no es válido',
-            'asistieron.required' => 'Debe indicar si asistieron o no',
-            'asistieron.in' => 'La opción seleccionada no es válida',
             'descripcion.required' => 'La descripción de la incidencia es obligatoria',
             'descripcion.min' => 'La descripción debe tener al menos 10 caracteres',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres',
+            'estado_recinto.in' => 'El estado del recinto no es válido',
+            'cantidad_personas.integer' => 'La cantidad de personas debe ser un número',
+            'cantidad_personas.min' => 'Debe haber al menos 1 persona',
+            'cantidad_personas.max' => 'No puede haber más de 500 personas',
+            'hora_inicio_real.date_format' => 'La hora de inicio debe tener el formato HH:MM',
+            'hora_fin_real.date_format' => 'La hora de finalización debe tener el formato HH:MM',
+            'hora_fin_real.after' => 'La hora de finalización debe ser posterior a la hora de inicio',
+            'imagenes.max' => 'Solo puede subir un máximo de 5 imágenes',
+            'imagenes.*.image' => 'El archivo debe ser una imagen',
+            'imagenes.*.mimes' => 'Las imágenes deben ser JPG, PNG o WebP',
+            'imagenes.*.max' => 'Cada imagen no puede exceder 2MB',
         ]);
 
-        // Si indicaron que si asistieron, valida campos adicionales
-        $validated = $baseValidated;
-        $imagenesGuardadas = [];
+        $reserva = Reserva::with('recinto')->findOrFail($validated['reserva_id']);
         
-        if ($baseValidated['asistieron'] === 'si') {
-            $additionalValidated = $request->validate([
-                'estado_recinto' => 'required|in:buen_estado,mal_estado',
-                'cantidad_personas' => 'required|integer|min:1|max:500',
-                'hora_inicio_real' => 'required|date_format:H:i',
-                'hora_fin_real' => 'required|date_format:H:i|after:hora_inicio_real',
-                'imagenes' => 'nullable|array|max:5',
-                'imagenes.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-            ], [
-                'estado_recinto.required' => 'Debe seleccionar el estado del recinto',
-                'estado_recinto.in' => 'El estado del recinto no es válido',
-                'cantidad_personas.required' => 'Debe ingresar la cantidad de personas',
-                'cantidad_personas.integer' => 'La cantidad de personas debe ser un número',
-                'cantidad_personas.min' => 'Debe haber al menos 1 persona',
-                'cantidad_personas.max' => 'No puede haber más de 500 personas',
-                'hora_inicio_real.required' => 'Debe ingresar la hora de inicio',
-                'hora_inicio_real.date_format' => 'La hora de inicio debe tener el formato HH:MM',
-                'hora_fin_real.required' => 'Debe ingresar la hora de finalización',
-                'hora_fin_real.date_format' => 'La hora de finalización debe tener el formato HH:MM',
-                'hora_fin_real.after' => 'La hora de finalización debe ser posterior a la hora de inicio',
-                'imagenes.max' => 'Solo puede subir un máximo de 5 imágenes',
-                'imagenes.*.image' => 'El archivo debe ser una imagen',
-                'imagenes.*.mimes' => 'Las imágenes deben ser JPG, PNG o WebP',
-                'imagenes.*.max' => 'Cada imagen no puede exceder 2MB',
-            ]);
-            
-            $validated = array_merge($baseValidated, $additionalValidated);
-            
-            // Guarda las imagenes subidas
-            if ($request->hasFile('imagenes')) {
-                foreach ($request->file('imagenes') as $imagen) {
-                    $nombreArchivo = 'incidencia_' . $reservaId . '_' . time() . '_' . uniqid() . '.' . $imagen->getClientOriginalExtension();
-                    $ruta = $imagen->storeAs('incidencias', $nombreArchivo, 'public');
-                    $imagenesGuardadas[] = $ruta;
-                }
+        // Verificacion de seguridad: la reserva debe poder tener incidencia
+        if (!$reserva->puedeReportarIncidencia()) {
+            return redirect()->route('admin.incidencias.index')
+                ->with('error', 'Esta reserva no puede tener incidencias reportadas.');
+        }
+
+        // Guardar imágenes
+        $imagenesGuardadas = [];
+        if ($request->hasFile('imagenes')) {
+            foreach ($request->file('imagenes') as $imagen) {
+                $nombreArchivo = 'incidencia_' . $reserva->id . '_' . time() . '_' . uniqid() . '.' . $imagen->getClientOriginalExtension();
+                $ruta = $imagen->storeAs('incidencias', $nombreArchivo, 'public');
+                $imagenesGuardadas[] = $ruta;
             }
         }
         
         // Construye la descripcion completa que se guardara
         $descripcionCompleta = "REPORTE DE INCIDENCIA\n";
         $descripcionCompleta .= "======================\n\n";
-        $descripcionCompleta .= "¿Asistieron?: " . ($validated['asistieron'] === 'si' ? 'SÍ' : 'NO') . "\n";
         
-        // Si asistieron, agrega los datos adicionales
-        if ($validated['asistieron'] === 'si') {
+        if (!empty($validated['estado_recinto'])) {
             $descripcionCompleta .= "Estado del Recinto: " . ($validated['estado_recinto'] === 'buen_estado' ? 'Buen Estado' : 'Mal Estado') . "\n";
+        }
+        if (!empty($validated['cantidad_personas'])) {
             $descripcionCompleta .= "Cantidad de Personas: " . $validated['cantidad_personas'] . "\n";
+        }
+        if (!empty($validated['hora_inicio_real'])) {
             $descripcionCompleta .= "Hora Real de Inicio: " . $validated['hora_inicio_real'] . "\n";
+        }
+        if (!empty($validated['hora_fin_real'])) {
             $descripcionCompleta .= "Hora Real de Finalización: " . $validated['hora_fin_real'] . "\n";
-            if (count($imagenesGuardadas) > 0) {
-                $descripcionCompleta .= "Imágenes adjuntas: " . count($imagenesGuardadas) . "\n";
-            }
+        }
+        if (count($imagenesGuardadas) > 0) {
+            $descripcionCompleta .= "Imágenes adjuntas: " . count($imagenesGuardadas) . "\n";
         }
         
         $descripcionCompleta .= "\n---\n\n";
@@ -156,7 +254,6 @@ class IncidenciasController extends Controller
             auditable: $incidencia,
             newValues: [
                 'tipo' => $validated['tipo'],
-                'asistieron' => $validated['asistieron'],
                 'estado_recinto' => $validated['estado_recinto'] ?? null,
                 'cantidad_personas' => $validated['cantidad_personas'] ?? null,
                 'hora_inicio_real' => $validated['hora_inicio_real'] ?? null,
@@ -178,7 +275,7 @@ class IncidenciasController extends Controller
     public function show(Incidencia $incidencia)
     {
         // Carga los datos relacionados: reserva, recinto, quien aprobo
-        $incidencia->load(['reserva.recinto', 'reserva.aprobadaPor']);
+        $incidencia->load(['reserva.recinto', 'reserva.aprobadaPor', 'recinto']);
         
         return view('admin.incidencias.show', compact('incidencia'));
     }

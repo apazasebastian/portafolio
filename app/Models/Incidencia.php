@@ -13,10 +13,12 @@ class Incidencia extends Model
 
     protected $fillable = [
         'reserva_id',
+        'recinto_id',
         'tipo',
         'descripcion',
         'estado',
         'imagenes',
+        'reportado_por',
     ];
 
     protected $casts = [
@@ -35,6 +37,14 @@ class Incidencia extends Model
     public function reserva(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Reserva::class);
+    }
+
+    /**
+     * Obtiene el recinto directamente (para informes sin reserva)
+     */
+    public function recinto(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Recinto::class);
     }
 
     // =========================================================================
